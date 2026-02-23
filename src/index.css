@@ -317,6 +317,23 @@ a:hover {
   font-size: 16px;
 }
 
+.sidebar-sub-nav {
+  margin-left: 24px;
+  border-left: 1px solid var(--border);
+  margin-bottom: 8px;
+}
+
+.nav-item.sub-item {
+  padding: 6px 12px;
+  font-size: 12px;
+  gap: 8px;
+  opacity: 0.8;
+}
+
+.nav-item.sub-item:hover {
+  opacity: 1;
+}
+
 .sidebar-divider {
   height: 1px;
   background: var(--border);
@@ -2134,7 +2151,7 @@ a:hover {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
   gap: 16px;
-  max-width: 900px;
+  max-width: 720px;
   margin: 0 auto;
 }
 
@@ -2198,7 +2215,43 @@ a:hover {
 
 .space-card-actions {
   display: flex;
-  gap: 6px;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+/* ===== Empty State ===== */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 40px;
+  text-align: center;
+  max-width: 500px;
+  margin: 40px auto;
+  background: var(--surface-glass);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-lg);
+}
+
+.empty-state svg {
+  color: var(--accent-light);
+  margin-bottom: 20px;
+  opacity: 0.8;
+}
+
+.empty-state h2 {
+  font-size: 22px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: var(--text-primary);
+}
+
+.empty-state p {
+  color: var(--text-secondary);
+  font-size: 15px;
+  line-height: 1.6;
+  margin-bottom: 24px;
 }
 
 /* ===== Space Editor ===== */

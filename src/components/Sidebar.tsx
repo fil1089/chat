@@ -88,6 +88,32 @@ export default function Sidebar() {
                         <IconSearch size={16} className="nav-icon" />
                         <span>ИИ Поиск</span>
                     </button>
+                    <button
+                        className={`nav-item ${location.pathname === '/spaces' ? 'active' : ''}`}
+                        onClick={() => navigate('/spaces')}
+                    >
+                        <IconFolder size={16} className="nav-icon" />
+                        <span>Пространства</span>
+                    </button>
+                    <div className="sidebar-sub-nav">
+                        {state.spaces.slice(0, 5).map((space) => (
+                            <button
+                                key={space.id}
+                                className={`nav-item sub-item ${location.pathname === `/space/${space.id}` ? 'active' : ''}`}
+                                onClick={() => { dispatch({ type: 'SET_ACTIVE_SPACE', payload: space.id }); navigate(`/space/${space.id}`); }}
+                            >
+                                <SpaceIcon icon={space.icon || 'folder'} size={14} className="nav-icon" />
+                                <span>{space.name}</span>
+                            </button>
+                        ))}
+                    </div>
+                    <button
+                        className={`nav-item ${location.pathname === '/history' ? 'active' : ''}`}
+                        onClick={() => navigate('/history')}
+                    >
+                        <IconHistory size={16} className="nav-icon" />
+                        <span>История</span>
+                    </button>
                 </div>
 
                 <div className="sidebar-search">
@@ -149,31 +175,7 @@ export default function Sidebar() {
 
                 <div className="sidebar-divider" />
 
-                <div className="sidebar-nav">
-                    {state.spaces.slice(0, 5).map((space) => (
-                        <button
-                            key={space.id}
-                            className={`nav-item ${location.pathname === `/space/${space.id}` ? 'active' : ''}`}
-                            onClick={() => { dispatch({ type: 'SET_ACTIVE_SPACE', payload: space.id }); navigate(`/space/${space.id}`); }}
-                        >
-                            <SpaceIcon icon={space.icon || 'folder'} size={16} className="nav-icon" />
-                            <span>{space.name}</span>
-                        </button>
-                    ))}
-                    <button
-                        className={`nav-item ${location.pathname === '/spaces' ? 'active' : ''}`}
-                        onClick={() => navigate('/spaces')}
-                    >
-                        <IconFolder size={16} className="nav-icon" />
-                        <span>Пространства</span>
-                    </button>
-                    <button
-                        className={`nav-item ${location.pathname === '/history' ? 'active' : ''}`}
-                        onClick={() => navigate('/history')}
-                    >
-                        <IconHistory size={16} className="nav-icon" />
-                        <span>История</span>
-                    </button>
+                <div className="sidebar-nav bottom-nav">
                     <button
                         className={`nav-item ${location.pathname === '/settings' ? 'active' : ''}`}
                         onClick={() => navigate('/settings')}
