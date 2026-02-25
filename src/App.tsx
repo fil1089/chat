@@ -24,7 +24,7 @@ function NoApiKeyModal({ onClose, onGoSettings }: { onClose: () => void; onGoSet
                 </div>
                 <h2 className="no-api-modal-title">Нужен API ключ</h2>
                 <p className="no-api-modal-desc">
-                    Для работы с ИИ нужен ключ <strong>NeuroAPI</strong>. Получить бесплатно:
+                    Для работы с ИИ нужен ключ <strong>NeuroAPI</strong>. Получить:
                 </p>
                 <a
                     className="no-api-modal-link"
@@ -35,8 +35,8 @@ function NoApiKeyModal({ onClose, onGoSettings }: { onClose: () => void; onGoSet
                     neuroapi.host →
                 </a>
                 <ol className="no-api-modal-steps">
-                    <li>Войдите или зарегистрируйтесь <em>(через Google, после авторизации)</em></li>
-                    <li>Если 404 — нажмите «На главную»</li>
+                    <li>Войдите или зарегистрируйтесь <em>(через Google)</em></li>
+                    <li>Если 404 <em>(после авторизации)</em> — нажмите «На главную»</li>
                     <li>Откройте <strong>Панель → API Ключи</strong></li>
                     <li>Пополните баланс — нажмите в правом верхнем углу на <strong>окошко с суммой</strong></li>
                     <li>Нажмите <strong>Создать новый ключ</strong>, введите любое название</li>
