@@ -62,7 +62,7 @@ const FALLBACK_PRICING = { input: 1, output: 4 };
 export function calcCost(modelId: string, promptTokens: number, completionTokens: number): string {
     const pricing = MODEL_PRICING[modelId] || FALLBACK_PRICING;
     const usdCost = (promptTokens * pricing.input + completionTokens * pricing.output) / 1_000_000;
-    const rubCost = usdCost * 100; // 1 USD = 100 RUB approximation
+    const rubCost = usdCost * 79; // Fixed exchange rate of NeuroAPI (79 RUB = 1 USD)
     if (rubCost < 0.0001) return '0.0001';
     if (rubCost < 0.1) return rubCost.toFixed(4);
     return rubCost.toFixed(2);
