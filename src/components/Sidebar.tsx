@@ -61,7 +61,7 @@ export default function Sidebar({ onLogout, userEmail }: SidebarProps) {
                 <div className="sidebar-header">
                     <div className="logo" onClick={handleNewChat} style={{ cursor: 'pointer' }}>
                         <IconLogo size={22} className="logo-svg" />
-                        <span className="logo-text">AI Aggregator</span>
+                        <span className="logo-text">Спроси ИИ</span>
                     </div>
                     <button
                         className="sidebar-toggle"

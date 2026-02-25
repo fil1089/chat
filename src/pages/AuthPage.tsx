@@ -44,7 +44,7 @@ export default function AuthPage() {
                 {/* Logo */}
                 <div className="auth-logo">
                     <IconLogo size={32} className="logo-svg" />
-                    <span className="auth-logo-text">AI Aggregator</span>
+                    <span className="auth-logo-text">Спроси ИИ</span>
                 </div>
 
                 {/* Tabs */}

@@ -22,10 +22,9 @@ function NoApiKeyModal({ onClose, onGoSettings }: { onClose: () => void; onGoSet
                 <div className="no-api-modal-icon">
                     <IconKey size={48} />
                 </div>
-                <h2 className="no-api-modal-title">API ключ не указан</h2>
+                <h2 className="no-api-modal-title">Нужен API ключ</h2>
                 <p className="no-api-modal-desc">
-                    Для работы с ИИ моделями необходимо указать API ключ.<br />
-                    Получите ключ на официальном сайте <strong>NeuroAPI</strong>:
+                    Для работы с ИИ нужен ключ <strong>NeuroAPI</strong>. Получить бесплатно:
                 </p>
                 <a
                     className="no-api-modal-link"
@@ -35,6 +34,13 @@ function NoApiKeyModal({ onClose, onGoSettings }: { onClose: () => void; onGoSet
                 >
                     neuroapi.host →
                 </a>
+                <ol className="no-api-modal-steps">
+                    <li>Войдите или зарегистрируйтесь <em>(через Google)</em></li>
+                    <li>Если 404 — нажмите «На главную»</li>
+                    <li>Откройте <strong>Панель → API Ключи</strong></li>
+                    <li>Нажмите <strong>Создать новый ключ</strong>, введите любое название</li>
+                    <li>Скопируйте ключ и вставьте в Настройках</li>
+                </ol>
                 <div className="no-api-modal-actions">
                     <button className="btn-secondary" onClick={onClose}>Позже</button>
                     <button className="btn-primary" onClick={onGoSettings}>

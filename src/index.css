@@ -4340,7 +4340,7 @@ a:hover {
   font-weight: 600;
   text-decoration: none;
   transition: var(--transition);
-  margin-bottom: 24px;
+  margin-bottom: 12px;
   letter-spacing: 0.2px;
 }
 
@@ -4349,6 +4349,31 @@ a:hover {
   color: #fff;
   box-shadow: 0 4px 20px var(--accent-soft);
   transform: translateY(-1px);
+}
+
+.no-api-modal-steps {
+  width: 100%;
+  text-align: left;
+  padding-left: 20px;
+  margin: 0 0 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.no-api-modal-steps li {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.no-api-modal-steps li strong {
+  color: var(--text-primary);
+}
+
+.no-api-modal-steps li em {
+  color: var(--text-muted);
+  font-style: normal;
 }
 
 .no-api-modal-actions {
