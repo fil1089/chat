@@ -851,6 +851,55 @@ a:hover {
   padding-bottom: 16px;
 }
 
+.chat-scroll-buttons {
+  position: absolute;
+  bottom: 120px;
+  right: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 100;
+}
+
+@media (max-width: 768px) {
+  .chat-scroll-buttons {
+    bottom: 90px;
+    right: 16px;
+  }
+}
+
+.chat-scroll-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition: var(--transition);
+  opacity: 0;
+  transform: translateY(10px) scale(0.9);
+  pointer-events: none;
+}
+
+.chat-scroll-btn.visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+}
+
+.chat-scroll-btn:hover {
+  background: var(--surface-glass-hover);
+  color: var(--text-primary);
+  border-color: var(--border-hover);
+  box-shadow: var(--shadow-md);
+  transform: scale(1.05);
+}
+
 .message-avatar {
   width: 28px;
   height: 28px;

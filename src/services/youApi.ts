@@ -360,6 +360,77 @@ async function streamNeuroResponse({
     }
 }
 
+// ===== Generate Image NeuroAPI =====
+async function generateImageNeuro({
+    apiKey,
+    model,
+    messages,
+    controller,
+    onDelta,
+    onStatus,
+    onDone,
+    onError,
+}: {
+    apiKey: string;
+    model: string;
+    messages: Message[];
+    controller: AbortController;
+    onDelta?: (delta: string) => void;
+    onStatus?: (status: StatusEvent) => void;
+    onDone?: () => void;
+    onError?: (error: string) => void;
+}) {
+    try {
+        const lastUserMessage = messages.slice().reverse().find(m => m.role === 'user');
+        const prompt = lastUserMessage?.displayContent || lastUserMessage?.content || 'Изображение';
+
+        onStatus?.({ type: 'status', message: 'Генерация изображения...' });
+
+        const requestBody = {
+            model: model,
+            prompt: prompt,
+            size: '1024x1024',
+            quality: 'high',
+            response_format: 'b64_json'
+        };
+
+        console.log(`[NeuroAPI Image] Request:`, requestBody);
+
+        const response = await fetch(`${API_URLS.neuro}/v1/images/generations`, {
+            method: 'POST',
+            headers: {
+                Authorization: `Bearer ${apiKey}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(requestBody),
+            signal: controller.signal,
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            let errorMsg = `Ошибка API (${response.status})`;
+            try {
+                const errorJson = JSON.parse(errorText);
+                errorMsg = errorJson.error?.message || errorJson.detail || errorMsg;
+            } catch { /* ignore */ }
+            onError?.(errorMsg);
+            return;
+        }
+
+        const data = await response.json();
+        const base64Data = data.data?.[0]?.b64_json;
+        if (base64Data) {
+            onDelta?.(base64Data);
+        } else {
+            onError?.('Сервер не вернул изображение в формате base64.');
+        }
+
+        onDone?.();
+    } catch (err: unknown) {
+        if (err instanceof Error && err.name !== 'AbortError') onError?.(err.message);
+    }
+}
+
 // ===== Stream You.com (Advanced Agent / Search) =====
 interface YouStreamParams {
     apiKey: string;
@@ -579,37 +650,68 @@ export function streamResponse({
         let fullContent = '';
         let capturedUsage: { prompt_tokens: number; completion_tokens: number; total_tokens: number } | null = null;
 
-        streamNeuroResponse({
-            apiKey,
-            model,
-            requestBody,
-            controller,
-            onDelta: (delta) => {
-                fullContent += delta;
-                onDelta?.(delta);
-            },
-            onUsage: (usage) => {
-                capturedUsage = usage;
-                onUsage?.(usage);
-            },
-            onDone: () => {
-                // Cache the response
-                if (fullContent) {
-                    responseCache.set(cacheKey, {
-                        content: fullContent,
-                        usage: capturedUsage,
-                        timestamp: Date.now(),
-                    });
-                    // Limit cache size
-                    if (responseCache.size > MAX_CACHE_SIZE) {
-                        const firstKey = responseCache.keys().next().value;
-                        if (firstKey) responseCache.delete(firstKey);
+        const isImageModel = model.includes('image-preview') || model.includes('image');
+
+        if (isImageModel) {
+            generateImageNeuro({
+                apiKey,
+                model,
+                messages,
+                controller,
+                onDelta: (delta) => {
+                    fullContent += delta;
+                    onDelta?.(delta);
+                },
+                onStatus,
+                onDone: () => {
+                    if (fullContent) {
+                        responseCache.set(cacheKey, {
+                            content: fullContent,
+                            usage: capturedUsage,
+                            timestamp: Date.now(),
+                        });
+                        if (responseCache.size > MAX_CACHE_SIZE) {
+                            const firstKey = responseCache.keys().next().value;
+                            if (firstKey) responseCache.delete(firstKey);
+                        }
                     }
-                }
-                onDone?.();
-            },
-            onError,
-        });
+                    onDone?.();
+                },
+                onError
+            });
+        } else {
+            streamNeuroResponse({
+                apiKey,
+                model,
+                requestBody,
+                controller,
+                onDelta: (delta) => {
+                    fullContent += delta;
+                    onDelta?.(delta);
+                },
+                onUsage: (usage) => {
+                    capturedUsage = usage;
+                    onUsage?.(usage);
+                },
+                onDone: () => {
+                    // Cache the response
+                    if (fullContent) {
+                        responseCache.set(cacheKey, {
+                            content: fullContent,
+                            usage: capturedUsage,
+                            timestamp: Date.now(),
+                        });
+                        // Limit cache size
+                        if (responseCache.size > MAX_CACHE_SIZE) {
+                            const firstKey = responseCache.keys().next().value;
+                            if (firstKey) responseCache.delete(firstKey);
+                        }
+                    }
+                    onDone?.();
+                },
+                onError,
+            });
+        }
     }
 
     return controller;

@@ -4,7 +4,7 @@ import { streamResponse, MODELS } from '../services/youApi';
 import ChatInput from './ChatInput';
 import MessageBubble from './MessageBubble';
 import ThreadNav from './ThreadNav';
-import { IconBrain, IconFolder, IconMessage } from './Icons';
+import { IconBrain, IconFolder, IconMessage, IconArrowUp, IconArrowDown } from './Icons';
 import { v4 as uuidv4 } from 'uuid';
 import type { Message, Chat, Attachment, StatusEvent, Space, ContextMode } from '../types';
 
@@ -19,6 +19,10 @@ export default function ChatView() {
     const [streamStatus, setStreamStatus] = useState<StreamStatus | null>(null);
     const controllerRef = useRef<AbortController | null>(null);
     const messagesEndRef = useRef<HTMLDivElement>(null);
+    const messagesStartRef = useRef<HTMLDivElement>(null);
+    const scrollContainerRef = useRef<HTMLDivElement>(null);
+    const [showScrollTop, setShowScrollTop] = useState(false);
+    const [showScrollBottom, setShowScrollBottom] = useState(false);
     const initialModel = (() => {
         const activeChat = state.chats.find(c => c.id === state.activeChat);
         const activeSpace = state.spaces.find(s => s.id === state.activeSpace);
@@ -46,8 +50,29 @@ export default function ChatView() {
     }, [activeChat?.id, activeSpace?.id]);
 
     useEffect(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+        if (messagesEndRef.current && !showScrollBottom) {
+            messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+        }
     }, [activeChat?.messages]);
+
+    const handleScroll = useCallback(() => {
+        if (!scrollContainerRef.current) return;
+        const { scrollTop, scrollHeight, clientHeight } = scrollContainerRef.current;
+        setShowScrollTop(scrollTop > 500);
+        setShowScrollBottom(scrollHeight - scrollTop - clientHeight > 150);
+    }, []);
+
+    useEffect(() => {
+        handleScroll();
+    }, [activeChat?.messages, handleScroll]);
+
+    const scrollToTop = () => {
+        messagesStartRef.current?.scrollIntoView({ behavior: 'smooth' });
+    };
+
+    const scrollToBottom = () => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    };
 
     const runStreaming = useCallback(async (chat: Chat, targetMessageId?: string, overrideModel?: string, bypassCache?: boolean) => {
         setIsStreaming(true);
@@ -303,7 +328,8 @@ export default function ChatView() {
                         </div>
                     </div>
                 ) : (
-                    <div className="messages-container">
+                    <div className="messages-container" ref={scrollContainerRef} onScroll={handleScroll}>
+                        <div ref={messagesStartRef} />
                         {messages.map((msg, i) => (
                             <MessageBubble
                                 key={msg.id}
@@ -319,6 +345,23 @@ export default function ChatView() {
                         <div ref={messagesEndRef} />
                     </div>
                 )}
+
+                <div className="chat-scroll-buttons">
+                    <button
+                        className={`chat-scroll-btn ${showScrollTop ? 'visible' : ''}`}
+                        onClick={scrollToTop}
+                        title="Наверх"
+                    >
+                        <IconArrowUp size={20} />
+                    </button>
+                    <button
+                        className={`chat-scroll-btn ${showScrollBottom ? 'visible' : ''}`}
+                        onClick={scrollToBottom}
+                        title="Вниз"
+                    >
+                        <IconArrowDown size={20} />
+                    </button>
+                </div>
 
                 <ChatInput
                     onSend={handleSend}
