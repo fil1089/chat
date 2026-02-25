@@ -182,8 +182,6 @@ export default function SpaceDashboard() {
                         hasSystemInstruction={!!space.instructions}
                         imageSize={state.settings.imageSize || '1024x1024'}
                         onImageSizeChange={(size) => dispatch({ type: 'UPDATE_SETTINGS', payload: { imageSize: size } })}
-                        imageQuality={state.settings.imageQuality || 'high'}
-                        onImageQualityChange={(quality) => dispatch({ type: 'UPDATE_SETTINGS', payload: { imageQuality: quality } })}
                     />
                 </div>
             </div>

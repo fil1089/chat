@@ -51,7 +51,6 @@ export interface Settings {
     defaultModel: string;
     theme: string;
     imageSize?: string;
-    imageQuality?: string;
 }
 
 export interface AppState {

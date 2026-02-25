@@ -117,7 +117,6 @@ export default function ChatView() {
             systemInstructions: activeSpace?.instructions || '',
             fileContents: activeSpace?.files || [],
             imageSize: state.settings.imageSize || '1024x1024',
-            imageQuality: state.settings.imageQuality || 'high',
             bypassCache,
             onDelta: (delta: string) => {
                 fullResponse += delta;
@@ -379,8 +378,6 @@ export default function ChatView() {
                     hasSystemInstruction={!!activeSpace?.instructions}
                     imageSize={state.settings.imageSize || '1024x1024'}
                     onImageSizeChange={(size) => dispatch({ type: 'UPDATE_SETTINGS', payload: { imageSize: size } })}
-                    imageQuality={state.settings.imageQuality || 'high'}
-                    onImageQualityChange={(quality) => dispatch({ type: 'UPDATE_SETTINGS', payload: { imageQuality: quality } })}
                 />
             </div>
 

@@ -371,7 +371,6 @@ async function generateImageNeuro({
     onDone,
     onError,
     imageSize,
-    imageQuality,
 }: {
     apiKey: string;
     model: string;
@@ -382,33 +381,77 @@ async function generateImageNeuro({
     onDone?: () => void;
     onError?: (error: string) => void;
     imageSize: string;
-    imageQuality: string;
 }) {
     try {
         const lastUserMessage = messages.slice().reverse().find(m => m.role === 'user');
         const prompt = lastUserMessage?.displayContent || lastUserMessage?.content || 'Изображение';
+        const imageAttachment = lastUserMessage?.fullAttachments?.find(a => a.type === 'image' || a.mimeType?.startsWith('image/'));
 
-        onStatus?.({ type: 'status', message: 'Генерация изображения...' });
+        onStatus?.({ type: 'status', message: imageAttachment ? 'Редактирование изображения...' : 'Генерация изображения...' });
 
-        const requestBody = {
-            model: model,
-            prompt: prompt,
-            size: imageSize,
-            quality: imageQuality,
-            response_format: 'b64_json'
-        };
+        let response: Response;
 
-        console.log(`[NeuroAPI Image] Request:`, requestBody);
+        if (imageAttachment) {
+            const formData = new FormData();
 
-        const response = await fetch(`${API_URLS.neuro}/v1/images/generations`, {
-            method: 'POST',
-            headers: {
-                Authorization: `Bearer ${apiKey}`,
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(requestBody),
-            signal: controller.signal,
-        });
+            const base64Parts = imageAttachment.content.split(',');
+            if (base64Parts.length === 2) {
+                const mimeType = base64Parts[0].match(/:(.*?);/)?.[1] || 'image/png';
+                const b64Data = base64Parts[1];
+
+                const byteCharacters = atob(b64Data);
+                const byteNumbers = new Array(byteCharacters.length);
+                for (let i = 0; i < byteCharacters.length; i++) {
+                    byteNumbers[i] = byteCharacters.charCodeAt(i);
+                }
+                const byteArray = new Uint8Array(byteNumbers);
+                const blob = new Blob([byteArray], { type: mimeType });
+
+                let fileName = imageAttachment.name || 'image.png';
+                if (!fileName.includes('.')) {
+                    fileName += mimeType === 'image/jpeg' ? '.jpg' : '.png';
+                }
+
+                formData.append('image', blob, fileName);
+            } else {
+                throw new Error("Неверный формат прикрепленного изображения");
+            }
+
+            formData.append('prompt', prompt);
+            formData.append('model', model);
+            formData.append('size', imageSize);
+            formData.append('response_format', 'b64_json');
+
+            console.log(`[NeuroAPI Image] Edit Request:`, { model, prompt, size: imageSize, hasImage: true });
+
+            response = await fetch(`${API_URLS.neuro}/v1/images/edits`, {
+                method: 'POST',
+                headers: {
+                    Authorization: `Bearer ${apiKey}`,
+                },
+                body: formData,
+                signal: controller.signal,
+            });
+        } else {
+            const requestBody = {
+                model: model,
+                prompt: prompt,
+                size: imageSize,
+                response_format: 'b64_json'
+            };
+
+            console.log(`[NeuroAPI Image] Request:`, requestBody);
+
+            response = await fetch(`${API_URLS.neuro}/v1/images/generations`, {
+                method: 'POST',
+                headers: {
+                    Authorization: `Bearer ${apiKey}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(requestBody),
+                signal: controller.signal,
+            });
+        }
 
         if (!response.ok) {
             const errorText = await response.text();
@@ -599,7 +642,6 @@ interface StreamResponseParams extends StreamCallbacks {
     systemInstructions?: string;
     fileContents?: Attachment[];
     imageSize?: string;
-    imageQuality?: string;
     onUsage?: (usage: { prompt_tokens: number; completion_tokens: number; total_tokens: number }) => void;
     bypassCache?: boolean;
 }
@@ -612,7 +654,6 @@ export function streamResponse({
     systemInstructions = '',
     fileContents = [],
     imageSize = '1024x1024',
-    imageQuality = 'high',
     onDelta,
     onStatus,
     onUsage,
@@ -667,7 +708,6 @@ export function streamResponse({
                 messages,
                 controller,
                 imageSize,
-                imageQuality,
                 onDelta: (delta) => {
                     fullContent += delta;
                     onDelta?.(delta);

@@ -140,11 +140,9 @@ interface ChatInputProps {
     hasSystemInstruction?: boolean;
     imageSize: string;
     onImageSizeChange: (size: string) => void;
-    imageQuality: string;
-    onImageQualityChange: (quality: string) => void;
 }
 
-export default function ChatInput({ onSend, model, onModelChange, isStreaming, onStop, direction = 'up', hideModelSelector = false, placeholder, contextMode, contextN, onContextModeChange, onContextNChange, hasSystemInstruction, imageSize, onImageSizeChange, imageQuality, onImageQualityChange }: ChatInputProps) {
+export default function ChatInput({ onSend, model, onModelChange, isStreaming, onStop, direction = 'up', hideModelSelector = false, placeholder, contextMode, contextN, onContextModeChange, onContextNChange, hasSystemInstruction, imageSize, onImageSizeChange }: ChatInputProps) {
     const [text, setText] = useState('');
     const [attachments, setAttachments] = useState<Attachment[]>([]);
     const [isDragging, setIsDragging] = useState(false);
@@ -260,7 +258,7 @@ export default function ChatInput({ onSend, model, onModelChange, isStreaming, o
                             <IconAttachment size={18} />
                         </button>
 
-                        <div className="chat-settings-wrapper" ref={settingsRef}>
+                        <div className="chat-settings-wrapper" ref={settingsRef} onMouseLeave={() => { setShowSettings(false); setShowDropdown(false); }}>
                             <button
                                 className="chat-settings-btn"
                                 onClick={() => setShowSettings(!showSettings)}
@@ -337,23 +335,17 @@ export default function ChatInput({ onSend, model, onModelChange, isStreaming, o
                                                     style={{ background: 'var(--surface-glass)', color: 'var(--text-primary)', border: '1px solid var(--border)', padding: '8px', borderRadius: '4px', width: '100%', fontSize: '13px', appearance: 'auto', outline: 'none', cursor: 'pointer', fontFamily: 'inherit' }}
                                                 >
                                                     <option value="1024x1024">1024x1024 (1:1 Квадрат)</option>
-                                                    <option value="896x1280">896x1280 (2:3 Портрет)</option>
-                                                    <option value="1280x896">1280x896 (3:2 Фото)</option>
-                                                    <option value="896x1536">896x1536 (9:16 Смартфон)</option>
-                                                    <option value="1536x896">1536x896 (16:9 Монитор)</option>
-                                                </select>
-                                            </div>
-                                            <div className="settings-field">
-                                                <label>Качество (Детализация)</label>
-                                                <select
-                                                    value={imageQuality}
-                                                    onChange={(e) => onImageQualityChange(e.target.value)}
-                                                    className="custom-select-trigger"
-                                                    style={{ background: 'var(--surface-glass)', color: 'var(--text-primary)', border: '1px solid var(--border)', padding: '8px', borderRadius: '4px', width: '100%', fontSize: '13px', appearance: 'auto', outline: 'none', cursor: 'pointer', fontFamily: 'inherit' }}
-                                                >
-                                                    <option value="low">Low (1K эквивалент, x1)</option>
-                                                    <option value="medium">Medium (2K эквивалент, x1.5)</option>
-                                                    <option value="high">High (4K эквивалент, x2)</option>
+                                                    <option value="848x1264">848x1264 (2:3 Классическое фото)</option>
+                                                    <option value="1024x1536">1024x1536 (2:3 Портрет большое)</option>
+                                                    <option value="1264x848">1264x848 (3:2 Классическое фото)</option>
+                                                    <option value="1536x1024">1536x1024 (3:2 Фото большое)</option>
+                                                    <option value="896x1200">896x1200 (3:4 Стандартный монитор (портрет))</option>
+                                                    <option value="1200x896">1200x896 (4:3 Стандартный монитор)</option>
+                                                    <option value="928x1152">928x1152 (4:5 Печатный формат (портрет))</option>
+                                                    <option value="1152x928">1152x928 (5:4 Печатный формат)</option>
+                                                    <option value="1376x768">1376x768 (16:9 Широкоформатный)</option>
+                                                    <option value="768x1376">768x1376 (9:16 Вертикальный смартфон)</option>
+                                                    <option value="1584x672">1584x672 (21:9 Ультраширокий)</option>
                                                 </select>
                                             </div>
                                         </>
