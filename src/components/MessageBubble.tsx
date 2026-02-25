@@ -203,7 +203,18 @@ export default function MessageBubble({ message, chatId, isLatest, isStreaming, 
                             )}
                         </div>
                     ) : (
-                        displayText.startsWith('Ошибка:') ? (
+                        displayText.startsWith('iVBORw0KGgo') || displayText.startsWith('/9j/') ? (
+                            <img
+                                src={`data:image/png;base64,${displayText}`}
+                                alt="Generated Image"
+                                style={{
+                                    maxWidth: '100%',
+                                    borderRadius: '8px',
+                                    border: '1px solid var(--border)',
+                                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                                }}
+                            />
+                        ) : displayText.startsWith('Ошибка:') ? (
                             <div className="message-error">
                                 <span className="message-error-icon"><IconError size={16} /></span>
                                 <ReactMarkdown
@@ -260,6 +271,22 @@ export default function MessageBubble({ message, chatId, isLatest, isStreaming, 
                                                 </div>
                                                 <pre><code className={className} {...rest}>{children}</code></pre>
                                             </div>
+                                        );
+                                    },
+                                    img(props) {
+                                        return (
+                                            <img
+                                                {...props}
+                                                style={{
+                                                    maxWidth: '100%',
+                                                    borderRadius: '8px',
+                                                    marginTop: '8px',
+                                                    marginBottom: '8px',
+                                                    border: '1px solid var(--border)',
+                                                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                                                }}
+                                                loading="lazy"
+                                            />
                                         );
                                     }
                                 }}
