@@ -6,9 +6,18 @@ const KEYS = {
     SETTINGS: 'aggregator_settings',
 } as const;
 
+function authHeaders(): Record<string, string> {
+    const token = localStorage.getItem('auth_token');
+    return token
+        ? { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }
+        : { 'Content-Type': 'application/json' };
+}
+
 async function apiGet<T>(key: string): Promise<T | null> {
     try {
-        const res = await fetch(`/store/${key}`);
+        const res = await fetch(`/api/store/${key}`, {
+            headers: authHeaders(),
+        });
         const data = await res.json();
         return data.value as T;
     } catch {
@@ -18,19 +27,21 @@ async function apiGet<T>(key: string): Promise<T | null> {
 
 async function apiSet(key: string, value: unknown): Promise<void> {
     try {
-        await fetch(`/store/${key}`, {
+        await fetch(`/api/store/${key}`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: authHeaders(),
             body: JSON.stringify({ value }),
         });
     } catch (e) {
         console.error('Storage write error:', e);
     }
 }
-
 async function apiDelete(key: string): Promise<void> {
     try {
-        await fetch(`/store/${key}`, { method: 'DELETE' });
+        await fetch(`/api/store/${key}`, {
+            method: 'DELETE',
+            headers: authHeaders(),
+        });
     } catch (e) {
         console.error('Storage delete error:', e);
     }

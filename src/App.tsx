@@ -1,12 +1,14 @@
 import { useState } from 'react';
-import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { AppProvider } from './context/AppContext';
+import { AuthProvider, useAuth } from './context/AuthContext';
 import Sidebar from './components/Sidebar';
 import ChatView from './components/ChatView';
 import SpacesPage from './pages/SpacesPage';
 import SettingsPage from './pages/SettingsPage';
 import SpaceDashboard from './pages/SpaceDashboard';
 import HistoryPage from './pages/HistoryPage';
+import AuthPage from './pages/AuthPage';
 import { useApp } from './context/AppContext';
 import { IconMenu, IconSettings, IconClose, IconKey } from './components/Icons';
 
@@ -47,6 +49,7 @@ function NoApiKeyModal({ onClose, onGoSettings }: { onClose: () => void; onGoSet
 
 function Layout() {
     const { state, dispatch } = useApp();
+    const { logout, user } = useAuth();
     const navigate = useNavigate();
     const [modalDismissed, setModalDismissed] = useState(false);
 
@@ -59,7 +62,7 @@ function Layout() {
 
     return (
         <div className={`app-layout ${state.sidebarOpen ? '' : 'sidebar-collapsed'}`}>
-            <Sidebar />
+            <Sidebar onLogout={logout} userEmail={user?.email} />
             <main className="main-content">
                 <button
                     className="mobile-menu-btn"
@@ -73,6 +76,7 @@ function Layout() {
                     <Route path="/spaces" element={<SpacesPage />} />
                     <Route path="/history" element={<HistoryPage />} />
                     <Route path="/settings" element={<SettingsPage />} />
+                    <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>
             </main>
             {showNoApiModal && (
@@ -85,12 +89,36 @@ function Layout() {
     );
 }
 
+function AuthGuard() {
+    const { user, isLoading } = useAuth();
+
+    if (isLoading) {
+        return (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', background: 'var(--bg-primary)' }}>
+                <div style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>Загрузка...</div>
+            </div>
+        );
+    }
+
+    if (!user) {
+        return <AuthPage />;
+    }
+
+    return (
+        <AppProvider>
+            <Layout />
+        </AppProvider>
+    );
+}
+
 export default function App() {
     return (
         <BrowserRouter>
-            <AppProvider>
-                <Layout />
-            </AppProvider>
+            <AuthProvider>
+                <Routes>
+                    <Route path="*" element={<AuthGuard />} />
+                </Routes>
+            </AuthProvider>
         </BrowserRouter>
     );
 }

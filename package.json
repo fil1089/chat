@@ -11,9 +11,14 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@neondatabase/serverless": "^1.0.2",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/jsonwebtoken": "^9.0.10",
+    "bcryptjs": "^3.0.3",
     "docx": "^9.6.0",
     "html2canvas": "^1.4.1",
     "html2pdf.js": "^0.14.0",
+    "jsonwebtoken": "^9.0.3",
     "jspdf": "^4.2.0",
     "pdfjs-dist": "^4.8.69",
     "react": "^19.0.0",

@@ -6,6 +6,8 @@ export default defineConfig({
     server: {
         proxy: {
             '/store': 'http://localhost:3001',
+            '/api/auth': 'http://localhost:3001',
+            '/api/store': 'http://localhost:3001',
             '/api/neuro': {
                 target: 'https://neuroapi.host',
                 changeOrigin: true,
