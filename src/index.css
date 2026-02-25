@@ -4667,3 +4667,41 @@ a:hover {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+/* ===== App Loading Screen ===== */
+.app-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  height: 100vh;
+  background: var(--bg-primary);
+}
+
+.app-loading-icon {
+  color: var(--accent-light);
+  animation: loading-pulse 1.8s ease-in-out infinite;
+  filter: drop-shadow(0 0 12px var(--accent-soft));
+}
+
+.app-loading-text {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-tertiary);
+  letter-spacing: 0.5px;
+  animation: loading-pulse 1.8s ease-in-out infinite;
+  animation-delay: 0.2s;
+}
+
+@keyframes loading-pulse {
+
+  0%,
+  100% {
+    opacity: 0.4;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}

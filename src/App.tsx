@@ -10,7 +10,7 @@ import SpaceDashboard from './pages/SpaceDashboard';
 import HistoryPage from './pages/HistoryPage';
 import AuthPage from './pages/AuthPage';
 import { useApp } from './context/AppContext';
-import { IconMenu, IconSettings, IconClose, IconKey } from './components/Icons';
+import { IconMenu, IconSettings, IconClose, IconKey, IconLogo } from './components/Icons';
 
 function NoApiKeyModal({ onClose, onGoSettings }: { onClose: () => void; onGoSettings: () => void }) {
     return (
@@ -37,8 +37,9 @@ function NoApiKeyModal({ onClose, onGoSettings }: { onClose: () => void; onGoSet
                 <ol className="no-api-modal-steps">
                     <li>Войдите или зарегистрируйтесь</li>
                     <li>Если 404 <em>(после авторизации)</em> — нажмите «На главную»</li>
-                    <li>Откройте <strong>Панель → API Ключи</strong></li>
+                    <li>Откройте <strong>Панель</strong></li>
                     <li>Пополните баланс — нажмите в правом верхнем углу на <strong>окошко с суммой</strong></li>
+                    <li>В левой панели найдите <strong>→ API Ключи</strong></li>
                     <li>Нажмите <strong>Создать новый ключ</strong>, введите любое название</li>
                     <li>Скопируйте ключ и вставьте в Настройках</li>
                 </ol>
@@ -69,8 +70,9 @@ function Layout() {
 
     if (!state.storageReady) {
         return (
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', background: 'var(--bg-primary)' }}>
-                <div style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>Загрузка данных...</div>
+            <div className="app-loading">
+                <IconLogo size={36} className="app-loading-icon" />
+                <span className="app-loading-text">Спроси ИИ</span>
             </div>
         );
     }
@@ -109,8 +111,9 @@ function AuthGuard() {
 
     if (isLoading) {
         return (
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', background: 'var(--bg-primary)' }}>
-                <div style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>Загрузка...</div>
+            <div className="app-loading">
+                <IconLogo size={36} className="app-loading-icon" />
+                <span className="app-loading-text">Спроси ИИ</span>
             </div>
         );
     }
