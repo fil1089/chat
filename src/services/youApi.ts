@@ -510,6 +510,7 @@ interface StreamResponseParams extends StreamCallbacks {
     systemInstructions?: string;
     fileContents?: Attachment[];
     onUsage?: (usage: { prompt_tokens: number; completion_tokens: number; total_tokens: number }) => void;
+    bypassCache?: boolean;
 }
 
 export function streamResponse({
@@ -524,6 +525,7 @@ export function streamResponse({
     onUsage,
     onDone,
     onError,
+    bypassCache = false,
 }: StreamResponseParams): AbortController {
     const controller = new AbortController();
 
@@ -542,15 +544,21 @@ export function streamResponse({
         const formatted = formatMessages(messages, systemInstructions, fileContents);
         const requestBody = { model, messages: formatted, stream: true, stream_options: { include_usage: true } };
 
-        // Check cache
+        // Check cache (skip if bypassing)
         const cacheKey = JSON.stringify({ model, messages: formatted });
-        const cached = responseCache.get(cacheKey);
-        if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
-            console.log('[Cache] HIT — returning cached response');
-            onDelta?.(cached.content);
-            if (cached.usage) onUsage?.(cached.usage);
-            onDone?.();
-            return controller;
+        if (!bypassCache) {
+            const cached = responseCache.get(cacheKey);
+            if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+                console.log('[Cache] HIT — returning cached response');
+                onDelta?.(cached.content);
+                if (cached.usage) onUsage?.(cached.usage);
+                onDone?.();
+                return controller;
+            }
+        } else {
+            // Invalidate stale cache for this key so regeneration is fresh
+            responseCache.delete(cacheKey);
+            console.log('[Cache] BYPASS — regenerating fresh response');
         }
 
         // Track full response for caching

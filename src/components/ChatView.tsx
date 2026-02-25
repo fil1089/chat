@@ -49,7 +49,7 @@ export default function ChatView() {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [activeChat?.messages]);
 
-    const runStreaming = useCallback(async (chat: Chat, targetMessageId?: string, overrideModel?: string) => {
+    const runStreaming = useCallback(async (chat: Chat, targetMessageId?: string, overrideModel?: string, bypassCache?: boolean) => {
         setIsStreaming(true);
         setStreamStatus(null);
         let fullResponse = '';
@@ -91,6 +91,7 @@ export default function ChatView() {
             messages: messagesToSend,
             systemInstructions: activeSpace?.instructions || '',
             fileContents: activeSpace?.files || [],
+            bypassCache,
             onDelta: (delta: string) => {
                 fullResponse += delta;
 
@@ -270,8 +271,8 @@ export default function ChatView() {
         const updatedChat: Chat = { ...activeChat, messages: updatedMessages, updatedAt: Date.now() };
         dispatch({ type: 'UPDATE_CHAT', payload: updatedChat });
 
-        // Run streaming for the new version
-        runStreaming(updatedChat, lastMsg.id, regenerateModel || model);
+        // Run streaming for the new version, bypassing cache
+        runStreaming(updatedChat, lastMsg.id, regenerateModel || model, true);
     }, [activeChat, model, dispatch, runStreaming]);
 
     const handleEdit = (text: string) => {
