@@ -4557,3 +4557,88 @@ a:hover {
   background: rgba(255, 77, 77, 0.1);
   color: #ff4d4d;
 }
+
+/* Sidebar nav group with collapse toggle */
+.nav-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.nav-item-header {
+  display: flex;
+  align-items: center;
+}
+
+.nav-item-header .nav-item {
+  flex: 1;
+  min-width: 0;
+}
+
+.collapse-toggle {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  transition: var(--transition);
+}
+
+.collapse-toggle:hover {
+  background: var(--surface-glass-hover);
+  color: var(--text-primary);
+}
+
+.collapse-toggle.collapsed svg {
+  transform: rotate(-90deg);
+}
+
+/* Sub-nav items (space list under ИИ Помощники) */
+.sidebar-sub-nav {
+  padding: 2px 0 4px;
+}
+
+.sub-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px 6px 32px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  text-decoration: none;
+  border-radius: var(--radius-sm);
+  transition: var(--transition);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sub-nav-item:hover {
+  background: var(--surface-glass-hover);
+  color: var(--text-primary);
+}
+
+.sub-nav-item.active {
+  color: var(--accent-light);
+  background: var(--accent-soft);
+}
+
+.sub-nav-icon {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  color: var(--text-tertiary);
+}
+
+.sub-nav-item.active .sub-nav-icon {
+  color: var(--accent-light);
+}
+
+.sub-nav-item span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

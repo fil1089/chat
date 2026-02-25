@@ -84,7 +84,7 @@ export default function Sidebar({ onLogout, userEmail }: SidebarProps) {
                                 className={`nav-item ${location.pathname === '/spaces' ? 'active' : ''}`}
                                 onClick={() => dispatch({ type: 'SET_ACTIVE_CHAT', payload: null })}
                             >
-                                <IconRobot size={20} />
+                                <IconRobot size={16} />
                                 <span>ИИ Помощники</span>
                             </Link>
                             <button
@@ -120,7 +120,7 @@ export default function Sidebar({ onLogout, userEmail }: SidebarProps) {
                         className={`nav-item ${location.pathname === '/history' ? 'active' : ''}`}
                         onClick={() => navigate('/history')}
                     >
-                        <IconHistory size={16} className="nav-icon" />
+                        <IconHistory size={16} />
                         <span>История</span>
                     </button>
                 </div>
