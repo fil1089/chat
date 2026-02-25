@@ -35,9 +35,10 @@ function NoApiKeyModal({ onClose, onGoSettings }: { onClose: () => void; onGoSet
                     neuroapi.host →
                 </a>
                 <ol className="no-api-modal-steps">
-                    <li>Войдите или зарегистрируйтесь <em>(через Google)</em></li>
+                    <li>Войдите или зарегистрируйтесь <em>(через Google, после авторизации)</em></li>
                     <li>Если 404 — нажмите «На главную»</li>
                     <li>Откройте <strong>Панель → API Ключи</strong></li>
+                    <li>Пополните баланс — нажмите в правом верхнем углу на <strong>окошко с суммой</strong></li>
                     <li>Нажмите <strong>Создать новый ключ</strong>, введите любое название</li>
                     <li>Скопируйте ключ и вставьте в Настройках</li>
                 </ol>
