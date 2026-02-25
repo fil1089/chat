@@ -365,43 +365,42 @@ export default function ChatInput({ onSend, model, onModelChange, isStreaming, o
                                 </select>
                             </div>
                         )}
+                        {isStreaming ? (
+                            <button className="send-btn stop-btn" onClick={onStop} title="Остановить">
+                                <IconStop size={18} />
+                            </button>
+                        ) : (
+                            <button
+                                className="send-btn"
+                                onClick={handleSubmit}
+                                disabled={!text.trim() && attachments.length === 0}
+                                title="Отправить (Enter)"
+                            >
+                                <IconSend size={18} />
+                            </button>
+                        )}
                     </div>
 
-                    {isStreaming ? (
-                        <button className="send-btn stop-btn" onClick={onStop} title="Остановить">
-                            <IconStop size={18} />
-                        </button>
-                    ) : (
-                        <button
-                            className="send-btn"
-                            onClick={handleSubmit}
-                            disabled={!text.trim() && attachments.length === 0}
-                            title="Отправить (Enter)"
-                        >
-                            <IconSend size={18} />
-                        </button>
-                    )}
+                    <input
+                        type="file"
+                        ref={fileInputRef}
+                        style={{ display: 'none' }}
+                        multiple
+                        onChange={handleFileChange}
+                    />
                 </div>
-
-                <input
-                    type="file"
-                    ref={fileInputRef}
-                    style={{ display: 'none' }}
-                    multiple
-                    onChange={handleFileChange}
-                />
-            </div>
-            <div className="chat-input-bottom">
-                <textarea
-                    ref={textareaRef}
-                    className="chat-textarea"
-                    placeholder={isDragging ? "Перетащите файлы сюда..." : (placeholder || "Введите сообщение...")}
-                    value={text}
-                    onChange={(e) => setText(e.target.value)}
-                    onKeyDown={handleKeyDown}
-                    rows={1}
-                    disabled={isStreaming}
-                />
+                <div className="chat-input-bottom">
+                    <textarea
+                        ref={textareaRef}
+                        className="chat-textarea"
+                        placeholder={isDragging ? "Перетащите файлы сюда..." : (placeholder || "Введите сообщение...")}
+                        value={text}
+                        onChange={(e) => setText(e.target.value)}
+                        onKeyDown={handleKeyDown}
+                        rows={1}
+                        disabled={isStreaming}
+                    />
+                </div>
             </div>
         </div>
     );
