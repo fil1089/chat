@@ -80,7 +80,7 @@ export default function ModelSelector({ model, onModelChange, direction = 'up' }
                 <div className="model-trigger-content">
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                         <span className="model-name">{currentModel?.name || model}</span>
-                        {currentModel?.isActual && <span className="model-badge" style={{ background: 'rgba(76, 175, 80, 0.15)', color: '#4caf50', border: '1px solid rgba(76,175,80,0.3)' }}>Актуальная</span>}
+                        {currentModel?.isActual && <span className="model-badge" style={{ background: 'rgba(255, 255, 255, 0.05)', color: 'var(--text-secondary)', border: '1px solid var(--border)', fontSize: '10px', padding: '2px 6px', fontWeight: 'normal', letterSpacing: '0.2px' }}>актуальная</span>}
                     </div>
                     {currentModel && <span className="model-badge">{currentModel.category}</span>}
                 </div>
@@ -143,7 +143,7 @@ export default function ModelSelector({ model, onModelChange, direction = 'up' }
                                                                             <div className="model-item-info">
                                                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                                                                                     <span className="model-item-name">{m.name}</span>
-                                                                                    {m.isActual && <span className="model-badge" style={{ background: 'rgba(76, 175, 80, 0.15)', color: '#4caf50', border: '1px solid rgba(76,175,80,0.3)', fontSize: '10px', padding: '2px 6px' }}>Актуальная</span>}
+                                                                                    {m.isActual && <span className="model-badge" style={{ background: 'rgba(255, 255, 255, 0.05)', color: 'var(--text-secondary)', border: '1px solid var(--border)', fontSize: '10px', padding: '1px 5px', fontWeight: 'normal' }}>актуальная</span>}
                                                                                 </div>
                                                                                 <span className="model-item-type">{m.desc}</span>
                                                                             </div>

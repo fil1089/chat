@@ -5,7 +5,7 @@ import { API_URLS } from './apiConfig';
 import type { AIModel, Message, StreamCallbacks, StatusEvent, Attachment } from '../types';
 
 // ===== Model Pricing ($ per 1M tokens) =====
-const MODEL_PRICING: Record<string, { input: number; output: number }> = {
+const MODEL_PRICING: Record<string, { input: number; output: number; fixedRub?: number }> = {
     'gpt-4o': { input: 2.5, output: 10 },
     'gpt-4o-mini': { input: 0.15, output: 0.6 },
     'gpt-4o-audio-preview': { input: 5, output: 15 },
@@ -31,7 +31,7 @@ const MODEL_PRICING: Record<string, { input: number; output: number }> = {
     'gemini-3-flash-preview': { input: 0.15, output: 0.6 },
     'gemini-3-pro-preview': { input: 1.25, output: 10 },
     'gemini-3.1-pro-preview': { input: 1.25, output: 10 },
-    'gemini-3-pro-image-preview': { input: 1.25, output: 10 },
+    'gemini-3-pro-image-preview': { input: 1.25, output: 10, fixedRub: 5.08 },
     'claude-sonnet-4-20250514': { input: 3, output: 15 },
     'claude-sonnet-4-20250514-thinking': { input: 3, output: 15 },
     'claude-sonnet-4-5-20250929': { input: 3, output: 15 },
@@ -67,6 +67,9 @@ const FALLBACK_PRICING = { input: 1, output: 4 };
 
 export function calcCost(modelId: string, promptTokens: number, completionTokens: number): string {
     const pricing = MODEL_PRICING[modelId] || FALLBACK_PRICING;
+    if (pricing.fixedRub !== undefined) {
+        return pricing.fixedRub.toFixed(2);
+    }
     const usdCost = (promptTokens * pricing.input + completionTokens * pricing.output) / 1_000_000;
     const rubCost = usdCost * 79; // Fixed exchange rate of NeuroAPI (79 RUB = 1 USD)
     if (rubCost < 0.0001) return '0.0001';
