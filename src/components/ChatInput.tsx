@@ -138,9 +138,13 @@ interface ChatInputProps {
     onContextModeChange: (mode: ContextMode) => void;
     onContextNChange: (n: number) => void;
     hasSystemInstruction?: boolean;
+    imageSize: string;
+    onImageSizeChange: (size: string) => void;
+    imageQuality: string;
+    onImageQualityChange: (quality: string) => void;
 }
 
-export default function ChatInput({ onSend, model, onModelChange, isStreaming, onStop, direction = 'up', hideModelSelector = false, placeholder, contextMode, contextN, onContextModeChange, onContextNChange, hasSystemInstruction }: ChatInputProps) {
+export default function ChatInput({ onSend, model, onModelChange, isStreaming, onStop, direction = 'up', hideModelSelector = false, placeholder, contextMode, contextN, onContextModeChange, onContextNChange, hasSystemInstruction, imageSize, onImageSizeChange, imageQuality, onImageQualityChange }: ChatInputProps) {
     const [text, setText] = useState('');
     const [attachments, setAttachments] = useState<Attachment[]>([]);
     const [isDragging, setIsDragging] = useState(false);
@@ -320,6 +324,39 @@ export default function ChatInput({ onSend, model, onModelChange, isStreaming, o
                                                 Только системная инструкция и файлы помощника
                                             </span>
                                         </div>
+                                    )}
+
+                                    {(model.includes('image') || model.includes('image-preview')) && (
+                                        <>
+                                            <div className="settings-field" style={{ marginTop: '12px' }}>
+                                                <label>Разрешение (Размер)</label>
+                                                <select
+                                                    value={imageSize}
+                                                    onChange={(e) => onImageSizeChange(e.target.value)}
+                                                    className="custom-select-trigger"
+                                                    style={{ background: 'var(--surface-glass)', color: 'var(--text-primary)', border: '1px solid var(--border)', padding: '8px', borderRadius: '4px', width: '100%', fontSize: '13px', appearance: 'auto', outline: 'none', cursor: 'pointer', fontFamily: 'inherit' }}
+                                                >
+                                                    <option value="1024x1024">1024x1024 (1:1 Квадрат)</option>
+                                                    <option value="896x1280">896x1280 (2:3 Портрет)</option>
+                                                    <option value="1280x896">1280x896 (3:2 Фото)</option>
+                                                    <option value="896x1536">896x1536 (9:16 Смартфон)</option>
+                                                    <option value="1536x896">1536x896 (16:9 Монитор)</option>
+                                                </select>
+                                            </div>
+                                            <div className="settings-field">
+                                                <label>Качество (Детализация)</label>
+                                                <select
+                                                    value={imageQuality}
+                                                    onChange={(e) => onImageQualityChange(e.target.value)}
+                                                    className="custom-select-trigger"
+                                                    style={{ background: 'var(--surface-glass)', color: 'var(--text-primary)', border: '1px solid var(--border)', padding: '8px', borderRadius: '4px', width: '100%', fontSize: '13px', appearance: 'auto', outline: 'none', cursor: 'pointer', fontFamily: 'inherit' }}
+                                                >
+                                                    <option value="low">Low (1K эквивалент, x1)</option>
+                                                    <option value="medium">Medium (2K эквивалент, x1.5)</option>
+                                                    <option value="high">High (4K эквивалент, x2)</option>
+                                                </select>
+                                            </div>
+                                        </>
                                     )}
                                 </div>
                             )}

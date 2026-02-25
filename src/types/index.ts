@@ -50,6 +50,8 @@ export interface Settings {
     youApiKey: string;
     defaultModel: string;
     theme: string;
+    imageSize?: string;
+    imageQuality?: string;
 }
 
 export interface AppState {

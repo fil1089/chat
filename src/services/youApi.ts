@@ -370,6 +370,8 @@ async function generateImageNeuro({
     onStatus,
     onDone,
     onError,
+    imageSize,
+    imageQuality,
 }: {
     apiKey: string;
     model: string;
@@ -379,6 +381,8 @@ async function generateImageNeuro({
     onStatus?: (status: StatusEvent) => void;
     onDone?: () => void;
     onError?: (error: string) => void;
+    imageSize: string;
+    imageQuality: string;
 }) {
     try {
         const lastUserMessage = messages.slice().reverse().find(m => m.role === 'user');
@@ -389,8 +393,8 @@ async function generateImageNeuro({
         const requestBody = {
             model: model,
             prompt: prompt,
-            size: '1024x1024',
-            quality: 'high',
+            size: imageSize,
+            quality: imageQuality,
             response_format: 'b64_json'
         };
 
@@ -594,6 +598,8 @@ interface StreamResponseParams extends StreamCallbacks {
     messages?: Message[];
     systemInstructions?: string;
     fileContents?: Attachment[];
+    imageSize?: string;
+    imageQuality?: string;
     onUsage?: (usage: { prompt_tokens: number; completion_tokens: number; total_tokens: number }) => void;
     bypassCache?: boolean;
 }
@@ -605,6 +611,8 @@ export function streamResponse({
     messages = [],
     systemInstructions = '',
     fileContents = [],
+    imageSize = '1024x1024',
+    imageQuality = 'high',
     onDelta,
     onStatus,
     onUsage,
@@ -658,6 +666,8 @@ export function streamResponse({
                 model,
                 messages,
                 controller,
+                imageSize,
+                imageQuality,
                 onDelta: (delta) => {
                     fullContent += delta;
                     onDelta?.(delta);

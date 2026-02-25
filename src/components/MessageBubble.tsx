@@ -204,16 +204,50 @@ export default function MessageBubble({ message, chatId, isLatest, isStreaming, 
                         </div>
                     ) : (
                         displayText.startsWith('iVBORw0KGgo') || displayText.startsWith('/9j/') ? (
-                            <img
-                                src={`data:image/png;base64,${displayText}`}
-                                alt="Generated Image"
-                                style={{
-                                    maxWidth: '100%',
-                                    borderRadius: '8px',
-                                    border: '1px solid var(--border)',
-                                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
-                                }}
-                            />
+                            <div className="generated-image-container" style={{ position: 'relative', display: 'inline-block', maxWidth: '100%' }}>
+                                <img
+                                    src={`data:image/${displayText.startsWith('/9j/') ? 'jpeg' : 'png'};base64,${displayText}`}
+                                    alt="Generated Image"
+                                    style={{
+                                        maxWidth: '100%',
+                                        borderRadius: '8px',
+                                        border: '1px solid var(--border)',
+                                        boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                                        display: 'block'
+                                    }}
+                                />
+                                <button
+                                    onClick={() => {
+                                        const link = document.createElement('a');
+                                        link.href = `data:image/${displayText.startsWith('/9j/') ? 'jpeg' : 'png'};base64,${displayText}`;
+                                        link.download = `generated-image-${Date.now()}.${displayText.startsWith('/9j/') ? 'jpeg' : 'png'}`;
+                                        document.body.appendChild(link);
+                                        link.click();
+                                        document.body.removeChild(link);
+                                    }}
+                                    style={{
+                                        position: 'absolute',
+                                        top: '8px',
+                                        right: '8px',
+                                        background: 'rgba(0, 0, 0, 0.6)',
+                                        border: 'none',
+                                        borderRadius: '6px',
+                                        color: 'white',
+                                        padding: '6px',
+                                        cursor: 'pointer',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        backdropFilter: 'blur(4px)',
+                                        transition: 'background 0.2s',
+                                    }}
+                                    onMouseOver={(e) => e.currentTarget.style.background = 'rgba(0, 0, 0, 0.8)'}
+                                    onMouseOut={(e) => e.currentTarget.style.background = 'rgba(0, 0, 0, 0.6)'}
+                                    title="Скачать изображение"
+                                >
+                                    <IconDownload size={16} />
+                                </button>
+                            </div>
                         ) : displayText.startsWith('Ошибка:') ? (
                             <div className="message-error">
                                 <span className="message-error-icon"><IconError size={16} /></span>
