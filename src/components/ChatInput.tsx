@@ -140,9 +140,11 @@ interface ChatInputProps {
     hasSystemInstruction?: boolean;
     imageSize: string;
     onImageSizeChange: (size: string) => void;
+    imageQuality: string;
+    onImageQualityChange: (quality: string) => void;
 }
 
-export default function ChatInput({ onSend, model, onModelChange, isStreaming, onStop, direction = 'up', hideModelSelector = false, placeholder, contextMode, contextN, onContextModeChange, onContextNChange, hasSystemInstruction, imageSize, onImageSizeChange }: ChatInputProps) {
+export default function ChatInput({ onSend, model, onModelChange, isStreaming, onStop, direction = 'up', hideModelSelector = false, placeholder, contextMode, contextN, onContextModeChange, onContextNChange, hasSystemInstruction, imageSize, onImageSizeChange, imageQuality, onImageQualityChange }: ChatInputProps) {
     const [text, setText] = useState('');
     const [attachments, setAttachments] = useState<Attachment[]>([]);
     const [isDragging, setIsDragging] = useState(false);
@@ -258,138 +260,148 @@ export default function ChatInput({ onSend, model, onModelChange, isStreaming, o
                             <IconAttachment size={18} />
                         </button>
 
-                        <div className="chat-settings-wrapper" ref={settingsRef} onMouseLeave={() => { setShowSettings(false); setShowDropdown(false); }}>
-                            <button
-                                className="chat-settings-btn"
-                                onClick={() => setShowSettings(!showSettings)}
-                                title="Настройки"
-                            >
-                                <IconSettings size={18} />
-                            </button>
-                            {showSettings && (
-                                <div className="chat-settings-popup">
-                                    <h4><IconSettings size={14} /> Настройки</h4>
-                                    <div className="settings-field">
-                                        <label>Контекст</label>
-                                        <div className="custom-select-wrapper">
-                                            <button
-                                                className="custom-select-trigger"
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    setShowDropdown(!showDropdown);
-                                                }}
-                                            >
-                                                <span>
-                                                    {contextMode === 'full' ? 'Полный' : contextMode === 'last_n' ? 'Последние сообщения' : 'Только системная инструкция'}
-                                                </span>
-                                                <IconChevronDown size={14} />
-                                            </button>
-                                            {showDropdown && (
-                                                <div className="custom-select-dropdown open">
-                                                    <div
-                                                        className={`custom-select-option${contextMode === 'full' ? ' active' : ''}`}
-                                                        onClick={(e) => { e.stopPropagation(); onContextModeChange('full'); setShowDropdown(false); }}
-                                                    >Полный</div>
-                                                    <div
-                                                        className={`custom-select-option${contextMode === 'last_n' ? ' active' : ''}`}
-                                                        onClick={(e) => { e.stopPropagation(); onContextModeChange('last_n'); setShowDropdown(false); }}
-                                                    >Последние сообщения</div>
-                                                    {hasSystemInstruction && (
-                                                        <div
-                                                            className={`custom-select-option${contextMode === 'system_only' ? ' active' : ''}`}
-                                                            onClick={(e) => { e.stopPropagation(); onContextModeChange('system_only'); setShowDropdown(false); }}
-                                                        >Только системная инструкция</div>
-                                                    )}
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
-                                    {contextMode === 'last_n' && (
+                        {!(model.includes('image') || model.includes('image-preview')) && (
+                            <div className="chat-settings-wrapper" ref={settingsRef} onMouseLeave={() => { setShowSettings(false); setShowDropdown(false); }}>
+                                <button
+                                    className="chat-settings-btn"
+                                    onClick={() => setShowSettings(!showSettings)}
+                                    title="Настройки контекста"
+                                >
+                                    <IconSettings size={18} />
+                                </button>
+                                {showSettings && (
+                                    <div className="chat-settings-popup">
+                                        <h4><IconSettings size={14} /> Настройки</h4>
                                         <div className="settings-field">
-                                            <label>Количество пар</label>
-                                            <input
-                                                type="number"
-                                                min={1}
-                                                max={50}
-                                                value={contextN}
-                                                onChange={(e) => onContextNChange(Number(e.target.value))}
-                                            />
-                                        </div>
-                                    )}
-                                    {contextMode === 'system_only' && (
-                                        <div className="settings-field">
-                                            <span style={{ fontSize: '12px', color: 'var(--accent-light)' }}>
-                                                Только системная инструкция и файлы помощника
-                                            </span>
-                                        </div>
-                                    )}
-
-                                    {(model.includes('image') || model.includes('image-preview')) && (
-                                        <>
-                                            <div className="settings-field" style={{ marginTop: '12px' }}>
-                                                <label>Разрешение (Размер)</label>
-                                                <select
-                                                    value={imageSize}
-                                                    onChange={(e) => onImageSizeChange(e.target.value)}
+                                            <label>Контекст</label>
+                                            <div className="custom-select-wrapper">
+                                                <button
                                                     className="custom-select-trigger"
-                                                    style={{ background: 'var(--surface-glass)', color: 'var(--text-primary)', border: '1px solid var(--border)', padding: '8px', borderRadius: '4px', width: '100%', fontSize: '13px', appearance: 'auto', outline: 'none', cursor: 'pointer', fontFamily: 'inherit' }}
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        setShowDropdown(!showDropdown);
+                                                    }}
                                                 >
-                                                    <option value="1024x1024">1024x1024 (1:1 Квадрат)</option>
-                                                    <option value="848x1264">848x1264 (2:3 Классическое фото)</option>
-                                                    <option value="1024x1536">1024x1536 (2:3 Портрет большое)</option>
-                                                    <option value="1264x848">1264x848 (3:2 Классическое фото)</option>
-                                                    <option value="1536x1024">1536x1024 (3:2 Фото большое)</option>
-                                                    <option value="896x1200">896x1200 (3:4 Стандартный монитор (портрет))</option>
-                                                    <option value="1200x896">1200x896 (4:3 Стандартный монитор)</option>
-                                                    <option value="928x1152">928x1152 (4:5 Печатный формат (портрет))</option>
-                                                    <option value="1152x928">1152x928 (5:4 Печатный формат)</option>
-                                                    <option value="1376x768">1376x768 (16:9 Широкоформатный)</option>
-                                                    <option value="768x1376">768x1376 (9:16 Вертикальный смартфон)</option>
-                                                    <option value="1584x672">1584x672 (21:9 Ультраширокий)</option>
-                                                </select>
+                                                    <span>
+                                                        {contextMode === 'full' ? 'Полный' : contextMode === 'last_n' ? 'Последние сообщения' : 'Только системная инструкция'}
+                                                    </span>
+                                                    <IconChevronDown size={14} />
+                                                </button>
+                                                {showDropdown && (
+                                                    <div className="custom-select-dropdown open">
+                                                        <div
+                                                            className={`custom-select-option${contextMode === 'full' ? ' active' : ''}`}
+                                                            onClick={(e) => { e.stopPropagation(); onContextModeChange('full'); setShowDropdown(false); }}
+                                                        >Полный</div>
+                                                        <div
+                                                            className={`custom-select-option${contextMode === 'last_n' ? ' active' : ''}`}
+                                                            onClick={(e) => { e.stopPropagation(); onContextModeChange('last_n'); setShowDropdown(false); }}
+                                                        >Последние сообщения</div>
+                                                        {hasSystemInstruction && (
+                                                            <div
+                                                                className={`custom-select-option${contextMode === 'system_only' ? ' active' : ''}`}
+                                                                onClick={(e) => { e.stopPropagation(); onContextModeChange('system_only'); setShowDropdown(false); }}
+                                                            >Только системная инструкция</div>
+                                                        )}
+                                                    </div>
+                                                )}
                                             </div>
-                                        </>
-                                    )}
-                                </div>
-                            )}
-                        </div>
+                                        </div>
+                                        {contextMode === 'last_n' && (
+                                            <div className="settings-field">
+                                                <label>Количество пар</label>
+                                                <input
+                                                    type="number"
+                                                    min={1}
+                                                    max={50}
+                                                    value={contextN}
+                                                    onChange={(e) => onContextNChange(Number(e.target.value))}
+                                                />
+                                            </div>
+                                        )}
+                                        {contextMode === 'system_only' && (
+                                            <div className="settings-field">
+                                                <span style={{ fontSize: '12px', color: 'var(--accent-light)' }}>
+                                                    Только системная инструкция и файлы помощника
+                                                </span>
+                                            </div>
+                                        )}
 
-                        {isStreaming ? (
-                            <button className="send-btn stop-btn" onClick={onStop} title="Остановить">
-                                <IconStop size={18} />
-                            </button>
-                        ) : (
-                            <button
-                                className="send-btn"
-                                onClick={handleSubmit}
-                                disabled={!text.trim() && attachments.length === 0}
-                                title="Отправить (Enter)"
-                            >
-                                <IconSend size={18} />
-                            </button>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                        {(model.includes('image') || model.includes('image-preview')) && (
+                            <div className="image-settings-inline" style={{ display: 'flex', gap: '8px', alignItems: 'center', marginLeft: '8px' }}>
+                                <select
+                                    value={imageSize}
+                                    onChange={(e) => onImageSizeChange(e.target.value)}
+                                    className="custom-select-trigger"
+                                    style={{ background: 'var(--surface-glass)', color: 'var(--text-primary)', border: '1px solid var(--border)', padding: '6px 12px', borderRadius: '8px', fontSize: '13px', appearance: 'auto', outline: 'none', cursor: 'pointer', fontFamily: 'inherit', width: 'auto' }}
+                                    title="Пропорции изображения"
+                                >
+                                    <option value="1024x1024">1:1</option>
+                                    <option value="848x1264">2:3</option>
+                                    <option value="1264x848">3:2</option>
+                                    <option value="896x1200">3:4</option>
+                                    <option value="1200x896">4:3</option>
+                                    <option value="928x1152">4:5</option>
+                                    <option value="1152x928">5:4</option>
+                                    <option value="1376x768">16:9</option>
+                                    <option value="768x1376">9:16</option>
+                                    <option value="1584x672">21:9</option>
+                                </select>
+                                <select
+                                    value={imageQuality}
+                                    onChange={(e) => onImageQualityChange(e.target.value)}
+                                    className="custom-select-trigger"
+                                    style={{ background: 'var(--surface-glass)', color: 'var(--text-primary)', border: '1px solid var(--border)', padding: '6px 12px', borderRadius: '8px', fontSize: '13px', appearance: 'auto', outline: 'none', cursor: 'pointer', fontFamily: 'inherit', width: 'auto' }}
+                                    title="Качество генерации"
+                                >
+                                    <option value="low">1K</option>
+                                    <option value="medium">2K</option>
+                                    <option value="high">4K</option>
+                                </select>
+                            </div>
                         )}
                     </div>
 
-                    <input
-                        type="file"
-                        ref={fileInputRef}
-                        style={{ display: 'none' }}
-                        multiple
-                        onChange={handleFileChange}
-                    />
+                    {isStreaming ? (
+                        <button className="send-btn stop-btn" onClick={onStop} title="Остановить">
+                            <IconStop size={18} />
+                        </button>
+                    ) : (
+                        <button
+                            className="send-btn"
+                            onClick={handleSubmit}
+                            disabled={!text.trim() && attachments.length === 0}
+                            title="Отправить (Enter)"
+                        >
+                            <IconSend size={18} />
+                        </button>
+                    )}
                 </div>
-                <div className="chat-input-bottom">
-                    <textarea
-                        ref={textareaRef}
-                        className="chat-textarea"
-                        placeholder={isDragging ? "Перетащите файлы сюда..." : (placeholder || "Введите сообщение...")}
-                        value={text}
-                        onChange={(e) => setText(e.target.value)}
-                        onKeyDown={handleKeyDown}
-                        rows={1}
-                        disabled={isStreaming}
-                    />
-                </div>
+
+                <input
+                    type="file"
+                    ref={fileInputRef}
+                    style={{ display: 'none' }}
+                    multiple
+                    onChange={handleFileChange}
+                />
+            </div>
+            <div className="chat-input-bottom">
+                <textarea
+                    ref={textareaRef}
+                    className="chat-textarea"
+                    placeholder={isDragging ? "Перетащите файлы сюда..." : (placeholder || "Введите сообщение...")}
+                    value={text}
+                    onChange={(e) => setText(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    rows={1}
+                    disabled={isStreaming}
+                />
             </div>
         </div>
     );

@@ -7,6 +7,7 @@ import ChatView from './components/ChatView';
 import SpacesPage from './pages/SpacesPage';
 import SettingsPage from './pages/SettingsPage';
 import SpaceDashboard from './pages/SpaceDashboard';
+import ImagesPage from './pages/ImagesPage';
 import HistoryPage from './pages/HistoryPage';
 import AuthPage from './pages/AuthPage';
 import { useApp } from './context/AppContext';
@@ -91,6 +92,7 @@ function Layout() {
                     <Route path="/" element={<ChatView />} />
                     <Route path="/space/:id" element={<SpaceDashboard />} />
                     <Route path="/spaces" element={<SpacesPage />} />
+                    <Route path="/images" element={<ImagesPage />} />
                     <Route path="/history" element={<HistoryPage />} />
                     <Route path="/settings" element={<SettingsPage />} />
                     <Route path="*" element={<Navigate to="/" replace />} />

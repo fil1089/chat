@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
-import { IconPlus, IconSidebar, IconMessage, IconFolder, IconHistory, IconSettings, IconSearch, IconTrash, IconLogo, SpaceIcon, IconRobot, IconChevronDown, IconClose } from './Icons';
+import { IconPlus, IconSidebar, IconMessage, IconFolder, IconHistory, IconSettings, IconSearch, IconTrash, IconLogo, SpaceIcon, IconRobot, IconChevronDown, IconClose, IconImage } from './Icons';
 import { v4 as uuidv4 } from 'uuid';
 import type { Chat } from '../types';
 
@@ -116,6 +116,13 @@ export default function Sidebar({ onLogout, userEmail }: SidebarProps) {
                             </div>
                         )}
                     </div>
+                    <button
+                        className={`nav-item ${location.pathname === '/images' ? 'active' : ''}`}
+                        onClick={() => navigate('/images')}
+                    >
+                        <IconImage size={16} />
+                        <span>Изображения</span>
+                    </button>
                     <button
                         className={`nav-item ${location.pathname === '/history' ? 'active' : ''}`}
                         onClick={() => navigate('/history')}

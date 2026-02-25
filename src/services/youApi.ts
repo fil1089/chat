@@ -68,7 +68,8 @@ const FALLBACK_PRICING = { input: 1, output: 4 };
 export function calcCost(modelId: string, promptTokens: number, completionTokens: number): string {
     const pricing = MODEL_PRICING[modelId] || FALLBACK_PRICING;
     if (pricing.fixedRub !== undefined) {
-        return pricing.fixedRub.toFixed(2);
+        const multiplier = completionTokens > 0 ? completionTokens : 1;
+        return (pricing.fixedRub * multiplier).toFixed(2);
     }
     const usdCost = (promptTokens * pricing.input + completionTokens * pricing.output) / 1_000_000;
     const rubCost = usdCost * 79; // Fixed exchange rate of NeuroAPI (79 RUB = 1 USD)
@@ -370,7 +371,9 @@ async function generateImageNeuro({
     onStatus,
     onDone,
     onError,
+    onUsage,
     imageSize,
+    imageQuality,
 }: {
     apiKey: string;
     model: string;
@@ -380,8 +383,14 @@ async function generateImageNeuro({
     onStatus?: (status: StatusEvent) => void;
     onDone?: () => void;
     onError?: (error: string) => void;
+    onUsage?: (usage: { prompt_tokens: number; completion_tokens: number; total_tokens: number }) => void;
     imageSize: string;
+    imageQuality: string;
 }) {
+    let multiplier = 1;
+    if (imageQuality === 'medium') multiplier = 1.5;
+    if (imageQuality === 'high') multiplier = 2;
+
     try {
         const lastUserMessage = messages.slice().reverse().find(m => m.role === 'user');
         const prompt = lastUserMessage?.displayContent || lastUserMessage?.content || 'Изображение';
@@ -420,9 +429,10 @@ async function generateImageNeuro({
             formData.append('prompt', prompt);
             formData.append('model', model);
             formData.append('size', imageSize);
+            formData.append('quality', imageQuality);
             formData.append('response_format', 'b64_json');
 
-            console.log(`[NeuroAPI Image] Edit Request:`, { model, prompt, size: imageSize, hasImage: true });
+            console.log(`[NeuroAPI Image] Edit Request:`, { model, prompt, size: imageSize, quality: imageQuality, hasImage: true });
 
             response = await fetch(`${API_URLS.neuro}/v1/images/edits`, {
                 method: 'POST',
@@ -437,6 +447,7 @@ async function generateImageNeuro({
                 model: model,
                 prompt: prompt,
                 size: imageSize,
+                quality: imageQuality,
                 response_format: 'b64_json'
             };
 
@@ -467,6 +478,7 @@ async function generateImageNeuro({
         const data = await response.json();
         const base64Data = data.data?.[0]?.b64_json;
         if (base64Data) {
+            onUsage?.({ prompt_tokens: 0, completion_tokens: multiplier, total_tokens: 0 });
             onDelta?.(base64Data);
         } else {
             onError?.('Сервер не вернул изображение в формате base64.');
@@ -642,6 +654,7 @@ interface StreamResponseParams extends StreamCallbacks {
     systemInstructions?: string;
     fileContents?: Attachment[];
     imageSize?: string;
+    imageQuality?: string;
     onUsage?: (usage: { prompt_tokens: number; completion_tokens: number; total_tokens: number }) => void;
     bypassCache?: boolean;
 }
@@ -654,6 +667,7 @@ export function streamResponse({
     systemInstructions = '',
     fileContents = [],
     imageSize = '1024x1024',
+    imageQuality = 'high',
     onDelta,
     onStatus,
     onUsage,
@@ -708,9 +722,14 @@ export function streamResponse({
                 messages,
                 controller,
                 imageSize,
+                imageQuality,
                 onDelta: (delta) => {
                     fullContent += delta;
                     onDelta?.(delta);
+                },
+                onUsage: (u) => {
+                    capturedUsage = u;
+                    onUsage?.(u);
                 },
                 onStatus,
                 onDone: () => {
