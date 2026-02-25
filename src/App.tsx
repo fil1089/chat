@@ -60,6 +60,14 @@ function Layout() {
         navigate('/settings');
     };
 
+    if (!state.storageReady) {
+        return (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', background: 'var(--bg-primary)' }}>
+                <div style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>Загрузка данных...</div>
+            </div>
+        );
+    }
+
     return (
         <div className={`app-layout ${state.sidebarOpen ? '' : 'sidebar-collapsed'}`}>
             <Sidebar onLogout={logout} userEmail={user?.email} />
