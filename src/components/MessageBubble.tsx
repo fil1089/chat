@@ -33,6 +33,7 @@ export default function MessageBubble({ message, chatId, isLatest, isStreaming, 
     const [isEditing, setIsEditing] = useState(false);
     const [editValue, setEditValue] = useState(message.content);
     const [showFull, setShowFull] = useState(false);
+    const [showDownloadMenu, setShowDownloadMenu] = useState(false);
     const contentRef = useRef<HTMLDivElement>(null);
 
     const CHAR_LIMIT = 600;
