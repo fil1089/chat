@@ -78,7 +78,10 @@ export default function ModelSelector({ model, onModelChange, direction = 'up' }
                 onClick={() => setOpen(!open)}
             >
                 <div className="model-trigger-content">
-                    <span className="model-name">{currentModel?.name || model}</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <span className="model-name">{currentModel?.name || model}</span>
+                        {currentModel?.isActual && <span className="model-badge" style={{ background: 'rgba(76, 175, 80, 0.15)', color: '#4caf50', border: '1px solid rgba(76,175,80,0.3)' }}>Актуальная</span>}
+                    </div>
                     {currentModel && <span className="model-badge">{currentModel.category}</span>}
                 </div>
                 {direction === 'up' ? <IconChevronUp size={14} /> : <IconChevronDown size={14} />}
@@ -138,7 +141,10 @@ export default function ModelSelector({ model, onModelChange, direction = 'up' }
                                                                     >
                                                                         <div className="model-item-main">
                                                                             <div className="model-item-info">
-                                                                                <span className="model-item-name">{m.name}</span>
+                                                                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                                                                    <span className="model-item-name">{m.name}</span>
+                                                                                    {m.isActual && <span className="model-badge" style={{ background: 'rgba(76, 175, 80, 0.15)', color: '#4caf50', border: '1px solid rgba(76,175,80,0.3)', fontSize: '10px', padding: '2px 6px' }}>Актуальная</span>}
+                                                                                </div>
                                                                                 <span className="model-item-type">{m.desc}</span>
                                                                             </div>
                                                                             <div className="model-item-actions">

@@ -86,6 +86,7 @@ export interface AIModel {
     name: string;
     category: string;
     desc: string;
+    isActual?: boolean;
 }
 
 export interface StreamCallbacks {
