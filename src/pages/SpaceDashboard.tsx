@@ -166,6 +166,10 @@ export default function SpaceDashboard() {
                         isStreaming={false}
                         onStop={() => { }}
                         hideModelSelector={false}
+                        contextMode="full"
+                        contextN={20}
+                        onContextModeChange={() => { }}
+                        onContextNChange={() => { }}
                     />
                 </div>
             </div>
