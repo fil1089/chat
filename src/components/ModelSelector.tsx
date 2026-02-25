@@ -29,14 +29,20 @@ export default function ModelSelector({ model, onModelChange, direction = 'up' }
     useEffect(() => {
         if (open && searchRef.current) {
             setTimeout(() => searchRef.current?.focus(), 50);
-            // Auto-expand all categories when opening
+            // Only expand the category/family containing the currently selected model
             const grouped = getGroupedChatModels();
-            setExpandedCategories(new Set(Object.keys(grouped)));
-            const allFamilies = new Set<string>();
-            Object.values(grouped).forEach(families => {
-                Object.keys(families).forEach(f => allFamilies.add(f));
+            const categoriesToExpand = new Set<string>();
+            const familiesToExpand = new Set<string>();
+            Object.entries(grouped).forEach(([category, families]) => {
+                Object.entries(families).forEach(([family, models]) => {
+                    if (models.some(m => m.id === model)) {
+                        categoriesToExpand.add(category);
+                        familiesToExpand.add(family);
+                    }
+                });
             });
-            setExpandedFamilies(allFamilies);
+            setExpandedCategories(categoriesToExpand);
+            setExpandedFamilies(familiesToExpand);
         } else {
             setSearch('');
         }

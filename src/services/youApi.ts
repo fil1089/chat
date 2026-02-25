@@ -2,75 +2,139 @@
 // Endpoint: POST https://neuroapi.host/v1/chat/completions
 // SSE streaming with Bearer auth
 import { API_URLS } from './apiConfig';
-import type { AIModel, Message, SpaceFile, StreamCallbacks, StatusEvent } from '../types';
+import type { AIModel, Message, StreamCallbacks, StatusEvent, Attachment } from '../types';
+
+// ===== Model Pricing ($ per 1M tokens) =====
+const MODEL_PRICING: Record<string, { input: number; output: number }> = {
+    'gpt-4o': { input: 2.5, output: 10 },
+    'gpt-4o-mini': { input: 0.15, output: 0.6 },
+    'gpt-4o-audio-preview': { input: 5, output: 15 },
+    'gpt-4o-realtime-preview': { input: 5, output: 20 },
+    'gpt-4.1': { input: 2, output: 8 },
+    'gpt-4.1-mini': { input: 0.4, output: 1.6 },
+    'gpt-4.1-nano': { input: 0.1, output: 0.4 },
+    'gpt-5': { input: 5, output: 20 },
+    'gpt-5-mini': { input: 1, output: 4 },
+    'gpt-5-nano': { input: 0.2, output: 0.8 },
+    'gpt-5-chat-latest': { input: 5, output: 20 },
+    'gpt-5.1': { input: 5, output: 20 },
+    'gpt-5.2': { input: 5, output: 20 },
+    'gpt-5.2-chat': { input: 5, output: 20 },
+    'gpt-oss-120b': { input: 3, output: 12 },
+    'o3': { input: 10, output: 40 },
+    'o3-mini': { input: 1.1, output: 4.4 },
+    'o4-mini': { input: 1.1, output: 4.4 },
+    'gemini-2.5-flash': { input: 0.15, output: 0.6 },
+    'gemini-2.5-flash-lite': { input: 0.075, output: 0.3 },
+    'gemini-2.5-pro': { input: 1.25, output: 10 },
+    'gemini-3-flash-preview': { input: 0.15, output: 0.6 },
+    'gemini-3-pro-preview': { input: 1.25, output: 10 },
+    'claude-sonnet-4-20250514': { input: 3, output: 15 },
+    'claude-sonnet-4-20250514-thinking': { input: 3, output: 15 },
+    'claude-sonnet-4-5-20250929': { input: 3, output: 15 },
+    'claude-sonnet-4-5-20250929-thinking': { input: 3, output: 15 },
+    'claude-3-7-sonnet-20250219': { input: 3, output: 15 },
+    'claude-opus-4-20250514': { input: 15, output: 75 },
+    'claude-opus-4-20250514-thinking': { input: 15, output: 75 },
+    'claude-opus-4-1-20250805': { input: 15, output: 75 },
+    'claude-opus-4-1-20250805-thinking': { input: 15, output: 75 },
+    'claude-opus-4-5-20251101': { input: 15, output: 75 },
+    'claude-haiku-4-5-20251001': { input: 0.8, output: 4 },
+    'claude-haiku-4-5-thinking': { input: 0.8, output: 4 },
+    'deepseek-r1': { input: 0.55, output: 2.19 },
+    'deepseek-v3.2': { input: 0.27, output: 1.1 },
+    'deepseek-v3.2-exp': { input: 0.27, output: 1.1 },
+    'glm-4.6v-flash': { input: 0.2, output: 0.8 },
+    'glm-4.7': { input: 0.5, output: 2 },
+    'grok-4': { input: 3, output: 15 },
+    'grok-4-fast-reasoning': { input: 3, output: 15 },
+    'grok-4-fast-non-reasoning': { input: 3, output: 15 },
+    'grok-4.1-fast-reasoning': { input: 3, output: 15 },
+    'grok-4.1-fast-non-reasoning': { input: 3, output: 15 },
+    'text-embedding-3-large': { input: 0.13, output: 0 },
+    'text-embedding-3-small': { input: 0.02, output: 0 },
+    'tts': { input: 15, output: 0 },
+    'whisper': { input: 0.006, output: 0 },
+};
+
+const FALLBACK_PRICING = { input: 1, output: 4 };
+
+export function calcCost(modelId: string, promptTokens: number, completionTokens: number): string {
+    const pricing = MODEL_PRICING[modelId] || FALLBACK_PRICING;
+    const usdCost = (promptTokens * pricing.input + completionTokens * pricing.output) / 1_000_000;
+    const rubCost = usdCost * 100; // 1 USD = 100 RUB approximation
+    if (rubCost < 0.0001) return '0.0001';
+    if (rubCost < 0.1) return rubCost.toFixed(4);
+    return rubCost.toFixed(2);
+}
 
 // ===== Available Models =====
 export const MODELS: AIModel[] = [
     // ── OpenAI ──
-    { id: 'gpt-4.1', name: 'GPT-4.1', category: 'OpenAI', desc: 'Улучшенная GPT-4' },
-    { id: 'gpt-4.1-mini', name: 'GPT-4.1 Mini', category: 'OpenAI', desc: 'Быстрая GPT-4.1' },
-    { id: 'gpt-4.1-nano', name: 'GPT-4.1 Nano', category: 'OpenAI', desc: 'Самая быстрая' },
-    { id: 'gpt-4o', name: 'GPT-4o', category: 'OpenAI', desc: 'Мощная мультимодальная' },
-    { id: 'gpt-4o-mini', name: 'GPT-4o Mini', category: 'OpenAI', desc: 'Быстрая и экономная' },
-    { id: 'gpt-4o-audio-preview', name: 'GPT-4o Audio', category: 'OpenAI', desc: 'Аудио возможности' },
-    { id: 'gpt-4o-realtime-preview', name: 'GPT-4o Realtime', category: 'OpenAI', desc: 'Реалтайм превью' },
-    { id: 'gpt-oss-120b', name: 'GPT OSS 120B', category: 'OpenAI', desc: 'Открытая 120B' },
-    { id: 'gpt-5', name: 'GPT-5', category: 'OpenAI', desc: 'Новейшая GPT-5' },
-    { id: 'gpt-5-chat-latest', name: 'GPT-5 Chat Latest', category: 'OpenAI', desc: 'GPT-5 для чата' },
-    { id: 'gpt-5-mini', name: 'GPT-5 Mini', category: 'OpenAI', desc: 'Быстрая GPT-5' },
-    { id: 'gpt-5-nano', name: 'GPT-5 Nano', category: 'OpenAI', desc: 'Лёгкая GPT-5' },
-    { id: 'gpt-5.1', name: 'GPT-5.1', category: 'OpenAI', desc: 'Обновлённая GPT-5' },
-    { id: 'gpt-5.2', name: 'GPT-5.2', category: 'OpenAI', desc: 'Последняя GPT-5.2' },
-    { id: 'gpt-5.2-chat', name: 'GPT-5.2 Chat', category: 'OpenAI', desc: 'GPT-5.2 для чата' },
-    { id: 'o3', name: 'o3', category: 'OpenAI', desc: 'Рассуждение' },
-    { id: 'o3-mini', name: 'o3 Mini', category: 'OpenAI', desc: 'Компактное рассуждение' },
-    { id: 'o4-mini', name: 'o4 Mini', category: 'OpenAI', desc: 'Новейшее рассуждение' },
-    { id: 'gpt-image-1', name: 'GPT Image 1', category: 'OpenAI', desc: 'Генерация изображений' },
-    { id: 'text-embedding-3-large', name: 'Embedding 3 Large', category: 'OpenAI', desc: 'Эмбеддинги (большая)' },
-    { id: 'text-embedding-3-small', name: 'Embedding 3 Small', category: 'OpenAI', desc: 'Эмбеддинги (малая)' },
-    { id: 'tts', name: 'TTS', category: 'OpenAI', desc: 'Синтез речи' },
-    { id: 'whisper', name: 'Whisper', category: 'OpenAI', desc: 'Распознавание речи' },
+    { id: 'gpt-4.1', name: 'GPT-4.1', category: 'OpenAI', desc: 'Улучшенная версия GPT-4 с повышенной точностью следования инструкциям, расширенным контекстным окном и более надёжной работой с кодом и сложными задачами.' },
+    { id: 'gpt-4.1-mini', name: 'GPT-4.1 Mini', category: 'OpenAI', desc: 'Компактная и быстрая версия GPT-4.1, оптимизированная для массовых запросов с сохранением высокого качества ответов при минимальной задержке.' },
+    { id: 'gpt-4.1-nano', name: 'GPT-4.1 Nano', category: 'OpenAI', desc: 'Самая лёгкая модель линейки GPT-4.1 для мгновенных ответов, автодополнения и встроенных систем с минимальным потреблением ресурсов.' },
+    { id: 'gpt-4o', name: 'GPT-4o', category: 'OpenAI', desc: 'Мощная мультимодальная модель с поддержкой текста, изображений и аудио. Отлично справляется с анализом, генерацией кода, переводами и творческими задачами.' },
+    { id: 'gpt-4o-mini', name: 'GPT-4o Mini', category: 'OpenAI', desc: 'Быстрая и экономичная версия GPT-4o для повседневных задач: ответы на вопросы, суммаризация, генерация текста и простой код.' },
+    { id: 'gpt-4o-audio-preview', name: 'GPT-4o Audio', category: 'OpenAI', desc: 'Версия GPT-4o с нативной поддержкой аудиовхода и вывода, предназначенная для голосовых ассистентов и обработки речи.' },
+    { id: 'gpt-4o-realtime-preview', name: 'GPT-4o Realtime', category: 'OpenAI', desc: 'Модель для потоковых real-time взаимодействий с минимальной задержкой, идеальна для живых диалогов и интерактивных приложений.' },
+    { id: 'gpt-oss-120b', name: 'GPT OSS 120B', category: 'OpenAI', desc: 'Открытая 120-миллиардная модель от OpenAI для исследовательских и коммерческих задач с возможностью локального развёртывания.' },
+    { id: 'gpt-5', name: 'GPT-5', category: 'OpenAI', desc: 'Флагманская модель нового поколения с глубоким пониманием контекста, экспертным уровнем рассуждений и широкой поддержкой мультимодальности.' },
+    { id: 'gpt-5-chat-latest', name: 'GPT-5 Chat Latest', category: 'OpenAI', desc: 'Последняя версия GPT-5, оптимизированная для разговорного формата с улучшенной естественностью и точностью диалога.' },
+    { id: 'gpt-5-mini', name: 'GPT-5 Mini', category: 'OpenAI', desc: 'Компактная GPT-5 для быстрых запросов и массовых задач, сохраняющая ключевые возможности полной модели при сниженной задержке.' },
+    { id: 'gpt-5-nano', name: 'GPT-5 Nano', category: 'OpenAI', desc: 'Ультралёгкая GPT-5 для мгновенных ответов, авто-саджестов и edge-устройств с минимальным потреблением ресурсов.' },
+    { id: 'gpt-5.1', name: 'GPT-5.1', category: 'OpenAI', desc: 'Обновлённая GPT-5 с улучшениями в точности, скорости и следовании инструкциям на основе обратной связи пользователей.' },
+    { id: 'gpt-5.2', name: 'GPT-5.2', category: 'OpenAI', desc: 'Последняя итерация GPT-5 с расширенными возможностями рассуждения, программирования и мультимодального анализа.' },
+    { id: 'gpt-5.2-chat', name: 'GPT-5.2 Chat', category: 'OpenAI', desc: 'Чат-версия GPT-5.2, настроенная для продолжительных диалогов с улучшенным запоминанием контекста и естественной речью.' },
+    { id: 'o3', name: 'o3', category: 'OpenAI', desc: 'Модель рассуждения, способная пошагово решать сложные логические, математические и научные задачи с высокой точностью.' },
+    { id: 'o3-mini', name: 'o3 Mini', category: 'OpenAI', desc: 'Компактная версия o3 для быстрых задач рассуждения — цепочки логики, арифметика и анализ с минимальной задержкой.' },
+    { id: 'o4-mini', name: 'o4 Mini', category: 'OpenAI', desc: 'Новейшая модель рассуждения с улучшенной цепочкой мыслей, планированием и решением задач STEM-уровня.' },
+    { id: 'gpt-image-1', name: 'GPT Image 1', category: 'OpenAI', desc: 'Модель для генерации и редактирования изображений по текстовому описанию с высоким качеством и детализацией.' },
+    { id: 'text-embedding-3-large', name: 'Embedding 3 Large', category: 'OpenAI', desc: 'Большая модель эмбеддингов для точного семантического поиска, кластеризации и сравнения текстов.' },
+    { id: 'text-embedding-3-small', name: 'Embedding 3 Small', category: 'OpenAI', desc: 'Компактная модель эмбеддингов для быстрого семантического поиска с хорошим соотношением качества и скорости.' },
+    { id: 'tts', name: 'TTS', category: 'OpenAI', desc: 'Модель синтеза речи, преобразующая текст в естественную речь с поддержкой нескольких голосов и языков.' },
+    { id: 'whisper', name: 'Whisper', category: 'OpenAI', desc: 'Модель распознавания речи, способная транскрибировать аудио на множестве языков с высокой точностью.' },
 
     // ── Google ──
-    { id: 'gemini-2.5-flash', name: 'Gemini 2.5 Flash', category: 'Google', desc: 'Быстрая Gemini' },
-    { id: 'gemini-2.5-flash-lite', name: 'Gemini 2.5 Flash Lite', category: 'Google', desc: 'Лёгкая Gemini' },
-    { id: 'gemini-2.5-pro', name: 'Gemini 2.5 Pro', category: 'Google', desc: 'Мощная Gemini' },
-    { id: 'gemini-3-flash-preview', name: 'Gemini 3 Flash Preview', category: 'Google', desc: 'Превью Gemini 3' },
-    { id: 'gemini-3-pro-preview', name: 'Gemini 3 Pro Preview', category: 'Google', desc: 'Превью Gemini 3 Pro' },
-    { id: 'gemini-2.5-flash-image', name: 'Gemini 2.5 Flash Image', category: 'Google', desc: 'Генерация изображений' },
+    { id: 'gemini-2.5-flash', name: 'Gemini 2.5 Flash', category: 'Google', desc: 'Быстрая и экономичная модель Google с большим контекстным окном, поддержкой мультимодальности и оптимизацией для интерактивных приложений.' },
+    { id: 'gemini-2.5-flash-lite', name: 'Gemini 2.5 Flash Lite', category: 'Google', desc: 'Высокоскоростная и экономичная мультимодальная модель с огромным контекстным окном и гибкими возможностями рассуждения, предназначенная для real-time приложений, интерактивных систем и обработки длинных сессий.' },
+    { id: 'gemini-2.5-pro', name: 'Gemini 2.5 Pro', category: 'Google', desc: 'Мощная профессиональная модель Google для сложного анализа, программирования и многоступенчатого рассуждения с расширенным контекстным окном.' },
+    { id: 'gemini-3-flash-preview', name: 'Gemini 3 Flash Preview', category: 'Google', desc: 'Превью нового поколения Gemini 3 — значительный скачок в скорости, качестве рассуждений и мультимодальных возможностях.' },
+    { id: 'gemini-3-pro-preview', name: 'Gemini 3 Pro Preview', category: 'Google', desc: 'Превью флагманской Gemini 3 Pro с передовыми возможностями анализа, генерации и работы с длинными документами.' },
+    { id: 'gemini-2.5-flash-image', name: 'Gemini 2.5 Flash Image', category: 'Google', desc: 'Модель генерации и редактирования изображений на базе Gemini 2.5 Flash с поддержкой текстовых описаний и мультимодального ввода.' },
 
     // ── Anthropic ──
-    { id: 'claude-sonnet-4-20250514', name: 'Claude Sonnet 4', category: 'Anthropic', desc: 'Баланс скорости и качества' },
-    { id: 'claude-sonnet-4-20250514-thinking', name: 'Claude Sonnet 4 Thinking', category: 'Anthropic', desc: 'С рассуждением' },
-    { id: 'claude-sonnet-4-5-20250929', name: 'Claude Sonnet 4.5', category: 'Anthropic', desc: 'Обновлённая Sonnet' },
-    { id: 'claude-sonnet-4-5-20250929-thinking', name: 'Claude Sonnet 4.5 Thinking', category: 'Anthropic', desc: 'С рассуждением' },
-    { id: 'claude-3-7-sonnet-20250219', name: 'Claude 3.7 Sonnet', category: 'Anthropic', desc: 'Продвинутая Sonnet' },
-    { id: 'claude-opus-4-20250514', name: 'Claude Opus 4', category: 'Anthropic', desc: 'Мощная Claude' },
-    { id: 'claude-opus-4-20250514-thinking', name: 'Claude Opus 4 Thinking', category: 'Anthropic', desc: 'С рассуждением' },
-    { id: 'claude-opus-4-1-20250805', name: 'Claude Opus 4.1', category: 'Anthropic', desc: 'Обновлённая Opus' },
-    { id: 'claude-opus-4-1-20250805-thinking', name: 'Claude Opus 4.1 Thinking', category: 'Anthropic', desc: 'С рассуждением' },
-    { id: 'claude-opus-4-5-20251101', name: 'Claude Opus 4.5', category: 'Anthropic', desc: 'Последняя Opus' },
-    { id: 'claude-haiku-4-5-20251001', name: 'Claude Haiku 4.5', category: 'Anthropic', desc: 'Быстрая Claude' },
-    { id: 'claude-haiku-4-5-thinking', name: 'Claude Haiku 4.5 Thinking', category: 'Anthropic', desc: 'Быстрая с рассуждением' },
+    { id: 'claude-sonnet-4-20250514', name: 'Claude Sonnet 4', category: 'Anthropic', desc: 'Сбалансированная модель Anthropic с отличным соотношением качества, скорости и стоимости для широкого спектра задач — от написания текстов до анализа данных.' },
+    { id: 'claude-sonnet-4-20250514-thinking', name: 'Claude Sonnet 4 Thinking', category: 'Anthropic', desc: 'Claude Sonnet 4 с расширенным режимом рассуждения — модель «думает вслух», показывая цепочку мыслей для сложных логических задач.' },
+    { id: 'claude-sonnet-4-5-20250929', name: 'Claude Sonnet 4.5', category: 'Anthropic', desc: 'Обновлённая Claude Sonnet с улучшенной точностью, расширенным пониманием контекста и более естественным стилем общения.' },
+    { id: 'claude-sonnet-4-5-20250929-thinking', name: 'Claude Sonnet 4.5 Thinking', category: 'Anthropic', desc: 'Claude Sonnet 4.5 с режимом пошагового рассуждения для математики, логики и задач, требующих глубокого анализа.' },
+    { id: 'claude-3-7-sonnet-20250219', name: 'Claude 3.7 Sonnet', category: 'Anthropic', desc: 'Продвинутая модель Claude с превосходным пониманием нюансов, качественной генерацией кода и надёжным следованием инструкциям.' },
+    { id: 'claude-opus-4-20250514', name: 'Claude Opus 4', category: 'Anthropic', desc: 'Флагманская модель Anthropic для самых сложных задач — глубокий анализ, экспертное программирование и научные исследования.' },
+    { id: 'claude-opus-4-20250514-thinking', name: 'Claude Opus 4 Thinking', category: 'Anthropic', desc: 'Claude Opus 4 с прозрачным рассуждением, идеальна для задач, где важно видеть полную цепочку анализа и принятия решений.' },
+    { id: 'claude-opus-4-1-20250805', name: 'Claude Opus 4.1', category: 'Anthropic', desc: 'Обновлённая Opus с улучшениями в многоступенчатом рассуждении, обработке длинных документов и точности следования инструкциям.' },
+    { id: 'claude-opus-4-1-20250805-thinking', name: 'Claude Opus 4.1 Thinking', category: 'Anthropic', desc: 'Claude Opus 4.1 с расширенным режимом рассуждения для глубокого анализа, планирования и исследовательских задач.' },
+    { id: 'claude-opus-4-5-20251101', name: 'Claude Opus 4.5', category: 'Anthropic', desc: 'Последняя версия Claude Opus — вершина линейки Anthropic с беспрецедентным качеством рассуждений и генерации.' },
+    { id: 'claude-haiku-4-5-20251001', name: 'Claude Haiku 4.5', category: 'Anthropic', desc: 'Быстрая и экономичная Claude для массовых запросов, чат-ботов и встроенных систем с сохранением качества ответов.' },
+    { id: 'claude-haiku-4-5-thinking', name: 'Claude Haiku 4.5 Thinking', category: 'Anthropic', desc: 'Haiku 4.5 с режимом рассуждения — быстрое пошаговое решение задач при минимальной задержке.' },
 
     // ── DeepSeek ──
-    { id: 'deepseek-r1', name: 'DeepSeek R1', category: 'DeepSeek', desc: 'С рассуждением' },
-    { id: 'deepseek-v3.2', name: 'DeepSeek V3.2', category: 'DeepSeek', desc: 'Универсальная' },
-    { id: 'deepseek-v3.2-exp', name: 'DeepSeek V3.2 Exp', category: 'DeepSeek', desc: 'Экспериментальная' },
+    { id: 'deepseek-r1', name: 'DeepSeek R1', category: 'DeepSeek', desc: 'Модель рассуждения с открытым кодом, демонстрирующая конкурентоспособные результаты в математике, программировании и научных задачах.' },
+    { id: 'deepseek-v3.2', name: 'DeepSeek V3.2', category: 'DeepSeek', desc: 'Универсальная языковая модель для широкого спектра задач — от написания текстов до программирования, с качеством на уровне лидеров рынка.' },
+    { id: 'deepseek-v3.2-exp', name: 'DeepSeek V3.2 Exp', category: 'DeepSeek', desc: 'Экспериментальная версия DeepSeek V3.2 с новейшими улучшениями в архитектуре для тестирования передовых возможностей.' },
 
     // ── GLM ──
-    { id: 'glm-4.6v-flash', name: 'GLM 4.6V Flash', category: 'GLM', desc: 'Быстрая мультимодальная' },
-    { id: 'glm-4.7', name: 'GLM 4.7', category: 'GLM', desc: 'Мощная GLM' },
+    { id: 'glm-4.6v-flash', name: 'GLM 4.6V Flash', category: 'GLM', desc: 'Быстрая мультимодальная модель GLM с поддержкой текста и изображений, оптимизированная для высокоскоростных интерактивных приложений.' },
+    { id: 'glm-4.7', name: 'GLM 4.7', category: 'GLM', desc: 'Мощная языковая модель GLM с расширенными возможностями анализа, генерации и многоязычной поддержкой.' },
 
     // ── X.AI ──
-    { id: 'grok-4', name: 'Grok 4', category: 'X.AI', desc: 'Мощная xAI' },
-    { id: 'grok-4-fast-reasoning', name: 'Grok 4 Fast Reasoning', category: 'X.AI', desc: 'Быстрая с рассуждением' },
-    { id: 'grok-4-fast-non-reasoning', name: 'Grok 4 Fast', category: 'X.AI', desc: 'Быстрая xAI' },
-    { id: 'grok-4.1-fast-reasoning', name: 'Grok 4.1 Fast Reasoning', category: 'X.AI', desc: 'Обновлённая с рассуждением' },
-    { id: 'grok-4.1-fast-non-reasoning', name: 'Grok 4.1 Fast', category: 'X.AI', desc: 'Обновлённая быстрая' },
+    { id: 'grok-4', name: 'Grok 4', category: 'X.AI', desc: 'Флагманская модель xAI с огромным контекстом, глубоким рассуждением и способностью к сложному многоступенчатому анализу и решению задач.' },
+    { id: 'grok-4-fast-reasoning', name: 'Grok 4 Fast Reasoning', category: 'X.AI', desc: 'Быстрая версия Grok 4 с рассуждением — оптимизирована для прямых ответов и анализа с минимальной задержкой при сохранении логической цепочки.' },
+    { id: 'grok-4-fast-non-reasoning', name: 'Grok 4 Fast', category: 'X.AI', desc: 'Мощная мультимодальная языковая модель с огромным контекстом и сверхбыстрой обработкой запросов, оптимизированная для прямых ответов, поиска информации и масштабных real-time приложений без глубоких рассуждений.' },
+    { id: 'grok-4.1-fast-reasoning', name: 'Grok 4.1 Fast Reasoning', category: 'X.AI', desc: 'Обновлённая Grok 4.1 с рассуждением — улучшенная точность и скорость в цепочках логического анализа и решении задач.' },
+    { id: 'grok-4.1-fast-non-reasoning', name: 'Grok 4.1 Fast', category: 'X.AI', desc: 'Обновлённая быстрая Grok 4.1 с улучшенным качеством прямых ответов и расширенной поддержкой мультимодальности.' },
 
     // ── You.com ──
-    { id: 'you-research', name: 'You Research', category: 'You.com', desc: 'Advanced AI Agent with web search iteration' },
+    { id: 'you-research', name: 'You Research', category: 'You.com', desc: 'Продвинутый ИИ-агент с итеративным поиском в интернете — исследует множество источников, анализирует и синтезирует информацию для глубоких и актуальных ответов.' },
 ];
 
 // Group models by category
@@ -143,12 +207,16 @@ export function getGroupedChatModels(): Record<string, Record<string, AIModel[]>
 }
 
 // ===== Format Messages =====
+type ContentPart =
+    | { type: 'text'; text: string }
+    | { type: 'image_url'; image_url: { url: string } };
+
 interface FormattedMessage {
     role: string;
-    content: string;
+    content: string | ContentPart[];
 }
 
-function formatMessages(messages: Message[], systemInstructions: string, fileContents: SpaceFile[]): FormattedMessage[] {
+function formatMessages(messages: Message[], systemInstructions: string, fileContents: Attachment[]): FormattedMessage[] {
     const formatted: FormattedMessage[] = [];
 
     let systemPrompt = '';
@@ -164,7 +232,36 @@ function formatMessages(messages: Message[], systemInstructions: string, fileCon
     }
 
     messages.forEach((msg) => {
-        formatted.push({ role: msg.role, content: msg.content });
+        // Check if user message has image attachments
+        const fullAttachments: Attachment[] = msg.fullAttachments || [];
+        const imageAttachments = fullAttachments.filter(a => a.type === 'image');
+        const textAttachments = fullAttachments.filter(a => a.type === 'text');
+
+        if (msg.role === 'user' && imageAttachments.length > 0) {
+            // Build multimodal content array
+            const contentParts: ContentPart[] = [];
+
+            // Text part: user message + any text file attachments
+            let textContent = msg.displayContent || msg.content;
+            if (textAttachments.length > 0) {
+                textContent += '\n\n' + textAttachments.map(a => `[Файл: ${a.name}]\n${a.content}`).join('\n\n');
+            }
+            if (textContent.trim()) {
+                contentParts.push({ type: 'text', text: textContent });
+            }
+
+            // Image parts
+            imageAttachments.forEach(a => {
+                contentParts.push({
+                    type: 'image_url',
+                    image_url: { url: a.content } // data:image/...;base64,...
+                });
+            });
+
+            formatted.push({ role: msg.role, content: contentParts });
+        } else {
+            formatted.push({ role: msg.role, content: msg.displayContent || msg.content });
+        }
     });
 
     return formatted;
@@ -177,6 +274,7 @@ interface NeuroStreamParams {
     requestBody: Record<string, unknown>;
     controller: AbortController;
     onDelta?: (delta: string) => void;
+    onUsage?: (usage: { prompt_tokens: number; completion_tokens: number; total_tokens: number }) => void;
     onDone?: () => void;
     onError?: (error: string) => void;
 }
@@ -187,6 +285,7 @@ async function streamNeuroResponse({
     requestBody,
     controller,
     onDelta,
+    onUsage,
     onDone,
     onError,
 }: NeuroStreamParams) {
@@ -237,6 +336,7 @@ async function streamNeuroResponse({
                     const parsed = JSON.parse(data);
                     const delta = parsed.choices?.[0]?.delta?.content;
                     if (delta) onDelta?.(delta);
+                    if (parsed.usage) onUsage?.(parsed.usage);
                 } catch { /* skip */ }
             }
         }
@@ -396,7 +496,7 @@ async function streamYouResponse({
     } catch (err: unknown) {
         console.error('[youApi] streamYouResponse error:', err);
         const msg = err instanceof Error ? err.message : String(err);
-        onStatus?.({ type: 'status', message: `❌ Ошибка: ${msg}` });
+        onStatus?.({ type: 'status', message: `Ошибка: ${msg}` });
         if (err instanceof Error && err.name !== 'AbortError') onError?.(msg);
     }
 }
@@ -408,7 +508,8 @@ interface StreamResponseParams extends StreamCallbacks {
     model: string;
     messages?: Message[];
     systemInstructions?: string;
-    fileContents?: SpaceFile[];
+    fileContents?: Attachment[];
+    onUsage?: (usage: { prompt_tokens: number; completion_tokens: number; total_tokens: number }) => void;
 }
 
 export function streamResponse({
@@ -420,6 +521,7 @@ export function streamResponse({
     fileContents = [],
     onDelta,
     onStatus,
+    onUsage,
     onDone,
     onError,
 }: StreamResponseParams): AbortController {
@@ -438,17 +540,66 @@ export function streamResponse({
         });
     } else {
         const formatted = formatMessages(messages, systemInstructions, fileContents);
-        const requestBody = { model, messages: formatted, stream: true };
+        const requestBody = { model, messages: formatted, stream: true, stream_options: { include_usage: true } };
+
+        // Check cache
+        const cacheKey = JSON.stringify({ model, messages: formatted });
+        const cached = responseCache.get(cacheKey);
+        if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+            console.log('[Cache] HIT — returning cached response');
+            onDelta?.(cached.content);
+            if (cached.usage) onUsage?.(cached.usage);
+            onDone?.();
+            return controller;
+        }
+
+        // Track full response for caching
+        let fullContent = '';
+        let capturedUsage: { prompt_tokens: number; completion_tokens: number; total_tokens: number } | null = null;
+
         streamNeuroResponse({
             apiKey,
             model,
             requestBody,
             controller,
-            onDelta,
-            onDone,
+            onDelta: (delta) => {
+                fullContent += delta;
+                onDelta?.(delta);
+            },
+            onUsage: (usage) => {
+                capturedUsage = usage;
+                onUsage?.(usage);
+            },
+            onDone: () => {
+                // Cache the response
+                if (fullContent) {
+                    responseCache.set(cacheKey, {
+                        content: fullContent,
+                        usage: capturedUsage,
+                        timestamp: Date.now(),
+                    });
+                    // Limit cache size
+                    if (responseCache.size > MAX_CACHE_SIZE) {
+                        const firstKey = responseCache.keys().next().value;
+                        if (firstKey) responseCache.delete(firstKey);
+                    }
+                }
+                onDone?.();
+            },
             onError,
         });
     }
 
     return controller;
 }
+
+// ===== Response Cache =====
+interface CachedResponse {
+    content: string;
+    usage: { prompt_tokens: number; completion_tokens: number; total_tokens: number } | null;
+    timestamp: number;
+}
+
+const responseCache = new Map<string, CachedResponse>();
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+const MAX_CACHE_SIZE = 100;

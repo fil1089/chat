@@ -5,7 +5,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const DB_PATH = path.join(__dirname, '..', '..', '..', 'db.json');
+const DB_PATH = path.join(__dirname, '..', '..', 'db.json');
 const PORT = 3001;
 
 const app = express();
@@ -14,14 +14,26 @@ app.use(express.json({ limit: '50mb' }));
 
 function readDb() {
     try {
-        return JSON.parse(fs.readFileSync(DB_PATH, 'utf-8'));
-    } catch {
+        if (!fs.existsSync(DB_PATH)) {
+            console.log(`ℹ️ Database file not found, creating new one at: ${DB_PATH}`);
+            fs.writeFileSync(DB_PATH, JSON.stringify({}, null, 2), 'utf-8');
+            return {};
+        }
+        const content = fs.readFileSync(DB_PATH, 'utf-8');
+        return JSON.parse(content);
+    } catch (err) {
+        console.error('❌ Database read error:', err.message);
         return {};
     }
 }
 
 function writeDb(data) {
-    fs.writeFileSync(DB_PATH, JSON.stringify(data, null, 2), 'utf-8');
+    try {
+        fs.writeFileSync(DB_PATH, JSON.stringify(data, null, 2), 'utf-8');
+        console.log(`✅ Database updated at ${new Date().toLocaleTimeString()}`);
+    } catch (err) {
+        console.error('❌ Database write error:', err.message);
+    }
 }
 
 // GET /store/:key  — read a value

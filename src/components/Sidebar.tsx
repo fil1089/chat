@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
-import { IconPlus, IconSidebar, IconMessage, IconFolder, IconHistory, IconSettings, IconSearch, IconTrash, IconLogo, SpaceIcon } from './Icons';
+import { IconPlus, IconSidebar, IconMessage, IconFolder, IconHistory, IconSettings, IconSearch, IconTrash, IconLogo, SpaceIcon, IconRobot, IconChevronDown } from './Icons';
 import { v4 as uuidv4 } from 'uuid';
 import type { Chat } from '../types';
 
@@ -10,6 +10,7 @@ export default function Sidebar() {
     const navigate = useNavigate();
     const location = useLocation();
     const [searchQuery, setSearchQuery] = useState('');
+    const [spacesCollapsed, setSpacesCollapsed] = useState(false);
 
     const handleNewChat = () => {
         dispatch({ type: 'SET_ACTIVE_CHAT', payload: null });
@@ -17,20 +18,7 @@ export default function Sidebar() {
         navigate('/');
     };
 
-    const handleNewSearch = () => {
-        const searchChat: Chat = {
-            id: uuidv4(),
-            title: 'ИИ Поиск',
-            messages: [],
-            model: 'you-search',
-            timestamp: Date.now(),
-            createdAt: Date.now(),
-            updatedAt: Date.now(),
-        };
-        dispatch({ type: 'NEW_CHAT', payload: searchChat });
-        dispatch({ type: 'SET_ACTIVE_SPACE', payload: null });
-        navigate('/');
-    };
+
 
     const handleSelectChat = (chatId: string) => {
         dispatch({ type: 'SET_ACTIVE_CHAT', payload: chatId });
@@ -84,28 +72,44 @@ export default function Sidebar() {
                 </button>
 
                 <div className="sidebar-nav">
-                    <button className="nav-item" onClick={handleNewSearch}>
-                        <IconSearch size={16} className="nav-icon" />
-                        <span>ИИ Поиск</span>
-                    </button>
-                    <button
-                        className={`nav-item ${location.pathname === '/spaces' ? 'active' : ''}`}
-                        onClick={() => navigate('/spaces')}
-                    >
-                        <IconFolder size={16} className="nav-icon" />
-                        <span>Пространства</span>
-                    </button>
-                    <div className="sidebar-sub-nav">
-                        {state.spaces.slice(0, 5).map((space) => (
-                            <button
-                                key={space.id}
-                                className={`nav-item sub-item ${location.pathname === `/space/${space.id}` ? 'active' : ''}`}
-                                onClick={() => { dispatch({ type: 'SET_ACTIVE_SPACE', payload: space.id }); navigate(`/space/${space.id}`); }}
+                    <div className="nav-group">
+                        <div className="nav-item-header">
+                            <Link
+                                to="/spaces"
+                                className={`nav-item ${location.pathname === '/spaces' ? 'active' : ''}`}
+                                onClick={() => dispatch({ type: 'SET_ACTIVE_CHAT', payload: null })}
                             >
-                                <SpaceIcon icon={space.icon || 'folder'} size={14} className="nav-icon" />
-                                <span>{space.name}</span>
+                                <IconRobot size={20} />
+                                <span>ИИ Помощники</span>
+                            </Link>
+                            <button
+                                className={`collapse-toggle ${spacesCollapsed ? 'collapsed' : ''}`}
+                                onClick={() => setSpacesCollapsed(!spacesCollapsed)}
+                            >
+                                <IconChevronDown size={14} />
                             </button>
-                        ))}
+                        </div>
+
+                        {!spacesCollapsed && state.spaces.length > 0 && (
+                            <div className="sidebar-sub-nav">
+                                {state.spaces.map(space => (
+                                    <Link
+                                        key={space.id}
+                                        to={`/space/${space.id}`}
+                                        className={`sub-nav-item ${state.activeSpace === space.id ? 'active' : ''}`}
+                                        onClick={() => {
+                                            dispatch({ type: 'SET_ACTIVE_CHAT', payload: null });
+                                            dispatch({ type: 'SET_ACTIVE_SPACE', payload: space.id });
+                                        }}
+                                    >
+                                        <div className="sub-nav-icon">
+                                            <SpaceIcon icon={space.icon || 'folder'} size={14} />
+                                        </div>
+                                        <span>{space.name}</span>
+                                    </Link>
+                                ))}
+                            </div>
+                        )}
                     </div>
                     <button
                         className={`nav-item ${location.pathname === '/history' ? 'active' : ''}`}

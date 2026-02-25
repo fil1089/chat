@@ -5,8 +5,18 @@ export interface Message {
     role: 'user' | 'assistant' | 'system';
     content: string;
     displayContent?: string;
+    model?: string;
+    usage?: { prompt_tokens: number; completion_tokens: number; total_tokens: number };
     attachments?: { name: string; size: number }[];
+    fullAttachments?: Attachment[];
     timestamp?: number;
+    versions?: {
+        content: string;
+        model?: string;
+        usage?: { prompt_tokens: number; completion_tokens: number; total_tokens: number };
+        timestamp?: number;
+    }[];
+    activeVersion?: number;
 }
 
 export interface Chat {
@@ -20,22 +30,20 @@ export interface Chat {
     updatedAt?: number;
 }
 
-export interface SpaceFile {
-    name: string;
-    content: string;
-}
-
 export interface Space {
     id: string;
     name: string;
     description?: string;
     instructions?: string;
     icon?: string;
+    color?: string;
     model?: string;
-    files?: SpaceFile[];
+    files?: Attachment[];
     createdAt?: number;
     updatedAt?: number;
 }
+
+export type ContextMode = 'full' | 'last_n' | 'system_only';
 
 export interface Settings {
     apiKey: string;
@@ -67,7 +75,9 @@ export type AppAction =
     | { type: 'DELETE_SPACE'; payload: string }
     | { type: 'UPDATE_SETTINGS'; payload: Partial<Settings> }
     | { type: 'TOGGLE_SIDEBAR' }
-    | { type: 'SET_SIDEBAR'; payload: boolean };
+    | { type: 'SET_SIDEBAR'; payload: boolean }
+    | { type: 'SET_MESSAGE_VERSION'; payload: { chatId: string; messageId: string; versionIndex: number } }
+    | { type: 'REORDER_SPACES'; payload: Space[] };
 
 // ===== Model Types =====
 
@@ -94,6 +104,8 @@ export interface Attachment {
     name: string;
     content: string;
     size: number;
+    type: 'image' | 'text';
+    mimeType?: string;
 }
 
 // ===== Icon Props =====

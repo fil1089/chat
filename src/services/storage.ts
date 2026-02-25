@@ -1,4 +1,4 @@
-import type { Chat, Space, Settings, SpaceFile } from '../types';
+import type { Chat, Space, Settings } from '../types';
 
 const KEYS = {
     CHATS: 'aggregator_chats',

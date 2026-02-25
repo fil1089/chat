@@ -1,18 +1,128 @@
 import { useState, useRef, useEffect, type ChangeEvent, type KeyboardEvent, type DragEvent } from 'react';
+import * as pdfjsLib from 'pdfjs-dist';
 import ModelSelector from './ModelSelector';
-import { IconSend, IconStop, IconAttachment, IconFileText, IconClose, IconSearch } from './Icons';
-import type { Attachment } from '../types';
+import { IconSend, IconStop, IconAttachment, IconFileText, IconClose, IconSettings, IconChevronDown } from './Icons';
+import type { Attachment, ContextMode } from '../types';
 
-interface SearchModel {
-    id: string;
-    name: string;
-    desc: string;
+// Configure PDF.js worker via CDN (avoids Vite bundling issues)
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.8.69/pdf.worker.min.mjs';
+
+
+
+const IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/bmp', 'image/svg+xml'];
+
+async function extractPdfText(file: File): Promise<string> {
+    console.log('[PDF] Starting text extraction for:', file.name, 'size:', file.size);
+    const arrayBuffer = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(arrayBuffer) }).promise;
+    console.log('[PDF] Document loaded, pages:', pdf.numPages);
+    const pages: string[] = [];
+    for (let i = 1; i <= pdf.numPages; i++) {
+        const page = await pdf.getPage(i);
+        const textContent = await page.getTextContent();
+        const pageText = textContent.items
+            .map((item: any) => item.str)
+            .join(' ');
+        if (pageText.trim()) pages.push(pageText);
+    }
+    console.log('[PDF] Extracted text length:', pages.join('\n\n').length);
+    return pages.join('\n\n');
 }
 
-const SEARCH_MODELS: SearchModel[] = [
-    { id: 'you-search', name: 'Умный Поиск', desc: 'Быстрые ответы из сети' },
-    { id: 'you-research', name: 'Исследование', desc: 'Глубокий анализ данных' }
-];
+async function renderPdfAsImages(file: File): Promise<Attachment[]> {
+    console.log('[PDF] Rendering pages as images for:', file.name);
+    const arrayBuffer = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(arrayBuffer) }).promise;
+    const attachments: Attachment[] = [];
+    const scale = 2; // Higher resolution for better AI recognition
+
+    for (let i = 1; i <= pdf.numPages; i++) {
+        const page = await pdf.getPage(i);
+        const viewport = page.getViewport({ scale });
+        const canvas = document.createElement('canvas');
+        canvas.width = viewport.width;
+        canvas.height = viewport.height;
+        const ctx = canvas.getContext('2d')!;
+        await page.render({ canvasContext: ctx, viewport }).promise;
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+        console.log('[PDF] Page', i, 'rendered, dataUrl length:', dataUrl.length);
+        attachments.push({
+            name: `${file.name} (стр. ${i})`,
+            content: dataUrl,
+            size: dataUrl.length,
+            type: 'image',
+            mimeType: 'image/jpeg',
+        });
+    }
+    return attachments;
+}
+
+async function readFile(file: File): Promise<Attachment[]> {
+    const isImage = IMAGE_TYPES.includes(file.type) || /\.(jpe?g|png|gif|webp|bmp|svg)$/i.test(file.name);
+    const isPdf = file.type === 'application/pdf' || /\.pdf$/i.test(file.name);
+
+    if (isImage) {
+        return new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onload = (e) => resolve([{
+                name: file.name,
+                content: (e.target?.result as string) || '',
+                size: file.size,
+                type: 'image',
+                mimeType: file.type || undefined,
+            }]);
+            reader.readAsDataURL(file);
+        });
+    }
+
+    if (isPdf) {
+        try {
+            // Try text extraction first
+            const text = await extractPdfText(file);
+            if (text.trim().length > 50) {
+                // Has real text content
+                return [{
+                    name: file.name,
+                    content: text,
+                    size: file.size,
+                    type: 'text',
+                    mimeType: 'application/pdf',
+                }];
+            }
+            // Scanned PDF — render as images
+            console.log('[PDF] No text found, rendering as images...');
+            return await renderPdfAsImages(file);
+        } catch (err) {
+            console.error('PDF extraction error:', err);
+            // Fallback: try to render as images
+            try {
+                return await renderPdfAsImages(file);
+            } catch (renderErr) {
+                console.error('PDF render error:', renderErr);
+                return [{
+                    name: file.name,
+                    content: '[Ошибка при чтении PDF файла]',
+                    size: file.size,
+                    type: 'text',
+                    mimeType: 'application/pdf',
+                }];
+            }
+        }
+    }
+
+    // Default: read as text
+    return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = (e) => resolve([{
+            name: file.name,
+            content: (e.target?.result as string) || '',
+            size: file.size,
+            type: 'text',
+            mimeType: file.type || undefined,
+        }]);
+        reader.readAsText(file);
+    });
+}
 
 interface ChatInputProps {
     onSend: (text: string, attachments: Attachment[]) => void;
@@ -22,14 +132,23 @@ interface ChatInputProps {
     onStop: () => void;
     direction?: 'up' | 'down';
     hideModelSelector?: boolean;
+    placeholder?: string;
+    contextMode: ContextMode;
+    contextN: number;
+    onContextModeChange: (mode: ContextMode) => void;
+    onContextNChange: (n: number) => void;
+    hasSystemInstruction?: boolean;
 }
 
-export default function ChatInput({ onSend, model, onModelChange, isStreaming, onStop, direction = 'up', hideModelSelector = false }: ChatInputProps) {
+export default function ChatInput({ onSend, model, onModelChange, isStreaming, onStop, direction = 'up', hideModelSelector = false, placeholder, contextMode, contextN, onContextModeChange, onContextNChange, hasSystemInstruction }: ChatInputProps) {
     const [text, setText] = useState('');
     const [attachments, setAttachments] = useState<Attachment[]>([]);
     const [isDragging, setIsDragging] = useState(false);
+    const [showSettings, setShowSettings] = useState(false);
+    const [showDropdown, setShowDropdown] = useState(false);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const settingsRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         if (textareaRef.current) {
@@ -52,23 +171,12 @@ export default function ChatInput({ onSend, model, onModelChange, isStreaming, o
         return () => window.removeEventListener('edit-chat-message', handleEdit as EventListener);
     }, []);
 
-    const readFile = (file: File): Promise<Attachment> => {
-        return new Promise((resolve) => {
-            const reader = new FileReader();
-            reader.onload = (e) => resolve({
-                name: file.name,
-                content: (e.target?.result as string) || '',
-                size: file.size
-            });
-            reader.readAsText(file);
-        });
-    };
-
     const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
         const files = Array.from(e.target.files || []);
         if (files.length === 0) return;
 
-        const newAttachments = await Promise.all(files.map(readFile));
+        const results = await Promise.all(files.map(readFile));
+        const newAttachments = results.flat();
         setAttachments(prev => [...prev, ...newAttachments]);
         if (fileInputRef.current) fileInputRef.current.value = '';
     };
@@ -107,7 +215,8 @@ export default function ChatInput({ onSend, model, onModelChange, isStreaming, o
         setIsDragging(false);
         const files = Array.from(e.dataTransfer.files || []);
         if (files.length > 0) {
-            const newAttachments = await Promise.all(files.map(readFile));
+            const results = await Promise.all(files.map(readFile));
+            const newAttachments = results.flat();
             setAttachments(prev => [...prev, ...newAttachments]);
         }
     };
@@ -134,22 +243,7 @@ export default function ChatInput({ onSend, model, onModelChange, isStreaming, o
                     </div>
                 )}
                 <div className="chat-input-top">
-                    {hideModelSelector && (model === 'you-search' || model === 'you-research') ? (
-                        <div className="search-model-toggle">
-                            {SEARCH_MODELS.map(m => (
-                                <button
-                                    key={m.id}
-                                    className={`search-model-option ${model === m.id ? 'active' : ''}`}
-                                    onClick={() => onModelChange(m.id)}
-                                >
-                                    <div className="search-model-name">{m.name}</div>
-                                    <div className="search-model-desc">{m.desc}</div>
-                                </button>
-                            ))}
-                        </div>
-                    ) : hideModelSelector ? (
-                        <div className="ai-search-label"><IconSearch size={16} /> ИИ Поиск</div>
-                    ) : (
+                    {!hideModelSelector && (
                         <ModelSelector model={model} onModelChange={onModelChange} direction={direction} />
                     )}
 
@@ -161,6 +255,75 @@ export default function ChatInput({ onSend, model, onModelChange, isStreaming, o
                         >
                             <IconAttachment size={18} />
                         </button>
+
+                        <div className="chat-settings-wrapper" ref={settingsRef}>
+                            <button
+                                className="chat-settings-btn"
+                                onClick={() => setShowSettings(!showSettings)}
+                                title="Настройки"
+                            >
+                                <IconSettings size={18} />
+                            </button>
+                            {showSettings && (
+                                <div className="chat-settings-popup">
+                                    <h4><IconSettings size={14} /> Настройки</h4>
+                                    <div className="settings-field">
+                                        <label>Контекст</label>
+                                        <div className="custom-select-wrapper">
+                                            <button
+                                                className="custom-select-trigger"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setShowDropdown(!showDropdown);
+                                                }}
+                                            >
+                                                <span>
+                                                    {contextMode === 'full' ? 'Полный' : contextMode === 'last_n' ? 'Последние сообщения' : 'Только системная инструкция'}
+                                                </span>
+                                                <IconChevronDown size={14} />
+                                            </button>
+                                            {showDropdown && (
+                                                <div className="custom-select-dropdown open">
+                                                    <div
+                                                        className={`custom-select-option${contextMode === 'full' ? ' active' : ''}`}
+                                                        onClick={(e) => { e.stopPropagation(); onContextModeChange('full'); setShowDropdown(false); }}
+                                                    >Полный</div>
+                                                    <div
+                                                        className={`custom-select-option${contextMode === 'last_n' ? ' active' : ''}`}
+                                                        onClick={(e) => { e.stopPropagation(); onContextModeChange('last_n'); setShowDropdown(false); }}
+                                                    >Последние сообщения</div>
+                                                    {hasSystemInstruction && (
+                                                        <div
+                                                            className={`custom-select-option${contextMode === 'system_only' ? ' active' : ''}`}
+                                                            onClick={(e) => { e.stopPropagation(); onContextModeChange('system_only'); setShowDropdown(false); }}
+                                                        >Только системная инструкция</div>
+                                                    )}
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                    {contextMode === 'last_n' && (
+                                        <div className="settings-field">
+                                            <label>Количество пар</label>
+                                            <input
+                                                type="number"
+                                                min={1}
+                                                max={50}
+                                                value={contextN}
+                                                onChange={(e) => onContextNChange(Number(e.target.value))}
+                                            />
+                                        </div>
+                                    )}
+                                    {contextMode === 'system_only' && (
+                                        <div className="settings-field">
+                                            <span style={{ fontSize: '12px', color: 'var(--accent-light)' }}>
+                                                Только системная инструкция и файлы помощника
+                                            </span>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
 
                         {isStreaming ? (
                             <button className="send-btn stop-btn" onClick={onStop} title="Остановить">
@@ -190,7 +353,7 @@ export default function ChatInput({ onSend, model, onModelChange, isStreaming, o
                     <textarea
                         ref={textareaRef}
                         className="chat-textarea"
-                        placeholder={isDragging ? "Перетащите файлы сюда..." : "Введите сообщение..."}
+                        placeholder={isDragging ? "Перетащите файлы сюда..." : (placeholder || "Введите сообщение...")}
                         value={text}
                         onChange={(e) => setText(e.target.value)}
                         onKeyDown={handleKeyDown}

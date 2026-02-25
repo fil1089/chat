@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { API_URLS } from '../services/apiConfig';
 import { useApp } from '../context/AppContext';
 import { getChatModelsByCategory } from '../services/youApi';
-import { IconSettings, IconDownload, IconPlus, IconTrash, IconMessage, IconFolder, IconEye, IconEyeOff } from '../components/Icons';
+import { IconSettings, IconDownload, IconPlus, IconTrash, IconMessage, IconFolder, IconEye, IconEyeOff, IconCheck, IconError } from '../components/Icons';
 import ModelSelector from '../components/ModelSelector';
 import { exportAllData, importAllData, clearAllData } from '../services/storage';
 import type { ChangeEvent } from 'react';
@@ -15,11 +15,8 @@ interface TestResult {
 export default function SettingsPage() {
     const { state, dispatch } = useApp();
     const [showKey, setShowKey] = useState(false);
-    const [showYouKey, setShowYouKey] = useState(false);
     const [testResult, setTestResult] = useState<TestResult | null>(null);
-    const [youTestResult, setYouTestResult] = useState<TestResult | null>(null);
     const [testing, setTesting] = useState(false);
-    const [youTesting, setYouTesting] = useState(false);
 
     const handleSave = (key: string, value: string) => {
         dispatch({ type: 'UPDATE_SETTINGS', payload: { [key]: value } as Record<string, string> });
@@ -45,40 +42,19 @@ export default function SettingsPage() {
             });
 
             if (response.ok) {
-                setTestResult({ ok: true, msg: '✅ Ключ работает!' });
+                setTestResult({ ok: true, msg: 'Ключ работает!' });
             } else {
                 const text = await response.text();
-                setTestResult({ ok: false, msg: `❌ Ошибка ${response.status}: ${text.slice(0, 100)}` });
+                setTestResult({ ok: false, msg: `Ошибка ${response.status}: ${text.slice(0, 100)}` });
             }
         } catch (err: unknown) {
             const msg = err instanceof Error ? err.message : String(err);
-            setTestResult({ ok: false, msg: `❌ ${msg}` });
+            setTestResult({ ok: false, msg: msg });
         }
         setTesting(false);
     };
 
-    const handleTestYouKey = async () => {
-        if (!state.settings.youApiKey) return;
-        setYouTesting(true);
-        setYouTestResult(null);
 
-        try {
-            const response = await fetch(`${API_URLS.youSearch}/v1/search?query=test&count=1`, {
-                headers: { 'X-API-Key': state.settings.youApiKey },
-            });
-
-            if (response.ok) {
-                setYouTestResult({ ok: true, msg: '✅ Ключ работает!' });
-            } else {
-                const text = await response.text();
-                setYouTestResult({ ok: false, msg: `❌ Ошибка ${response.status}: ${text.slice(0, 100)}` });
-            }
-        } catch (err: unknown) {
-            const msg = err instanceof Error ? err.message : String(err);
-            setYouTestResult({ ok: false, msg: `❌ ${msg}` });
-        }
-        setYouTesting(false);
-    };
 
     const handleExport = async () => {
         const data = await exportAllData();
@@ -160,7 +136,7 @@ export default function SettingsPage() {
                     </div>
                     {testResult && (
                         <div className={`test-result ${testResult.ok ? 'success' : 'error'}`}>
-                            {testResult.msg}
+                            <span>{testResult.msg}</span>
                         </div>
                     )}
                     <p className="setting-hint">
@@ -171,38 +147,7 @@ export default function SettingsPage() {
                     </p>
                 </div>
 
-                <div className="setting-row">
-                    <label>API Ключ (You.com)</label>
-                    <div className="api-key-input">
-                        <input
-                            type={showYouKey ? 'text' : 'password'}
-                            value={state.settings.youApiKey || ''}
-                            onChange={(e) => handleSave('youApiKey', e.target.value)}
-                            placeholder="You.com API ключ"
-                        />
-                        <button className="btn-ghost" onClick={() => setShowYouKey(!showYouKey)} title={showYouKey ? 'Скрыть' : 'Показать'}>
-                            {showYouKey ? <IconEyeOff size={18} /> : <IconEye size={18} />}
-                        </button>
-                        <button
-                            className="btn-secondary"
-                            onClick={handleTestYouKey}
-                            disabled={youTesting || !state.settings.youApiKey}
-                        >
-                            {youTesting ? '...' : 'Проверить'}
-                        </button>
-                    </div>
-                    {youTestResult && (
-                        <div className={`test-result ${youTestResult.ok ? 'success' : 'error'}`}>
-                            {youTestResult.msg}
-                        </div>
-                    )}
-                    <p className="setting-hint">
-                        Получите ключ на{' '}
-                        <a href="https://you.com/platform/api-keys" target="_blank" rel="noopener noreferrer">
-                            you.com
-                        </a>
-                    </p>
-                </div>
+
             </div>
 
             <div className="settings-section">

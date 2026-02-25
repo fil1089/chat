@@ -93,6 +93,22 @@ function reducer(state: AppState, action: AppAction): AppState {
         case 'SET_SIDEBAR':
             return { ...state, sidebarOpen: action.payload };
 
+        case 'SET_MESSAGE_VERSION': {
+            const { chatId, messageId, versionIndex } = action.payload;
+            const chats = state.chats.map(chat => {
+                if (chat.id !== chatId) return chat;
+                const messages = chat.messages.map(msg => {
+                    if (msg.id !== messageId) return msg;
+                    return { ...msg, activeVersion: versionIndex };
+                });
+                return { ...chat, messages };
+            });
+            return { ...state, chats };
+        }
+
+        case 'REORDER_SPACES':
+            return { ...state, spaces: action.payload };
+
         default:
             return state;
     }
@@ -131,6 +147,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
             case 'UPDATE_SETTINGS':
                 await storage.saveSettings(action.payload);
                 break;
+            case 'SET_MESSAGE_VERSION': {
+                const chat = state.chats.find(c => c.id === action.payload.chatId);
+                if (chat) await storage.saveChat(chat);
+                break;
+            }
+            case 'REORDER_SPACES': {
+                for (const space of action.payload) {
+                    await storage.saveSpace(space);
+                }
+                break;
+            }
         }
     }, []);
 
