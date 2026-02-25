@@ -1,4 +1,4 @@
-import { createContext, useContext, useReducer, useEffect, useCallback, type ReactNode, type Dispatch } from 'react';
+import { createContext, useContext, useReducer, useEffect, useCallback, useRef, type ReactNode, type Dispatch } from 'react';
 import * as storage from '../services/storage';
 import type { AppState, AppAction, Settings, Chat, Space } from '../types';
 
@@ -129,13 +129,31 @@ export function AppProvider({ children }: { children: ReactNode }) {
         loadData();
     }, []);
 
+    // Debounce timers for UPDATE_CHAT: keyed by chatId
+    const saveChatTimers = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
+
     const asyncDispatch = useCallback(async (action: AppAction) => {
         dispatch(action);
         switch (action.type) {
-            case 'UPDATE_CHAT':
-                await storage.saveChat(action.payload);
+            case 'UPDATE_CHAT': {
+                const chat = action.payload;
+                // Debounce: cancel pending save for this chat and schedule a new one
+                const existing = saveChatTimers.current.get(chat.id);
+                if (existing) clearTimeout(existing);
+                const timer = setTimeout(() => {
+                    storage.saveChat(chat);
+                    saveChatTimers.current.delete(chat.id);
+                }, 2000);
+                saveChatTimers.current.set(chat.id, timer);
                 break;
+            }
             case 'DELETE_CHAT':
+                // If there's a pending save for this chat, cancel it
+                const pendingTimer = saveChatTimers.current.get(action.payload);
+                if (pendingTimer) {
+                    clearTimeout(pendingTimer);
+                    saveChatTimers.current.delete(action.payload);
+                }
                 await storage.deleteChat(action.payload);
                 break;
             case 'SAVE_SPACE':
@@ -160,6 +178,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
             }
         }
     }, []);
+
 
     return (
         <AppContext.Provider value={{ state, dispatch: asyncDispatch as Dispatch<AppAction> }}>
