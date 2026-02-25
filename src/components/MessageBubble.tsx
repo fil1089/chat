@@ -32,8 +32,10 @@ export default function MessageBubble({ message, chatId, isLatest, isStreaming, 
     const [copied, setCopied] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [editValue, setEditValue] = useState(message.content);
-    const [showDownloadMenu, setShowDownloadMenu] = useState(false);
+    const [showFull, setShowFull] = useState(false);
     const contentRef = useRef<HTMLDivElement>(null);
+
+    const CHAR_LIMIT = 600;
 
     const isUser = message.role === 'user';
     const activeIdx = message.activeVersion ?? 0;
@@ -41,6 +43,9 @@ export default function MessageBubble({ message, chatId, isLatest, isStreaming, 
     const displayText = currentVersion?.content ?? (message.displayContent || message.content);
     const displayModel = currentVersion?.model || message.model;
     const displayUsage = currentVersion?.usage || message.usage;
+
+    const isLong = isUser && displayText.length > CHAR_LIMIT;
+    const contentToDisplay = isLong && !showFull ? displayText.slice(0, CHAR_LIMIT) : displayText;
 
     const handleCopy = async () => {
         try {
@@ -185,7 +190,17 @@ export default function MessageBubble({ message, chatId, isLatest, isStreaming, 
 
                 <div className="message-content" ref={contentRef}>
                     {isUser ? (
-                        <p>{displayText}</p>
+                        <div className="user-message-container">
+                            <p>{contentToDisplay}{isLong && !showFull && '...'}</p>
+                            {isLong && (
+                                <button
+                                    className="show-more-link"
+                                    onClick={() => setShowFull(!showFull)}
+                                >
+                                    {showFull ? 'Свернуть' : 'Показать полностью'}
+                                </button>
+                            )}
+                        </div>
                     ) : (
                         displayText.startsWith('Ошибка:') ? (
                             <div className="message-error">

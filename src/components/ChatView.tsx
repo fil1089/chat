@@ -19,7 +19,14 @@ export default function ChatView() {
     const [streamStatus, setStreamStatus] = useState<StreamStatus | null>(null);
     const controllerRef = useRef<AbortController | null>(null);
     const messagesEndRef = useRef<HTMLDivElement>(null);
-    const [model, setModel] = useState(state.settings.defaultModel || 'gpt-4o');
+    const initialModel = (() => {
+        const activeChat = state.chats.find(c => c.id === state.activeChat);
+        const activeSpace = state.spaces.find(s => s.id === state.activeSpace);
+        if (activeChat?.model) return activeChat.model;
+        if (activeSpace?.model) return activeSpace.model;
+        return state.settings.defaultModel || 'gpt-4o';
+    })();
+    const [model, setModel] = useState(initialModel);
     const [contextMode, setContextMode] = useState<ContextMode>('full');
     const [contextN, setContextN] = useState(5);
 
@@ -29,8 +36,14 @@ export default function ChatView() {
     useEffect(() => {
         if (activeChat?.model) {
             setModel(activeChat.model);
+        } else if (!activeChat && activeSpace?.model) {
+            // Новый чат в спейсе — применяем модель спейса
+            setModel(activeSpace.model);
+        } else if (!activeChat && !activeSpace) {
+            // Обычный новый чат — применяем глобальную модель
+            setModel(state.settings.defaultModel || 'gpt-4o');
         }
-    }, [activeChat?.id]);
+    }, [activeChat?.id, activeSpace?.id]);
 
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });

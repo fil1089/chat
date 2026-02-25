@@ -1,11 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import ChatView from '../components/ChatView';
 import ChatInput from '../components/ChatInput';
 import { IconPlus, IconMessage, IconTrash, IconEdit, IconSettings, IconAttachment, IconHistory, SpaceIcon, IconChevronDown, IconChevronUp } from '../components/Icons';
 import { v4 as uuidv4 } from 'uuid';
-import type { Chat, Attachment } from '../types';
+import type { Chat, Attachment, ContextMode } from '../types';
 
 export default function SpaceDashboard() {
     const { id } = useParams<{ id: string }>();
@@ -16,8 +16,17 @@ export default function SpaceDashboard() {
     const [expandedDescription, setExpandedDescription] = useState(false);
     const [editingChatId, setEditingChatId] = useState<string | null>(null);
     const [editTitle, setEditTitle] = useState('');
+    const [contextMode, setContextMode] = useState<ContextMode>('full');
+    const [contextN, setContextN] = useState(20);
 
     const space = state.spaces.find((s) => s.id === id);
+
+    useEffect(() => {
+        if (space?.model) {
+            setSelectedModel(space.model);
+        }
+    }, [space?.id, space?.model]);
+
     if (!space) {
         return (
             <div className="page">
@@ -166,10 +175,11 @@ export default function SpaceDashboard() {
                         isStreaming={false}
                         onStop={() => { }}
                         hideModelSelector={false}
-                        contextMode="full"
-                        contextN={20}
-                        onContextModeChange={() => { }}
-                        onContextNChange={() => { }}
+                        contextMode={contextMode}
+                        contextN={contextN}
+                        onContextModeChange={setContextMode}
+                        onContextNChange={setContextN}
+                        hasSystemInstruction={!!space.instructions}
                     />
                 </div>
             </div>
