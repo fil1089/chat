@@ -8,7 +8,7 @@ import SettingsPage from './pages/SettingsPage';
 import SpaceDashboard from './pages/SpaceDashboard';
 import HistoryPage from './pages/HistoryPage';
 import { useApp } from './context/AppContext';
-import { IconMenu, IconSettings, IconClose } from './components/Icons';
+import { IconMenu, IconSettings, IconClose, IconKey } from './components/Icons';
 
 function NoApiKeyModal({ onClose, onGoSettings }: { onClose: () => void; onGoSettings: () => void }) {
     return (
@@ -17,7 +17,9 @@ function NoApiKeyModal({ onClose, onGoSettings }: { onClose: () => void; onGoSet
                 <button className="no-api-modal-close" onClick={onClose}>
                     <IconClose size={18} />
                 </button>
-                <div className="no-api-modal-icon">🔑</div>
+                <div className="no-api-modal-icon">
+                    <IconKey size={48} />
+                </div>
                 <h2 className="no-api-modal-title">API ключ не указан</h2>
                 <p className="no-api-modal-desc">
                     Для работы с ИИ моделями необходимо указать API ключ.<br />
