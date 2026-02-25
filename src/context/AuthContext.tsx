@@ -26,11 +26,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             setIsLoading(false);
             return;
         }
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000);
+
         // Validate token with server
         fetch('/api/auth/me', {
             headers: { Authorization: `Bearer ${storedToken}` },
+            signal: controller.signal
         })
-            .then(r => r.ok ? r.json() : null)
+            .then(r => {
+                clearTimeout(timeoutId);
+                return r.ok ? r.json() : null;
+            })
             .then(data => {
                 if (data?.user) {
                     setToken(storedToken);
@@ -39,7 +46,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                     localStorage.removeItem('auth_token');
                 }
             })
-            .catch(() => localStorage.removeItem('auth_token'))
+            .catch((e) => {
+                console.error('Auth /me error:', e);
+                localStorage.removeItem('auth_token');
+            })
             .finally(() => setIsLoading(false));
     }, []);
 

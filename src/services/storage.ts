@@ -15,9 +15,16 @@ function authHeaders(): Record<string, string> {
 
 async function apiGet<T>(key: string): Promise<T | null> {
     try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000);
         const res = await fetch(`/api/store/${key}`, {
             headers: authHeaders(),
+            signal: controller.signal
         });
+        clearTimeout(timeoutId);
+
+        if (!res.ok) return null;
+
         const data = await res.json();
         return data.value as T;
     } catch {
@@ -27,21 +34,29 @@ async function apiGet<T>(key: string): Promise<T | null> {
 
 async function apiSet(key: string, value: unknown): Promise<void> {
     try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000);
         await fetch(`/api/store/${key}`, {
             method: 'POST',
             headers: authHeaders(),
             body: JSON.stringify({ value }),
+            signal: controller.signal
         });
+        clearTimeout(timeoutId);
     } catch (e) {
         console.error('Storage write error:', e);
     }
 }
 async function apiDelete(key: string): Promise<void> {
     try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000);
         await fetch(`/api/store/${key}`, {
             method: 'DELETE',
             headers: authHeaders(),
+            signal: controller.signal
         });
+        clearTimeout(timeoutId);
     } catch (e) {
         console.error('Storage delete error:', e);
     }
