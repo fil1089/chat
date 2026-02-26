@@ -80,49 +80,60 @@ export default function ImagesPage() {
     }
 
     return (
-        <div className="space-dashboard">
-            <div className="space-dashboard-main" style={{ maxWidth: '800px', margin: '0 auto', width: '100%' }}>
-                <div className="space-header" style={{ padding: '40px 20px', textAlign: 'center' }}>
-                    <div className="space-icon-lg" style={{ width: 80, height: 80, margin: '0 auto 20px', background: 'var(--accent)', color: 'white', borderRadius: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 8px 24px var(--accent-alpha)' }}>
-                        <IconImage size={40} />
+        <div className="space-dashboard-layout">
+            <div className="space-dashboard-main">
+                <div className="page-header" style={{ padding: '24px 24px 0' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                        <div className="space-icon-lg" style={{ width: 40, height: 40, background: 'var(--accent)', color: 'white', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                            <IconImage size={24} />
+                        </div>
+                        <div>
+                            <h1 style={{ margin: 0, fontSize: '24px' }}>Генерация изображений</h1>
+                            <p className="page-subtitle" style={{ margin: '4px 0 0' }}>
+                                Создавайте изображения с помощью модели Gemini 3 Pro Image Preview.
+                            </p>
+                        </div>
                     </div>
-                    <h1>Генерация изображений</h1>
-                    <p style={{ color: 'var(--text-secondary)', marginTop: '8px' }}>
-                        Создавайте изображения с помощью модели Gemini 3 Pro Image Preview.
-                    </p>
                 </div>
 
-                <div className="space-content" style={{ padding: '0 20px 120px' }}>
-                    <div className="space-chats-section">
+                <div className="space-dashboard-content">
+                    <div className="space-chats">
+                        <h2 className="section-title">История генераций</h2>
                         {imageChats.length > 0 && (
-                            <div className="space-chats-grid" style={{ gridTemplateColumns: 'minmax(0, 1fr)', maxWidth: '600px', margin: '0 auto' }}>
+                            <div className="chats-list">
                                 {imageChats.map((chat) => (
-                                    <div key={chat.id} className="space-chat-card" onClick={() => handleSelectChat(chat.id)} style={{ padding: '16px' }}>
-                                        <div className="chat-card-content">
-                                            <div className="chat-card-icon" style={{ background: 'var(--surface-hover)', alignSelf: 'center' }}>
-                                                <IconMessage size={18} />
-                                            </div>
-                                            <div className="chat-card-info">
+                                    <div
+                                        key={chat.id}
+                                        className="chat-list-item"
+                                        onClick={() => editingChatId !== chat.id && handleSelectChat(chat.id)}
+                                    >
+                                        <div className="chat-list-main">
+                                            <IconMessage size={18} />
+                                            <div className="chat-list-info">
                                                 {editingChatId === chat.id ? (
                                                     <input
-                                                        type="text"
+                                                        autoFocus
+                                                        className="chat-rename-input"
                                                         value={editTitle}
                                                         onChange={(e) => setEditTitle(e.target.value)}
-                                                        onKeyDown={(e) => handleKeyDown(e, chat.id)}
                                                         onBlur={() => handleSaveRename(chat.id)}
+                                                        onKeyDown={(e) => handleKeyDown(e, chat.id)}
                                                         onClick={(e) => e.stopPropagation()}
-                                                        autoFocus
-                                                        className="rename-input"
                                                     />
                                                 ) : (
-                                                    <h4>{chat.title}</h4>
+                                                    <span className="chat-list-title">{chat.title}</span>
                                                 )}
-                                                <span className="chat-card-meta">
+                                                {chat.messages.length > 0 && chat.messages[0].content && (
+                                                    <div className="chat-list-preview">
+                                                        {chat.messages[0].content}
+                                                    </div>
+                                                )}
+                                                <span className="chat-list-meta">
                                                     {chat.messages.length} сообщений • {new Date(chat.updatedAt || chat.timestamp || Date.now()).toLocaleDateString('ru-RU')}
                                                 </span>
                                             </div>
                                         </div>
-                                        <div className="chat-list-actions" style={{ marginLeft: 'auto' }}>
+                                        <div className="chat-list-actions">
                                             <button className="btn-ghost btn-sm action-btn" onClick={(e) => handleStartRename(e, chat)}>
                                                 <IconEdit size={14} />
                                             </button>
@@ -137,7 +148,7 @@ export default function ImagesPage() {
                     </div>
                 </div>
 
-                <div className="space-input-container" style={{ maxWidth: '800px', margin: '0 auto' }}>
+                <div className="space-input-container">
                     <ChatInput
                         onSend={(text, attachments) => handleNewChat(text, attachments)}
                         placeholder="Опишите изображение..."
@@ -156,6 +167,30 @@ export default function ImagesPage() {
                         imageQuality={state.settings.imageQuality || 'high'}
                         onImageQualityChange={(quality) => dispatch({ type: 'UPDATE_SETTINGS', payload: { imageQuality: quality } })}
                     />
+                </div>
+            </div>
+
+            <div className="space-dashboard-sidebar">
+                <div className="sidebar-section">
+                    <div className="sidebar-section-header">
+                        <h3>Описание</h3>
+                    </div>
+                    <p style={{ fontSize: '13px', lineHeight: '1.5', color: 'var(--text-secondary)', marginTop: '12px' }}>
+                        Этот раздел предназначен исключительно для расширенной генерации изображений.
+                        Здесь используется специализированная модель `gemini-3-pro-image-preview`,
+                        которая позволяет точно настраивать разрешение и качество картинки прямо над строкой ввода.
+                    </p>
+                </div>
+
+                <div className="sidebar-divider" style={{ margin: '16px 0', opacity: 0.1 }} />
+
+                <div className="sidebar-section">
+                    <h3>Особенности</h3>
+                    <ul style={{ fontSize: '13px', lineHeight: '1.5', color: 'var(--text-secondary)', marginTop: '12px', paddingLeft: '20px' }}>
+                        <li style={{ marginBottom: '8px' }}>Отсутствие селектора модели</li>
+                        <li style={{ marginBottom: '8px' }}>Быстрый выбор пропорций (например, 16:9, 1:1, 9:16)</li>
+                        <li style={{ marginBottom: '8px' }}>Настройка качества от 1K до 4K</li>
+                    </ul>
                 </div>
             </div>
         </div>
