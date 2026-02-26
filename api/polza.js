@@ -1,19 +1,27 @@
 export default async function handler(req, res) {
+    // Enable CORS
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+
     if (req.method === 'OPTIONS') {
-        res.setHeader('Access-Control-Allow-Origin', '*');
-        res.setHeader('Access-Control-Allow-Headers', 'Authentication, Authorization, Content-Type, Accept');
-        res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
         return res.status(200).end();
     }
 
     // Example req.url: /api/polza/v1/chat/completions?query=1
-    // We just need to replace the local prefix with the real one
-    const targetPath = req.url.replace('/api/polza', '');
+    // We rewrite it to https://polza.ai/v1/chat/completions?query=1
+
+    // Safety check - if somehow just /api/polza is called without path
+    const targetPath = req.url.split('/api/polza')[1] || '';
     const apiUrl = `https://polza.ai${targetPath}`;
 
     const headers = new Headers();
-    if (req.headers.authorization) headers.set('Authorization', req.headers.authorization);
-    if (req.headers['content-type']) headers.set('Content-Type', req.headers['content-type']);
+    if (req.headers.authorization) {
+        headers.set('Authorization', req.headers.authorization);
+    }
+    if (req.headers['content-type']) {
+        headers.set('Content-Type', req.headers['content-type']);
+    }
 
     try {
         const response = await fetch(apiUrl, {
@@ -21,9 +29,6 @@ export default async function handler(req, res) {
             headers,
             body: req.method !== 'GET' ? JSON.stringify(req.body) : undefined,
         });
-
-        // Set standard CORS and content type
-        res.setHeader('Access-Control-Allow-Origin', '*');
 
         const contentType = response.headers.get('content-type');
         if (contentType) {
@@ -35,30 +40,33 @@ export default async function handler(req, res) {
             return res.status(response.status).send(err);
         }
 
+        // Handle Server-Sent Events (SSE) streaming
         if (contentType?.includes('text/event-stream')) {
-            // Need to proxy stream to client chunk by chunk
             res.writeHead(200, {
                 'Content-Type': 'text/event-stream',
                 'Cache-Control': 'no-cache, no-transform',
                 'Connection': 'keep-alive',
             });
+
+            // Vercel Edge/Serverless stream piping
             const reader = response.body.getReader();
             const decoder = new TextDecoder();
+
             while (true) {
                 const { done, value } = await reader.read();
                 if (done) break;
-                res.write(decoder.decode(value, { stream: true }));
+                const chunk = decoder.decode(value, { stream: true });
+                res.write(chunk);
             }
-            res.end();
-            return;
+            return res.end();
         }
 
-        // Just regular JSON response (e.g., images)
+        // Handle standard JSON response (like images)
         const data = await response.json();
         return res.status(200).json(data);
 
     } catch (e) {
-        console.error('Polza routing error:', e);
-        return res.status(500).json({ error: e.message || 'Internal API Error' });
+        console.error('Polza API Proxy Error:', e);
+        return res.status(500).json({ error: e.message || 'Internal proxy error' });
     }
 }
