@@ -58,7 +58,7 @@ async function renderPdfAsImages(file: File): Promise<Attachment[]> {
     return attachments;
 }
 
-async function readFile(file: File): Promise<Attachment[]> {
+async function readFile(file: File, isPolza: boolean): Promise<Attachment[]> {
     const isImage = IMAGE_TYPES.includes(file.type) || /\.(jpe?g|png|gif|webp|bmp|svg)$/i.test(file.name);
     const isPdf = file.type === 'application/pdf' || /\.pdf$/i.test(file.name);
 
@@ -77,6 +77,20 @@ async function readFile(file: File): Promise<Attachment[]> {
     }
 
     if (isPdf) {
+        if (isPolza) {
+            return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onload = (e) => resolve([{
+                    name: file.name,
+                    content: (e.target?.result as string) || '',
+                    size: file.size,
+                    type: 'file',
+                    mimeType: 'application/pdf',
+                }]);
+                reader.readAsDataURL(file);
+            });
+        }
+
         try {
             // Try text extraction first
             const text = await extractPdfText(file);
@@ -145,9 +159,11 @@ interface ChatInputProps {
     onImageQualityChange: (quality: string) => void;
     enableReasoning?: boolean;
     onReasoningChange?: (val: boolean) => void;
+    enableWebSearch?: boolean;
+    onWebSearchChange?: (val: boolean) => void;
 }
 
-export default function ChatInput({ onSend, model, onModelChange, isStreaming, onStop, direction = 'up', hideModelSelector = false, placeholder, contextMode, contextN, onContextModeChange, onContextNChange, hasSystemInstruction, imageSize, onImageSizeChange, imageQuality, onImageQualityChange, enableReasoning, onReasoningChange }: ChatInputProps) {
+export default function ChatInput({ onSend, model, onModelChange, isStreaming, onStop, direction = 'up', hideModelSelector = false, placeholder, contextMode, contextN, onContextModeChange, onContextNChange, hasSystemInstruction, imageSize, onImageSizeChange, imageQuality, onImageQualityChange, enableReasoning, onReasoningChange, enableWebSearch, onWebSearchChange }: ChatInputProps) {
     const { state } = useApp();
     const [text, setText] = useState('');
     const [attachments, setAttachments] = useState<Attachment[]>([]);
@@ -183,7 +199,8 @@ export default function ChatInput({ onSend, model, onModelChange, isStreaming, o
         const files = Array.from(e.target.files || []);
         if (files.length === 0) return;
 
-        const results = await Promise.all(files.map(readFile));
+        const isPolza = state.settings.apiProvider === 'polza';
+        const results = await Promise.all(files.map(f => readFile(f, isPolza)));
         const newAttachments = results.flat();
         setAttachments(prev => [...prev, ...newAttachments]);
         if (fileInputRef.current) fileInputRef.current.value = '';
@@ -223,7 +240,8 @@ export default function ChatInput({ onSend, model, onModelChange, isStreaming, o
         setIsDragging(false);
         const files = Array.from(e.dataTransfer.files || []);
         if (files.length > 0) {
-            const results = await Promise.all(files.map(readFile));
+            const isPolza = state.settings.apiProvider === 'polza';
+            const results = await Promise.all(files.map(f => readFile(f, isPolza)));
             const newAttachments = results.flat();
             setAttachments(prev => [...prev, ...newAttachments]);
         }
@@ -356,6 +374,21 @@ export default function ChatInput({ onSend, model, onModelChange, isStreaming, o
                                                             type="checkbox"
                                                             checked={!!enableReasoning}
                                                             onChange={(e) => onReasoningChange(e.target.checked)}
+                                                        />
+                                                        <span className="toggle-slider"></span>
+                                                    </div>
+                                                </label>
+                                            </div>
+                                        )}
+                                        {state.settings.apiProvider === 'polza' && onWebSearchChange && (
+                                            <div className="settings-field" style={{ marginTop: '8px', paddingTop: '12px', borderTop: '1px solid var(--border)' }}>
+                                                <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', cursor: 'pointer', margin: 0 }}>
+                                                    <span style={{ fontSize: '13px' }}>Поиск в интернете</span>
+                                                    <div className="toggle-switch" style={{ transform: 'scale(0.8)', transformOrigin: 'right center', margin: 0 }}>
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={!!enableWebSearch}
+                                                            onChange={(e) => onWebSearchChange(e.target.checked)}
                                                         />
                                                         <span className="toggle-slider"></span>
                                                     </div>

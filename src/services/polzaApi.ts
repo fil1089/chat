@@ -94,10 +94,11 @@ export const getGroupedPolzaModels = () => {
 // Types for stream parameters (compatible with existing setup)
 export interface PolzaStreamParams {
     model: string;
-    messages: { role: string; content: string }[];
+    messages: { role: string; content: string | any[] }[];
     apiKey: string;
     onUpdate: (text: string) => void;
     enableReasoning?: boolean;
+    enableWebSearch?: boolean;
     onUsage?: (usage: { prompt_tokens: number; completion_tokens: number; total_tokens: number; cost_rub?: number }) => void;
     onStatus?: (status: { type: string; message: string }) => void;
     onHistoryFix?: () => void;
@@ -109,6 +110,7 @@ export async function streamResponsePolza({
     apiKey,
     onUpdate,
     enableReasoning,
+    enableWebSearch,
     onUsage,
     onStatus,
 }: PolzaStreamParams): Promise<void> {
@@ -127,6 +129,20 @@ export async function streamResponsePolza({
             body.reasoning = {
                 effort: "medium"
             };
+        }
+
+        const plugins: any[] = [];
+        if (enableWebSearch) {
+            plugins.push({ id: 'web' });
+        }
+
+        const hasPdf = messages.some(m => Array.isArray(m.content) && m.content.some((c: any) => c.type === 'file'));
+        if (hasPdf) {
+            plugins.push({ id: 'file-parser' });
+        }
+
+        if (plugins.length > 0) {
+            body.plugins = plugins;
         }
 
         const response = await fetch(`${API_URLS.polza}/v1/chat/completions`, {

@@ -120,8 +120,24 @@ export default function ChatView() {
         const streamCallback = isPolza ? streamResponsePolza({
             apiKey: state.settings.polzaApiKey,
             model: currentModel,
-            messages: messagesToSend.map(m => ({ role: m.role, content: m.content })),
+            messages: messagesToSend.map(m => {
+                const parts: any[] = [];
+                if (m.content) parts.push({ type: 'text', text: m.content });
+
+                if (m.fullAttachments) {
+                    m.fullAttachments.forEach(att => {
+                        if (att.type === 'image') {
+                            parts.push({ type: 'image_url', image_url: { url: att.content } });
+                        } else if (att.type === 'file') {
+                            parts.push({ type: 'file', file: { filename: att.name, file_data: att.content } });
+                        }
+                    });
+                }
+                const finalContent = (m.fullAttachments && m.fullAttachments.length > 0) ? parts : m.content;
+                return { role: m.role, content: finalContent };
+            }),
             enableReasoning: state.settings.enableReasoning,
+            enableWebSearch: state.settings.enableWebSearch,
             onUpdate: (fullText: string) => {
                 fullResponse = fullText;
                 let updatedMessages;
@@ -412,7 +428,7 @@ export default function ChatView() {
         if (!text.trim() && attachments.length === 0) return;
 
         const textAttachments = attachments.filter(a => a.type === 'text');
-        const imageAttachments = attachments.filter(a => a.type === 'image');
+        const nonTextAttachments = attachments.filter(a => a.type === 'image' || a.type === 'file');
 
         const userMessage: Message = {
             id: uuidv4(),
@@ -422,7 +438,7 @@ export default function ChatView() {
                 : text,
             displayContent: text,
             attachments: attachments.map(a => ({ name: a.name, size: a.size })),
-            fullAttachments: imageAttachments.length > 0 ? attachments : undefined,
+            fullAttachments: nonTextAttachments.length > 0 ? nonTextAttachments : undefined,
             timestamp: Date.now(),
         };
 
@@ -573,6 +589,8 @@ export default function ChatView() {
                     onImageQualityChange={(quality) => dispatch({ type: 'UPDATE_SETTINGS', payload: { imageQuality: quality } })}
                     enableReasoning={state.settings.enableReasoning}
                     onReasoningChange={(val) => dispatch({ type: 'UPDATE_SETTINGS', payload: { enableReasoning: val as any } })}
+                    enableWebSearch={state.settings.enableWebSearch}
+                    onWebSearchChange={(val) => dispatch({ type: 'UPDATE_SETTINGS', payload: { enableWebSearch: val as any } })}
                 />
             </div>
 

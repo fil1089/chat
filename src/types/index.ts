@@ -57,6 +57,7 @@ export interface Settings {
     imageSize?: string;
     imageQuality?: string;
     enableReasoning: boolean;
+    enableWebSearch?: boolean;
 }
 
 export interface AppState {
@@ -112,7 +113,7 @@ export interface Attachment {
     name: string;
     content: string;
     size: number;
-    type: 'image' | 'text';
+    type: 'image' | 'text' | 'file';
     mimeType?: string;
 }
 

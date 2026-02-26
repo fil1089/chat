@@ -24,6 +24,7 @@ const initialState: AppState = {
         imageSize: '1024x1024',
         imageQuality: 'high',
         enableReasoning: false,
+        enableWebSearch: false,
     },
     sidebarOpen: true,
     storageReady: false,
