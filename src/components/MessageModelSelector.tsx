@@ -1,5 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { getChatModelsByCategory } from '../services/youApi';
+import { getPolzaModelsByCategory } from '../services/polzaApi';
+import { useApp } from '../context/AppContext';
 import { IconChevronDown, IconChevronUp } from './Icons';
 import type { AIModel } from '../types';
 
@@ -8,10 +10,13 @@ interface MessageModelSelectorProps {
 }
 
 export default function MessageModelSelector({ onSelect }: MessageModelSelectorProps) {
+    const { state } = useApp();
     const [open, setOpen] = useState(false);
     const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
     const ref = useRef<HTMLDivElement>(null);
-    const grouped = getChatModelsByCategory();
+
+    const isPolza = state.settings.apiProvider === 'polza';
+    const grouped = isPolza ? getPolzaModelsByCategory() : getChatModelsByCategory();
 
     useEffect(() => {
         const handleClickOutside = (e: MouseEvent) => {
@@ -43,7 +48,7 @@ export default function MessageModelSelector({ onSelect }: MessageModelSelectorP
                                     <span>{category}</span>
                                     {collapsed[category] ? <IconChevronDown size={10} /> : <IconChevronUp size={10} />}
                                 </div>
-                                {!collapsed[category] && models.map(m => (
+                                {!collapsed[category] && (models as AIModel[]).map((m: AIModel) => (
                                     <button
                                         key={m.id}
                                         className="model-option-mini"

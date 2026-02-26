@@ -91,6 +91,15 @@ export const getGroupedPolzaModels = () => {
     return groups;
 };
 
+export const getPolzaModelsByCategory = (): Record<string, AIModel[]> => {
+    const groups: Record<string, AIModel[]> = {};
+    ALL_POLZA_MODELS.forEach((m) => {
+        if (!groups[m.category]) groups[m.category] = [];
+        groups[m.category].push(m);
+    });
+    return groups;
+};
+
 // Types for stream parameters (compatible with existing setup)
 export interface PolzaStreamParams {
     model: string;

@@ -3,7 +3,7 @@ import { useApp } from '../context/AppContext';
 import { useAuth } from '../context/AuthContext';
 import { useGlobalAuthModal } from '../App';
 import { streamResponse, MODELS } from '../services/youApi';
-import { streamResponsePolza } from '../services/polzaApi';
+import { streamResponsePolza, ALL_POLZA_MODELS } from '../services/polzaApi';
 import ChatInput from './ChatInput';
 import MessageBubble from './MessageBubble';
 import ThreadNav from './ThreadNav';
@@ -603,7 +603,8 @@ export default function ChatView() {
             <div className="dialogue-nav-sidebar">
                 <div className="sidebar-section" style={{ padding: '24px' }}>
                     {(() => {
-                        const currentModel = MODELS.find(m => m.id === model);
+                        const allModels = [...MODELS, ...ALL_POLZA_MODELS];
+                        const currentModel = allModels.find(m => m.id === model);
                         return currentModel ? (
                             <div className="model-info-card">
                                 <div className="model-info-label">Модель</div>
