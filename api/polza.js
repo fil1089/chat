@@ -11,8 +11,15 @@ export default async function handler(req, res) {
     // Example req.url: /api/polza/v1/chat/completions?query=1
     // We rewrite it to https://polza.ai/v1/chat/completions?query=1
 
-    // Safety check - if somehow just /api/polza is called without path
-    const targetPath = req.url.split('/api/polza')[1] || '';
+    // The path is passed from vercel.json rewrite rule
+    // e.g. /api/polza?polzapath=v1/chat/completions
+    let targetPath = '';
+    if (req.query && req.query.polzapath) {
+        targetPath = '/' + req.query.polzapath;
+    } else {
+        targetPath = req.url.replace('/api/polza', '').split('?')[0];
+    }
+
     const apiUrl = `https://polza.ai${targetPath}`;
 
     const headers = new Headers();
