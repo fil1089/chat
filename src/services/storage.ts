@@ -36,10 +36,15 @@ async function apiSet(key: string, value: unknown): Promise<void> {
     try {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 10000);
+        const body = JSON.stringify({ value });
+        if (body.length > 1 * 1024 * 1024) {
+            console.warn(`[Storage API] Large payload for ${key}: ${(body.length / 1024 / 1024).toFixed(2)} MB`);
+        }
+
         await fetch(`/api/store/${key}`, {
             method: 'POST',
             headers: authHeaders(),
-            body: JSON.stringify({ value }),
+            body,
             signal: controller.signal
         });
         clearTimeout(timeoutId);

@@ -6,7 +6,7 @@ import { Document, Packer, Paragraph, TextRun } from 'docx';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeHighlight from 'rehype-highlight';
-import { IconCopy, IconCheck, IconRegenerate, IconDownload, IconEdit, IconMarkdown, IconPdf, IconDoc, IconFileText, IconChevronDown, IconUser, IconBrain, IconAttachment, IconHistory, IconSearch, IconChevronLeft, IconChevronRight, IconError, IconExternalLink } from './Icons';
+import { IconCopy, IconCheck, IconRegenerate, IconDownload, IconEdit, IconMarkdown, IconPdf, IconDoc, IconFileText, IconChevronDown, IconChevronUp, IconUser, IconBrain, IconAttachment, IconHistory, IconSearch, IconChevronLeft, IconChevronRight, IconError, IconExternalLink } from './Icons';
 import { useApp } from '../context/AppContext';
 import { MODELS, calcCost } from '../services/youApi';
 import { ALL_POLZA_MODELS } from '../services/polzaApi';
@@ -48,7 +48,22 @@ export default function MessageBubble({ message, chatId, isLatest, isStreaming, 
     const reasoningText = currentVersion?.reasoningContent || message.reasoningContent;
 
     const isLong = isUser && displayText.length > CHAR_LIMIT;
-    const contentToDisplay = isLong && !showFull ? displayText.slice(0, CHAR_LIMIT) : displayText;
+
+    // Extract <thinking> tags from assistant messages
+    let processedDisplayText = displayText;
+    let extractedThinking = '';
+
+    if (!isUser) {
+        const thinkingMatch = displayText.match(/<thinking>([\s\S]*?)<\/thinking>/);
+        if (thinkingMatch) {
+            extractedThinking = thinkingMatch[1].trim();
+            processedDisplayText = displayText.replace(/<thinking>[\s\S]*?<\/thinking>/g, '').trim();
+        }
+    }
+
+    const combinedReasoning = [reasoningText, extractedThinking].filter(Boolean).join('\n\n');
+
+    const contentToDisplay = isLong && !showFull ? processedDisplayText.slice(0, CHAR_LIMIT) : processedDisplayText;
 
     const handleCopy = async () => {
         try {
@@ -192,13 +207,13 @@ export default function MessageBubble({ message, chatId, isLatest, isStreaming, 
                 )}
 
                 <div className="message-content" ref={contentRef}>
-                    {reasoningText && (
+                    {combinedReasoning && (
                         <details className="reasoning-details" style={{ marginBottom: '12px', background: 'var(--surface-hover)', padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--border)' }}>
                             <summary style={{ cursor: 'pointer', fontWeight: 600, fontSize: '13px', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
                                 <IconBrain size={14} /> Процесс размышления
                             </summary>
                             <div style={{ marginTop: '8px', fontSize: '13px', color: 'var(--text-secondary)', whiteSpace: 'pre-wrap', borderTop: '1px solid var(--border)', paddingTop: '8px' }}>
-                                {reasoningText}
+                                {combinedReasoning}
                             </div>
                         </details>
                     )}
@@ -211,7 +226,7 @@ export default function MessageBubble({ message, chatId, isLatest, isStreaming, 
                                     className="show-more-link"
                                     onClick={() => setShowFull(!showFull)}
                                 >
-                                    {showFull ? 'Свернуть' : 'Показать полностью'}
+                                    {showFull ? <><IconChevronUp size={12} /> Свернуть</> : <><IconChevronDown size={12} /> Развернуть</>}
                                 </button>
                             )}
                         </div>

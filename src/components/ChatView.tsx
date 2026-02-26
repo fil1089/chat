@@ -139,6 +139,9 @@ export default function ChatView() {
             }),
             enableReasoning: state.settings.enableReasoning,
             enableWebSearch: state.settings.enableWebSearch,
+            systemInstructions: activeSpace?.instructions || '',
+            fileContents: activeSpace?.files || [],
+            signal: controllerRef.current?.signal,
             onUpdate: (fullText: string) => {
                 fullResponse = fullText;
                 let updatedMessages;
