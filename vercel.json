@@ -2,7 +2,7 @@
     "rewrites": [
         {
             "source": "/api/polza/:path*",
-            "destination": "https://polza.ai/:path*"
+            "destination": "/api/polza/:path*"
         },
         {
             "source": "/api/(.*)",
