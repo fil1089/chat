@@ -231,20 +231,6 @@ export default function SettingsPage() {
                         />
                     </div>
                 </div>
-                <div className="setting-row" style={{ alignItems: 'flex-start' }}>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                        <label>Токены рассуждений (Reasoning Tokens)</label>
-                        <span className="setting-hint" style={{ marginTop: 0 }}>Включает прозрачный процесс размышления для сложных задач. Может увеличивать стоимость.</span>
-                    </div>
-                    <label className="toggle-switch">
-                        <input
-                            type="checkbox"
-                            checked={!!state.settings.enableReasoning}
-                            onChange={(e) => handleSave('enableReasoning', e.target.checked as any)}
-                        />
-                        <span className="toggle-slider"></span>
-                    </label>
-                </div>
             </div>
 
             <div className="settings-section">

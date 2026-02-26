@@ -14,6 +14,8 @@ import { useApp } from './context/AppContext';
 import { IconMenu, IconSettings, IconClose, IconKey, IconLogo } from './components/Icons';
 
 function NoApiKeyModal({ onClose, onGoSettings }: { onClose: () => void; onGoSettings: () => void }) {
+    const [provider, setProvider] = useState<'neuro' | 'polza'>('polza'); // Default to Polza since it's the app default
+
     return (
         <div className="no-api-modal-overlay" onClick={onClose}>
             <div className="no-api-modal" onClick={(e) => e.stopPropagation()}>
@@ -24,26 +26,32 @@ function NoApiKeyModal({ onClose, onGoSettings }: { onClose: () => void; onGoSet
                     <IconKey size={48} />
                 </div>
                 <h2 className="no-api-modal-title">Нужен API ключ</h2>
-                <p className="no-api-modal-desc">
-                    Для работы с ИИ нужен ключ <strong>NeuroAPI</strong>. Получить:
+                <p className="no-api-modal-desc" style={{ marginBottom: '16px' }}>
+                    Для работы с ИИ выберите провайдера и введите ключ в настройках.
                 </p>
-                <a
-                    className="no-api-modal-link"
-                    href="https://neuroapi.host"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                >
-                    neuroapi.host →
-                </a>
-                <ol className="no-api-modal-steps">
-                    <li>Войдите или зарегистрируйтесь</li>
-                    <li>Если 404 <em>(после авторизации)</em> — нажмите «На главную»</li>
-                    <li>Откройте <strong>Панель</strong></li>
-                    <li>Пополните баланс — нажмите в правом верхнем углу на <strong>окошко с суммой</strong></li>
-                    <li>В левой панели найдите <strong>→ API Ключи</strong></li>
-                    <li>Нажмите <strong>Создать новый ключ</strong>, введите любое название</li>
-                    <li>Скопируйте ключ и вставьте в Настройках</li>
-                </ol>
+                <div style={{ display: 'flex', gap: '8px', marginBottom: '16px', justifyContent: 'center' }}>
+                    <button
+                        className={`auth-tab ${provider === 'polza' ? 'active' : ''}`}
+                        onClick={() => setProvider('polza')}
+                        style={{ flex: 1 }}
+                    >Polza API</button>
+                    <button
+                        className={`auth-tab ${provider === 'neuro' ? 'active' : ''}`}
+                        onClick={() => setProvider('neuro')}
+                        style={{ flex: 1 }}
+                    >Neuro API</button>
+                </div>
+                <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+                    <a
+                        className="no-api-modal-link"
+                        href={provider === 'neuro' ? "https://neuroapi.host/dashboard/tokens" : "https://polza.ai/dashboard/api-keys"}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{ fontSize: '15px' }}
+                    >
+                        {provider === 'neuro' ? "Получить ключ на neuroapi.host →" : "Получить ключ на polza.ai →"}
+                    </a>
+                </div>
                 <div className="no-api-modal-actions">
                     <button className="btn-secondary" onClick={onClose}>Позже</button>
                     <button className="btn-primary" onClick={onGoSettings}>

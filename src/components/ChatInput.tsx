@@ -3,6 +3,7 @@ import * as pdfjsLib from 'pdfjs-dist';
 import ModelSelector from './ModelSelector';
 import { IconSend, IconStop, IconAttachment, IconFileText, IconClose, IconSettings, IconChevronDown } from './Icons';
 import type { Attachment, ContextMode } from '../types';
+import { useApp } from '../context/AppContext';
 
 // Configure PDF.js worker via CDN (avoids Vite bundling issues)
 pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.8.69/pdf.worker.min.mjs';
@@ -142,9 +143,12 @@ interface ChatInputProps {
     onImageSizeChange: (size: string) => void;
     imageQuality: string;
     onImageQualityChange: (quality: string) => void;
+    enableReasoning?: boolean;
+    onReasoningChange?: (val: boolean) => void;
 }
 
-export default function ChatInput({ onSend, model, onModelChange, isStreaming, onStop, direction = 'up', hideModelSelector = false, placeholder, contextMode, contextN, onContextModeChange, onContextNChange, hasSystemInstruction, imageSize, onImageSizeChange, imageQuality, onImageQualityChange }: ChatInputProps) {
+export default function ChatInput({ onSend, model, onModelChange, isStreaming, onStop, direction = 'up', hideModelSelector = false, placeholder, contextMode, contextN, onContextModeChange, onContextNChange, hasSystemInstruction, imageSize, onImageSizeChange, imageQuality, onImageQualityChange, enableReasoning, onReasoningChange }: ChatInputProps) {
+    const { state } = useApp();
     const [text, setText] = useState('');
     const [attachments, setAttachments] = useState<Attachment[]>([]);
     const [isDragging, setIsDragging] = useState(false);
@@ -261,11 +265,14 @@ export default function ChatInput({ onSend, model, onModelChange, isStreaming, o
                     </div>
                 )}
                 <div className="chat-input-top">
-                    {!hideModelSelector && (
-                        <ModelSelector model={model} onModelChange={onModelChange} direction={direction} />
-                    )}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1 }}>
+                        {!hideModelSelector && (
+                            <ModelSelector model={model} onModelChange={onModelChange} direction={direction} />
+                        )}
+                    </div>
 
-                    <div className="chat-input-actions">
+                    <div className="chat-input-actions" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+
                         <button
                             className="btn-ghost btn-sm attachment-btn"
                             onClick={() => fileInputRef.current?.click()}
@@ -338,6 +345,21 @@ export default function ChatInput({ onSend, model, onModelChange, isStreaming, o
                                                 <span style={{ fontSize: '12px', color: 'var(--accent-light)' }}>
                                                     Только системная инструкция и файлы помощника
                                                 </span>
+                                            </div>
+                                        )}
+                                        {state.settings.apiProvider === 'polza' && onReasoningChange && (
+                                            <div className="settings-field" style={{ marginTop: '8px', paddingTop: '12px', borderTop: '1px solid var(--border)' }}>
+                                                <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', cursor: 'pointer', margin: 0 }}>
+                                                    <span style={{ fontSize: '13px' }}>Токены рассуждений</span>
+                                                    <div className="toggle-switch" style={{ transform: 'scale(0.8)', transformOrigin: 'right center', margin: 0 }}>
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={!!enableReasoning}
+                                                            onChange={(e) => onReasoningChange(e.target.checked)}
+                                                        />
+                                                        <span className="toggle-slider"></span>
+                                                    </div>
+                                                </label>
                                             </div>
                                         )}
 

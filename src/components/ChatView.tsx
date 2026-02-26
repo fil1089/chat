@@ -571,6 +571,8 @@ export default function ChatView() {
                     onImageSizeChange={(size) => dispatch({ type: 'UPDATE_SETTINGS', payload: { imageSize: size } })}
                     imageQuality={state.settings.imageQuality || 'high'}
                     onImageQualityChange={(quality) => dispatch({ type: 'UPDATE_SETTINGS', payload: { imageQuality: quality } })}
+                    enableReasoning={state.settings.enableReasoning}
+                    onReasoningChange={(val) => dispatch({ type: 'UPDATE_SETTINGS', payload: { enableReasoning: val as any } })}
                 />
             </div>
 
