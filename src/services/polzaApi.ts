@@ -101,6 +101,7 @@ export interface PolzaStreamParams {
     enableWebSearch?: boolean;
     onUsage?: (usage: { prompt_tokens: number; completion_tokens: number; total_tokens: number; cost_rub?: number }) => void;
     onStatus?: (status: { type: string; message: string }) => void;
+    onAnnotations?: (annotations: any[]) => void;
     onHistoryFix?: () => void;
 }
 
@@ -113,6 +114,7 @@ export async function streamResponsePolza({
     enableWebSearch,
     onUsage,
     onStatus,
+    onAnnotations,
 }: PolzaStreamParams): Promise<void> {
     if (!apiKey) {
         throw new Error('Укажите API ключ Polza.ai в настройках');
@@ -193,6 +195,15 @@ export async function streamResponsePolza({
                         const reasoning = data.choices && (data.choices[0]?.delta?.reasoning || data.choices[0]?.delta?.reasoning_content);
                         if (reasoning && onStatus) {
                             onStatus({ type: 'reasoning', message: reasoning });
+                        }
+
+                        // Handle citations/annotations
+                        const annotations = data.choices && data.choices[0]?.delta?.annotations;
+                        if (annotations && annotations.length > 0 && onAnnotations) {
+                            onAnnotations(annotations);
+                            if (onStatus) {
+                                onStatus({ type: 'search', message: 'Поиск...' });
+                            }
                         }
 
                         // Collect text content

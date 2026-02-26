@@ -114,6 +114,7 @@ export default function ChatView() {
 
         let capturedUsage: { prompt_tokens: number; completion_tokens: number; total_tokens: number; cost_rub?: number } | null = null;
         let capturedReasoning = '';
+        let capturedAnnotations: any[] = [];
 
         const isPolza = state.settings.apiProvider === 'polza';
 
@@ -153,13 +154,14 @@ export default function ChatView() {
                                 model: currentModel,
                                 usage: capturedUsage || undefined,
                                 timestamp: Date.now(),
-                                reasoningContent: capturedReasoning || undefined
+                                reasoningContent: capturedReasoning || undefined,
+                                annotations: capturedAnnotations.length > 0 ? capturedAnnotations : undefined
                             };
                         }
-                        return { ...m, content: fullResponse, versions, usage: capturedUsage || undefined, reasoningContent: capturedReasoning || undefined };
+                        return { ...m, content: fullResponse, versions, usage: capturedUsage || undefined, reasoningContent: capturedReasoning || undefined, annotations: capturedAnnotations.length > 0 ? capturedAnnotations : undefined };
                     });
                 } else {
-                    updatedMessages = [...chat.messages, { ...assistantMessage, content: fullResponse, model: currentModel, usage: capturedUsage || undefined, reasoningContent: capturedReasoning || undefined }];
+                    updatedMessages = [...chat.messages, { ...assistantMessage, content: fullResponse, model: currentModel, usage: capturedUsage || undefined, reasoningContent: capturedReasoning || undefined, annotations: capturedAnnotations.length > 0 ? capturedAnnotations : undefined }];
                 }
 
                 const updatedChat: Chat = {
@@ -171,6 +173,9 @@ export default function ChatView() {
             },
             onUsage: (usage) => {
                 capturedUsage = usage;
+            },
+            onAnnotations: (anns: any[]) => {
+                capturedAnnotations = [...capturedAnnotations, ...anns];
             },
             onStatus: (status) => {
                 if (status.type === 'reasoning') {
@@ -190,13 +195,14 @@ export default function ChatView() {
                                         model: currentModel,
                                         usage: capturedUsage || undefined,
                                         timestamp: Date.now(),
-                                        reasoningContent: capturedReasoning || undefined
+                                        reasoningContent: capturedReasoning || undefined,
+                                        annotations: capturedAnnotations.length > 0 ? capturedAnnotations : undefined
                                     };
                                 }
-                                return { ...m, content: fullResponse, versions, usage: capturedUsage || undefined, reasoningContent: capturedReasoning || undefined };
+                                return { ...m, content: fullResponse, versions, usage: capturedUsage || undefined, reasoningContent: capturedReasoning || undefined, annotations: capturedAnnotations.length > 0 ? capturedAnnotations : undefined };
                             });
                         } else {
-                            updatedMessages = [...chat.messages, { ...assistantMessage, content: fullResponse, model: currentModel, usage: capturedUsage || undefined, reasoningContent: capturedReasoning || undefined }];
+                            updatedMessages = [...chat.messages, { ...assistantMessage, content: fullResponse, model: currentModel, usage: capturedUsage || undefined, reasoningContent: capturedReasoning || undefined, annotations: capturedAnnotations.length > 0 ? capturedAnnotations : undefined }];
                         }
                         const updatedChat: Chat = {
                             ...chat,

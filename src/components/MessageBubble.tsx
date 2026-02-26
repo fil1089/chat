@@ -6,7 +6,7 @@ import { Document, Packer, Paragraph, TextRun } from 'docx';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeHighlight from 'rehype-highlight';
-import { IconCopy, IconCheck, IconRegenerate, IconDownload, IconEdit, IconMarkdown, IconPdf, IconDoc, IconFileText, IconChevronDown, IconUser, IconBrain, IconAttachment, IconHistory, IconSearch, IconChevronLeft, IconChevronRight, IconError } from './Icons';
+import { IconCopy, IconCheck, IconRegenerate, IconDownload, IconEdit, IconMarkdown, IconPdf, IconDoc, IconFileText, IconChevronDown, IconUser, IconBrain, IconAttachment, IconHistory, IconSearch, IconChevronLeft, IconChevronRight, IconError, IconExternalLink } from './Icons';
 import { useApp } from '../context/AppContext';
 import { MODELS, calcCost } from '../services/youApi';
 import MessageModelSelector from './MessageModelSelector';
@@ -340,6 +340,49 @@ export default function MessageBubble({ message, chatId, isLatest, isStreaming, 
                                 {displayText}
                             </ReactMarkdown>
                         )
+                    )}
+
+                    {/* Citations block */}
+                    {!isUser && message.annotations && message.annotations.length > 0 && (
+                        <div className="message-citations" style={{ marginTop: '16px', paddingTop: '12px', borderTop: '1px solid var(--border)' }}>
+                            <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                                Источники:
+                            </div>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                                {message.annotations.map((ann: any, idx: number) => {
+                                    if (ann.type === 'url_citation' && ann.url_citation) {
+                                        return (
+                                            <a
+                                                key={idx}
+                                                href={ann.url_citation.url}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                style={{
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    gap: '6px',
+                                                    fontSize: '13px',
+                                                    color: 'var(--accent)',
+                                                    textDecoration: 'none',
+                                                    background: 'var(--surface-hover)',
+                                                    padding: '6px 10px',
+                                                    borderRadius: '6px',
+                                                    border: '1px solid var(--border)',
+                                                    width: 'fit-content',
+                                                    maxWidth: '100%'
+                                                }}
+                                            >
+                                                <IconExternalLink size={14} />
+                                                <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
+                                                    {ann.url_citation.title || ann.url_citation.url}
+                                                </span>
+                                            </a>
+                                        );
+                                    }
+                                    return null;
+                                })}
+                            </div>
+                        </div>
                     )}
                 </div>
 

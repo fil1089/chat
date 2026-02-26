@@ -11,12 +11,14 @@ export interface Message {
     fullAttachments?: Attachment[];
     timestamp?: number;
     reasoningContent?: string;
+    annotations?: any[];
     versions?: {
         content: string;
         model?: string;
         usage?: { prompt_tokens: number; completion_tokens: number; total_tokens: number; cost_rub?: number };
         timestamp?: number;
         reasoningContent?: string;
+        annotations?: any[];
     }[];
     activeVersion?: number;
 }
