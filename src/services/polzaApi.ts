@@ -121,9 +121,17 @@ export async function streamResponsePolza({
     }
 
     try {
+        let modifiedMessages = [...messages];
+        if (enableWebSearch) {
+            modifiedMessages.unshift({
+                role: 'system',
+                content: 'ВАЖНО: При использовании веб-поиска всегда формулируй свой финальный ответ ТОЛЬКО на русском языке. Отвечай максимально лаконично, структурированно и строго по делу. Не используй лишних вводных слов.'
+            });
+        }
+
         const body: Record<string, any> = {
             model,
-            messages,
+            messages: modifiedMessages,
             stream: true,
         };
 

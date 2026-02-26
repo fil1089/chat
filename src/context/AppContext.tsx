@@ -37,7 +37,7 @@ function reducer(state: AppState, action: AppAction): AppState {
                 ...state,
                 chats: action.payload.chats,
                 spaces: action.payload.spaces,
-                settings: action.payload.settings,
+                settings: { ...action.payload.settings, enableWebSearch: false },
                 storageReady: true,
             };
 
