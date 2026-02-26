@@ -91,18 +91,23 @@ export async function streamResponsePolza({
         const reader = response.body.getReader();
         const decoder = new TextDecoder();
         let fullContent = '';
+        let buffer = '';
 
         while (true) {
             const { value, done } = await reader.read();
             if (done) break;
 
-            const chunk = decoder.decode(value, { stream: true });
-            const lines = chunk.split('\n');
+            buffer += decoder.decode(value, { stream: true });
+            const lines = buffer.split('\n');
+
+            // Keep the last partial line in the buffer
+            buffer = lines.pop() || '';
 
             for (const line of lines) {
-                if (line.startsWith('data: ') && line !== 'data: [DONE]') {
+                const trimmedLine = line.trim();
+                if (trimmedLine.startsWith('data: ') && trimmedLine !== 'data: [DONE]') {
                     try {
-                        const data = JSON.parse(line.slice(6));
+                        const data = JSON.parse(trimmedLine.slice(6));
 
                         // Handle usage statistics if present
                         if (data.usage?.prompt_tokens && onUsage) {
@@ -110,7 +115,7 @@ export async function streamResponsePolza({
                         }
 
                         // Collect text content
-                        const content = data.choices[0]?.delta?.content;
+                        const content = data.choices && data.choices[0]?.delta?.content;
                         if (content) {
                             fullContent += content;
                             onUpdate(fullContent);
@@ -150,7 +155,7 @@ export async function generateImagePolza({
     }
 
     try {
-        const response = await fetch(`${API_URLS.polza}/v1/images/generations`, {
+        const response = await fetch(`${API_URLS.polza}/v2/images/generations`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

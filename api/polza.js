@@ -15,9 +15,9 @@ export default async function handler(req, res) {
     // e.g. /api/polza?polzapath=v1/chat/completions
     let targetPath = '';
     if (req.query && req.query.polzapath) {
-        targetPath = '/' + req.query.polzapath;
+        targetPath = '/api/' + req.query.polzapath;
     } else {
-        targetPath = req.url.replace('/api/polza', '').split('?')[0];
+        targetPath = req.url.replace('/api/polza', '/api').split('?')[0];
     }
 
     const apiUrl = `https://polza.ai${targetPath}`;

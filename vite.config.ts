@@ -16,7 +16,7 @@ export default defineConfig({
             '/api/polza': {
                 target: 'https://polza.ai',
                 changeOrigin: true,
-                rewrite: (path) => path.replace(/^\/api\/polza/, ''),
+                rewrite: (path) => path.replace(/^\/api\/polza/, '/api'),
             },
             '/api/you-search': {
                 target: 'https://ydc-index.io',
