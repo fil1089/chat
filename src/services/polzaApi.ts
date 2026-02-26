@@ -26,10 +26,11 @@ export const POLZA_MODELS: AIModel[] = [
 ];
 
 export const POLZA_IMAGE_MODELS: AIModel[] = [
-    { id: 'openai/dall-e-3', name: 'DALL-E 3', desc: 'Передовой генератор изображений от OpenAI.', isActual: true, category: 'Изображения' },
-    { id: 'midjourney', name: 'Midjourney', desc: 'Генератор изображений непревзойденного художественного качества.', isActual: true, category: 'Изображения' },
-    { id: 'black-forest-labs/flux-1.1-pro-ultra', name: 'Flux 1.1 Pro Ultra', desc: 'Высокоскоростной генератор нового поколения от FLUX.', isActual: true, category: 'Изображения' },
-    { id: 'stability-ai/stable-diffusion-3.5-large', name: 'Stable Diffusion 3.5', desc: 'Открытая модель от Stability AI для гибкой настройки.', category: 'Изображения' },
+    // Временно отключены для доработки, раскомментировать позже
+    // { id: 'openai/dall-e-3', name: 'DALL-E 3', desc: 'Передовой генератор изображений от OpenAI.', isActual: true, category: 'Изображения' },
+    // { id: 'midjourney', name: 'Midjourney', desc: 'Генератор изображений непревзойденного художественного качества.', isActual: true, category: 'Изображения' },
+    // { id: 'black-forest-labs/flux-1.1-pro-ultra', name: 'Flux 1.1 Pro Ultra', desc: 'Высокоскоростной генератор нового поколения от FLUX.', isActual: true, category: 'Изображения' },
+    // { id: 'stability-ai/stable-diffusion-3.5-large', name: 'Stable Diffusion 3.5', desc: 'Открытая модель от Stability AI для гибкой настройки.', category: 'Изображения' },
 ];
 
 // Combine all for easy search
