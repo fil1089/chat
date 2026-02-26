@@ -44,6 +44,7 @@ export default function MessageBubble({ message, chatId, isLatest, isStreaming, 
     const displayText = currentVersion?.content ?? (message.displayContent || message.content);
     const displayModel = currentVersion?.model || message.model;
     const displayUsage = currentVersion?.usage || message.usage;
+    const reasoningText = currentVersion?.reasoningContent || message.reasoningContent;
 
     const isLong = isUser && displayText.length > CHAR_LIMIT;
     const contentToDisplay = isLong && !showFull ? displayText.slice(0, CHAR_LIMIT) : displayText;
@@ -190,6 +191,17 @@ export default function MessageBubble({ message, chatId, isLatest, isStreaming, 
                 )}
 
                 <div className="message-content" ref={contentRef}>
+                    {reasoningText && (
+                        <details className="reasoning-details" style={{ marginBottom: '12px', background: 'var(--surface-hover)', padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--border)' }}>
+                            <summary style={{ cursor: 'pointer', fontWeight: 600, fontSize: '13px', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                <IconBrain size={14} /> Процесс размышления
+                            </summary>
+                            <div style={{ marginTop: '8px', fontSize: '13px', color: 'var(--text-secondary)', whiteSpace: 'pre-wrap', borderTop: '1px solid var(--border)', paddingTop: '8px' }}>
+                                {reasoningText}
+                            </div>
+                        </details>
+                    )}
+
                     {isUser ? (
                         <div className="user-message-container">
                             <p>{contentToDisplay}{isLong && !showFull && '...'}</p>
@@ -337,7 +349,7 @@ export default function MessageBubble({ message, chatId, isLatest, isStreaming, 
                         {displayModel && (MODELS.find(m => m.id === displayModel)?.name || displayModel)}
                         {displayUsage && (() => {
                             const u = displayUsage;
-                            const cost = calcCost(displayModel || '', u.prompt_tokens, u.completion_tokens);
+                            const cost = u.cost_rub !== undefined ? u.cost_rub.toFixed(4) : calcCost(displayModel || '', u.prompt_tokens, u.completion_tokens);
                             return (
                                 <span className="message-usage">
                                     {' · '}{u.prompt_tokens} → {u.completion_tokens} токенов

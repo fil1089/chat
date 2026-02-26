@@ -6,15 +6,17 @@ export interface Message {
     content: string;
     displayContent?: string;
     model?: string;
-    usage?: { prompt_tokens: number; completion_tokens: number; total_tokens: number };
+    usage?: { prompt_tokens: number; completion_tokens: number; total_tokens: number; cost_rub?: number };
     attachments?: { name: string; size: number }[];
     fullAttachments?: Attachment[];
     timestamp?: number;
+    reasoningContent?: string;
     versions?: {
         content: string;
         model?: string;
-        usage?: { prompt_tokens: number; completion_tokens: number; total_tokens: number };
+        usage?: { prompt_tokens: number; completion_tokens: number; total_tokens: number; cost_rub?: number };
         timestamp?: number;
+        reasoningContent?: string;
     }[];
     activeVersion?: number;
 }
@@ -54,6 +56,7 @@ export interface Settings {
     theme: string;
     imageSize?: string;
     imageQuality?: string;
+    enableReasoning: boolean;
 }
 
 export interface AppState {
@@ -101,7 +104,7 @@ export interface StreamCallbacks {
 }
 
 export interface StatusEvent {
-    type: 'status' | 'search' | 'thought';
+    type: 'status' | 'search' | 'thought' | 'reasoning';
     message: string;
 }
 

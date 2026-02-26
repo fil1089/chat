@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { AppProvider } from './context/AppContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
@@ -108,8 +108,27 @@ function Layout() {
     );
 }
 
-function AuthGuard() {
+import AuthModal from './components/AuthModal';
+
+export const GlobalAuthModalContext = React.createContext<{
+    showAuthModal: (title?: string) => void;
+} | null>(null);
+
+export function useGlobalAuthModal() {
+    const ctx = React.useContext(GlobalAuthModalContext);
+    if (!ctx) throw new Error('useGlobalAuthModal must be used within App component');
+    return ctx;
+}
+
+function MainApp() {
     const { user, isLoading } = useAuth();
+    const [authModalVisible, setAuthModalVisible] = useState(false);
+    const [authModalTitle, setAuthModalTitle] = useState('Необходима авторизация');
+
+    const showAuthModal = (title?: string) => {
+        if (title) setAuthModalTitle(title);
+        setAuthModalVisible(true);
+    };
 
     if (isLoading) {
         return (
@@ -120,14 +139,18 @@ function AuthGuard() {
         );
     }
 
-    if (!user) {
-        return <AuthPage />;
-    }
-
     return (
-        <AppProvider>
-            <Layout />
-        </AppProvider>
+        <GlobalAuthModalContext.Provider value={{ showAuthModal }}>
+            <AppProvider>
+                <Layout />
+                {(!user && authModalVisible) && (
+                    <AuthModal
+                        onClose={() => setAuthModalVisible(false)}
+                        title={authModalTitle}
+                    />
+                )}
+            </AppProvider>
+        </GlobalAuthModalContext.Provider>
     );
 }
 
@@ -135,9 +158,7 @@ export default function App() {
     return (
         <BrowserRouter>
             <AuthProvider>
-                <Routes>
-                    <Route path="*" element={<AuthGuard />} />
-                </Routes>
+                <MainApp />
             </AuthProvider>
         </BrowserRouter>
     );

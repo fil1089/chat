@@ -1,5 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useApp } from '../context/AppContext';
+import { useAuth } from '../context/AuthContext';
+import { useGlobalAuthModal } from '../App';
 import { streamResponse, MODELS } from '../services/youApi';
 import { streamResponsePolza } from '../services/polzaApi';
 import ChatInput from './ChatInput';
@@ -16,6 +18,8 @@ interface StreamStatus {
 
 export default function ChatView() {
     const { state, dispatch } = useApp();
+    const { user } = useAuth();
+    const { showAuthModal } = useGlobalAuthModal();
     const [isStreaming, setIsStreaming] = useState(false);
     const [streamStatus, setStreamStatus] = useState<StreamStatus | null>(null);
     const controllerRef = useRef<AbortController | null>(null);
@@ -108,7 +112,8 @@ export default function ChatView() {
                 ? baseMessages.slice(-(contextN * 2))
                 : baseMessages;
 
-        let capturedUsage: { prompt_tokens: number; completion_tokens: number; total_tokens: number } | null = null;
+        let capturedUsage: { prompt_tokens: number; completion_tokens: number; total_tokens: number; cost_rub?: number } | null = null;
+        let capturedReasoning = '';
 
         const isPolza = state.settings.apiProvider === 'polza';
 
@@ -116,6 +121,7 @@ export default function ChatView() {
             apiKey: state.settings.polzaApiKey,
             model: currentModel,
             messages: messagesToSend.map(m => ({ role: m.role, content: m.content })),
+            enableReasoning: state.settings.enableReasoning,
             onUpdate: (fullText: string) => {
                 fullResponse = fullText;
                 let updatedMessages;
@@ -130,13 +136,14 @@ export default function ChatView() {
                                 content: fullResponse,
                                 model: currentModel,
                                 usage: capturedUsage || undefined,
-                                timestamp: Date.now()
+                                timestamp: Date.now(),
+                                reasoningContent: capturedReasoning || undefined
                             };
                         }
-                        return { ...m, content: fullResponse, versions, usage: capturedUsage || undefined };
+                        return { ...m, content: fullResponse, versions, usage: capturedUsage || undefined, reasoningContent: capturedReasoning || undefined };
                     });
                 } else {
-                    updatedMessages = [...chat.messages, { ...assistantMessage, content: fullResponse, model: currentModel, usage: capturedUsage || undefined }];
+                    updatedMessages = [...chat.messages, { ...assistantMessage, content: fullResponse, model: currentModel, usage: capturedUsage || undefined, reasoningContent: capturedReasoning || undefined }];
                 }
 
                 const updatedChat: Chat = {
@@ -149,6 +156,43 @@ export default function ChatView() {
             onUsage: (usage) => {
                 capturedUsage = usage;
             },
+            onStatus: (status) => {
+                if (status.type === 'reasoning') {
+                    capturedReasoning += status.message;
+                    // Trigger UI update specifically for reasoning if text hasn't started yet
+                    if (!fullResponse) {
+                        let updatedMessages;
+                        if (targetMessageId) {
+                            updatedMessages = chat.messages.map(m => {
+                                if (m.id !== targetMessageId) return m;
+                                const versions = [...(m.versions || [])];
+                                const activeIdx = m.activeVersion ?? 0;
+                                if (versions[activeIdx]) {
+                                    versions[activeIdx] = {
+                                        ...versions[activeIdx],
+                                        content: fullResponse,
+                                        model: currentModel,
+                                        usage: capturedUsage || undefined,
+                                        timestamp: Date.now(),
+                                        reasoningContent: capturedReasoning || undefined
+                                    };
+                                }
+                                return { ...m, content: fullResponse, versions, usage: capturedUsage || undefined, reasoningContent: capturedReasoning || undefined };
+                            });
+                        } else {
+                            updatedMessages = [...chat.messages, { ...assistantMessage, content: fullResponse, model: currentModel, usage: capturedUsage || undefined, reasoningContent: capturedReasoning || undefined }];
+                        }
+                        const updatedChat: Chat = {
+                            ...chat,
+                            messages: updatedMessages,
+                            updatedAt: Date.now(),
+                        };
+                        dispatch({ type: 'UPDATE_CHAT', payload: updatedChat });
+                    }
+                } else {
+                    setStreamStatus(status as any);
+                }
+            }
         }) : streamResponse({
             apiKey: state.settings.apiKey,
             youApiKey: state.settings.youApiKey,
@@ -158,6 +202,7 @@ export default function ChatView() {
             fileContents: activeSpace?.files || [],
             imageSize: state.settings.imageSize || '1024x1024',
             imageQuality: state.settings.imageQuality || 'high',
+            enableReasoning: state.settings.enableReasoning,
             bypassCache,
             onDelta: (delta: string) => {
                 fullResponse += delta;
@@ -175,13 +220,14 @@ export default function ChatView() {
                                 content: fullResponse,
                                 model: currentModel,
                                 usage: capturedUsage || undefined,
-                                timestamp: Date.now()
+                                timestamp: Date.now(),
+                                reasoningContent: capturedReasoning || undefined
                             };
                         }
-                        return { ...m, content: fullResponse, versions, usage: capturedUsage || undefined };
+                        return { ...m, content: fullResponse, versions, usage: capturedUsage || undefined, reasoningContent: capturedReasoning || undefined };
                     });
                 } else {
-                    updatedMessages = [...chat.messages, { ...assistantMessage, content: fullResponse, model: currentModel, usage: capturedUsage || undefined }];
+                    updatedMessages = [...chat.messages, { ...assistantMessage, content: fullResponse, model: currentModel, usage: capturedUsage || undefined, reasoningContent: capturedReasoning || undefined }];
                 }
 
                 const updatedChat: Chat = {
@@ -192,7 +238,41 @@ export default function ChatView() {
                 dispatch({ type: 'UPDATE_CHAT', payload: updatedChat });
             },
             onStatus: (status: StatusEvent) => {
-                setStreamStatus(status);
+                if (status.type === 'reasoning') {
+                    capturedReasoning += status.message;
+                    // Trigger UI update
+                    if (!fullResponse) {
+                        let updatedMessages;
+                        if (targetMessageId) {
+                            updatedMessages = chat.messages.map(m => {
+                                if (m.id !== targetMessageId) return m;
+                                const versions = [...(m.versions || [])];
+                                const activeIdx = m.activeVersion ?? 0;
+                                if (versions[activeIdx]) {
+                                    versions[activeIdx] = {
+                                        ...versions[activeIdx],
+                                        content: fullResponse,
+                                        model: currentModel,
+                                        usage: capturedUsage || undefined,
+                                        timestamp: Date.now(),
+                                        reasoningContent: capturedReasoning || undefined
+                                    };
+                                }
+                                return { ...m, content: fullResponse, versions, usage: capturedUsage || undefined, reasoningContent: capturedReasoning || undefined };
+                            });
+                        } else {
+                            updatedMessages = [...chat.messages, { ...assistantMessage, content: fullResponse, model: currentModel, usage: capturedUsage || undefined, reasoningContent: capturedReasoning || undefined }];
+                        }
+                        const updatedChat: Chat = {
+                            ...chat,
+                            messages: updatedMessages,
+                            updatedAt: Date.now(),
+                        };
+                        dispatch({ type: 'UPDATE_CHAT', payload: updatedChat });
+                    }
+                } else {
+                    setStreamStatus(status);
+                }
             },
             onUsage: (usage) => {
                 capturedUsage = usage;
@@ -213,13 +293,14 @@ export default function ChatView() {
                                 content: fullResponse,
                                 model: currentModel,
                                 usage: capturedUsage || undefined,
-                                timestamp: Date.now()
+                                timestamp: Date.now(),
+                                reasoningContent: capturedReasoning || undefined
                             };
                         }
-                        return { ...m, content: fullResponse, versions, usage: capturedUsage || undefined };
+                        return { ...m, content: fullResponse, versions, usage: capturedUsage || undefined, reasoningContent: capturedReasoning || undefined };
                     });
                 } else {
-                    finalMessages = [...chat.messages, { ...assistantMessage, content: fullResponse, model: currentModel, usage: capturedUsage || undefined }];
+                    finalMessages = [...chat.messages, { ...assistantMessage, content: fullResponse, model: currentModel, usage: capturedUsage || undefined, reasoningContent: capturedReasoning || undefined }];
                 }
 
                 const finalChat: Chat = {
@@ -323,6 +404,11 @@ export default function ChatView() {
     }, [activeChat?.id]);
 
     const handleSend = useCallback(async (text: string, attachments: Attachment[] = []) => {
+        if (!user) {
+            showAuthModal('Для отправки сообщений необходимо войти');
+            return;
+        }
+
         if (!text.trim() && attachments.length === 0) return;
 
         const textAttachments = attachments.filter(a => a.type === 'text');
@@ -363,7 +449,7 @@ export default function ChatView() {
         }
         dispatch({ type: 'UPDATE_CHAT', payload: chat });
         runStreaming(chat);
-    }, [activeChat, model, state.activeSpace, dispatch, runStreaming]);
+    }, [activeChat, model, state.activeSpace, dispatch, runStreaming, user, showAuthModal]);
 
     const handleStop = () => {
         controllerRef.current?.abort();
@@ -372,6 +458,11 @@ export default function ChatView() {
     };
 
     const handleRegenerate = useCallback((regenerateModel?: string) => {
+        if (!user) {
+            showAuthModal('Для генерации ответов необходимо войти');
+            return;
+        }
+
         if (!activeChat || activeChat.messages.length < 2) return;
 
         const lastMsg = activeChat.messages[activeChat.messages.length - 1];
@@ -399,7 +490,7 @@ export default function ChatView() {
 
         // Run streaming for the new version, bypassing cache
         runStreaming(updatedChat, lastMsg.id, regenerateModel || model, true);
-    }, [activeChat, model, dispatch, runStreaming]);
+    }, [activeChat, model, dispatch, runStreaming, user, showAuthModal]);
 
     const handleEdit = (text: string) => {
         window.dispatchEvent(new CustomEvent('edit-chat-message', { detail: { text } }));

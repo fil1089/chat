@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { API_URLS } from '../services/apiConfig';
 import { useApp } from '../context/AppContext';
 import { getChatModelsByCategory } from '../services/youApi';
+import { checkPolzaBalance } from '../services/polzaApi';
 import { IconSettings, IconDownload, IconPlus, IconTrash, IconMessage, IconFolder, IconEye, IconEyeOff, IconCheck, IconError } from '../components/Icons';
 import ModelSelector from '../components/ModelSelector';
 import { exportAllData, importAllData, clearAllData } from '../services/storage';
@@ -17,6 +18,22 @@ export default function SettingsPage() {
     const [showKey, setShowKey] = useState(false);
     const [testResult, setTestResult] = useState<TestResult | null>(null);
     const [testing, setTesting] = useState(false);
+    const [balance, setBalance] = useState<string | null>(null);
+    const [isFetchingBalance, setIsFetchingBalance] = useState(false);
+
+    const fetchBalance = async () => {
+        if (state.settings.apiProvider !== 'polza' || !state.settings.polzaApiKey) return;
+        setIsFetchingBalance(true);
+        const result = await checkPolzaBalance(state.settings.polzaApiKey);
+        setBalance(result);
+        setIsFetchingBalance(false);
+    };
+
+    useEffect(() => {
+        if (state.settings.apiProvider === 'polza' && state.settings.polzaApiKey) {
+            fetchBalance();
+        }
+    }, [state.settings.apiProvider, state.settings.polzaApiKey]);
 
     const handleSave = (key: string, value: string) => {
         dispatch({ type: 'UPDATE_SETTINGS', payload: { [key]: value } as Record<string, string> });
@@ -183,6 +200,22 @@ export default function SettingsPage() {
                     </p>
                 </div>
 
+                {state.settings.apiProvider === 'polza' && state.settings.polzaApiKey && (
+                    <div className="setting-row">
+                        <label>Баланс Polza.ai</label>
+                        <div className="balance-display" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <span style={{ fontWeight: 600, fontSize: '18px', color: 'var(--text-primary)' }}>
+                                {balance || '—'} ₽
+                            </span>
+                            <button className="btn-ghost" onClick={fetchBalance} title="Обновить баланс" disabled={isFetchingBalance}>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ animation: isFetchingBalance ? 'spin 1s linear infinite' : 'none' }}>
+                                    <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.3" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                )}
+
 
             </div>
 
@@ -197,6 +230,20 @@ export default function SettingsPage() {
                             direction="down"
                         />
                     </div>
+                </div>
+                <div className="setting-row" style={{ alignItems: 'flex-start' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                        <label>Токены рассуждений (Reasoning Tokens)</label>
+                        <span className="setting-hint" style={{ marginTop: 0 }}>Включает прозрачный процесс размышления для сложных задач. Может увеличивать стоимость.</span>
+                    </div>
+                    <label className="toggle-switch">
+                        <input
+                            type="checkbox"
+                            checked={!!state.settings.enableReasoning}
+                            onChange={(e) => handleSave('enableReasoning', e.target.checked as any)}
+                        />
+                        <span className="toggle-slider"></span>
+                    </label>
                 </div>
             </div>
 

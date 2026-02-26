@@ -115,11 +115,12 @@ const DEFAULT_SETTINGS: Settings = {
     apiKey: '',
     youApiKey: '',
     polzaApiKey: '',
-    apiProvider: 'neuro',
-    defaultModel: 'gpt-4o',
+    apiProvider: 'polza',
+    defaultModel: 'openai/gpt-4o-mini',
     theme: 'dark',
     imageSize: '1024x1024',
     imageQuality: 'high',
+    enableReasoning: false,
 };
 
 export async function getSettings(): Promise<Settings> {

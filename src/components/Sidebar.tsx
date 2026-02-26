@@ -116,13 +116,13 @@ export default function Sidebar({ onLogout, userEmail }: SidebarProps) {
                             </div>
                         )}
                     </div>
-                    <button
+                    {/* <button
                         className={`nav-item ${location.pathname === '/images' ? 'active' : ''}`}
                         onClick={() => navigate('/images')}
                     >
                         <IconImage size={16} />
                         <span>Изображения</span>
-                    </button>
+                    </button> */}
                     <button
                         className={`nav-item ${location.pathname === '/history' ? 'active' : ''}`}
                         onClick={() => navigate('/history')}

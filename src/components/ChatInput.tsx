@@ -225,6 +225,20 @@ export default function ChatInput({ onSend, model, onModelChange, isStreaming, o
         }
     };
 
+    // Add click outside handler for settings and dropdown
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (settingsRef.current && !settingsRef.current.contains(event.target as Node)) {
+                setShowSettings(false);
+                setShowDropdown(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
+
     return (
         <div
             className={`chat-input-container ${isDragging ? 'dragging' : ''}`}
@@ -261,7 +275,7 @@ export default function ChatInput({ onSend, model, onModelChange, isStreaming, o
                         </button>
 
                         {!(model.includes('image') || model.includes('image-preview')) && (
-                            <div className="chat-settings-wrapper" ref={settingsRef} onMouseLeave={() => { setShowSettings(false); setShowDropdown(false); }}>
+                            <div className="chat-settings-wrapper" ref={settingsRef}>
                                 <button
                                     className="chat-settings-btn"
                                     onClick={() => setShowSettings(!showSettings)}

@@ -289,7 +289,7 @@ interface NeuroStreamParams {
     requestBody: Record<string, unknown>;
     controller: AbortController;
     onDelta?: (delta: string) => void;
-    onUsage?: (usage: { prompt_tokens: number; completion_tokens: number; total_tokens: number }) => void;
+    onUsage?: (usage: { prompt_tokens: number; completion_tokens: number; total_tokens: number; cost_rub?: number }) => void;
     onDone?: () => void;
     onError?: (error: string) => void;
 }
@@ -383,7 +383,7 @@ async function generateImageNeuro({
     onStatus?: (status: StatusEvent) => void;
     onDone?: () => void;
     onError?: (error: string) => void;
-    onUsage?: (usage: { prompt_tokens: number; completion_tokens: number; total_tokens: number }) => void;
+    onUsage?: (usage: { prompt_tokens: number; completion_tokens: number; total_tokens: number; cost_rub?: number }) => void;
     imageSize: string;
     imageQuality: string;
 }) {
@@ -655,7 +655,8 @@ interface StreamResponseParams extends StreamCallbacks {
     fileContents?: Attachment[];
     imageSize?: string;
     imageQuality?: string;
-    onUsage?: (usage: { prompt_tokens: number; completion_tokens: number; total_tokens: number }) => void;
+    enableReasoning?: boolean;
+    onUsage?: (usage: { prompt_tokens: number; completion_tokens: number; total_tokens: number; cost_rub?: number }) => void;
     bypassCache?: boolean;
 }
 
@@ -789,7 +790,7 @@ export function streamResponse({
 // ===== Response Cache =====
 interface CachedResponse {
     content: string;
-    usage: { prompt_tokens: number; completion_tokens: number; total_tokens: number } | null;
+    usage: { prompt_tokens: number; completion_tokens: number; total_tokens: number; cost_rub?: number } | null;
     timestamp: number;
 }
 

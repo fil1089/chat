@@ -61,10 +61,7 @@ export const POLZA_MODELS: AIModel[] = [
     { id: 'x-ai/grok-2', name: 'Grok 4 Fast Reasoning', category: 'X.AI', desc: 'Быстрая версия Grok 4 с рассуждением — оптимизирована для прямых ответов и анализа с минимальной задержкой при сохранении логической цепочки.' },
     { id: 'x-ai/grok-2', name: 'Grok 4 Fast', category: 'X.AI', desc: 'Мощная мультимодальная языковая модель с огромным контекстом и сверхбыстрой обработкой запросов, оптимизированная для прямых ответов.' },
     { id: 'x-ai/grok-2', name: 'Grok 4.1 Fast Reasoning', category: 'X.AI', desc: 'Обновлённая Grok 4.1 с рассуждением — улучшенная точность и скорость в цепочках логического анализа и решении задач.', isActual: true },
-    { id: 'x-ai/grok-2', name: 'Grok 4.1 Fast', category: 'X.AI', desc: 'Обновлённая быстрая Grok 4.1 с улучшенным качеством прямых ответов и расширенной поддержкой мультимодальности.', isActual: true },
-
-    // ── You.com ──
-    { id: 'you-research', name: 'You Research', category: 'You.com', desc: 'Продвинутый ИИ-агент с итеративным поиском в интернете — исследует множество источников, анализирует и синтезирует информацию для глубоких и актуальных ответов.' },
+    { id: 'x-ai/grok-2', name: 'Grok 4.1 Fast', category: 'X.AI', desc: 'Обновлённая быстрая Grok 4.1 с улучшенным качеством прямых ответов и расширенной поддержкой мультимодальности.', isActual: true }
 ];
 
 export const POLZA_IMAGE_MODELS: AIModel[] = [
@@ -100,7 +97,9 @@ export interface PolzaStreamParams {
     messages: { role: string; content: string }[];
     apiKey: string;
     onUpdate: (text: string) => void;
-    onUsage?: (usage: { prompt_tokens: number; completion_tokens: number; total_tokens: number }) => void;
+    enableReasoning?: boolean;
+    onUsage?: (usage: { prompt_tokens: number; completion_tokens: number; total_tokens: number; cost_rub?: number }) => void;
+    onStatus?: (status: { type: string; message: string }) => void;
     onHistoryFix?: () => void;
 }
 
@@ -109,24 +108,34 @@ export async function streamResponsePolza({
     messages,
     apiKey,
     onUpdate,
+    enableReasoning,
     onUsage,
+    onStatus,
 }: PolzaStreamParams): Promise<void> {
     if (!apiKey) {
         throw new Error('Укажите API ключ Polza.ai в настройках');
     }
 
     try {
+        const body: Record<string, any> = {
+            model,
+            messages,
+            stream: true,
+        };
+
+        if (enableReasoning) {
+            body.reasoning = {
+                effort: "medium"
+            };
+        }
+
         const response = await fetch(`${API_URLS.polza}/v1/chat/completions`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${apiKey}`,
             },
-            body: JSON.stringify({
-                model,
-                messages,
-                stream: true,
-            }),
+            body: JSON.stringify(body),
         });
 
         if (!response.ok) {
@@ -162,6 +171,12 @@ export async function streamResponsePolza({
                         // Handle usage statistics if present
                         if (data.usage?.prompt_tokens && onUsage) {
                             onUsage(data.usage);
+                        }
+
+                        // Handle reasoning chunks
+                        const reasoning = data.choices && (data.choices[0]?.delta?.reasoning || data.choices[0]?.delta?.reasoning_content);
+                        if (reasoning && onStatus) {
+                            onStatus({ type: 'reasoning', message: reasoning });
                         }
 
                         // Collect text content
@@ -243,5 +258,22 @@ export async function generateImagePolza({
     } catch (error: any) {
         console.error('[PolzaAPI Image] Error:', error);
         throw error;
+    }
+}
+
+export async function checkPolzaBalance(apiKey: string): Promise<string> {
+    if (!apiKey) return '0.00';
+    try {
+        const response = await fetch(`${API_URLS.polza}/v1/balance`, {
+            headers: {
+                'Authorization': `Bearer ${apiKey}`
+            }
+        });
+        if (!response.ok) return '0.00';
+        const data = await response.json();
+        return data.amount || '0.00';
+    } catch (e) {
+        console.error('Failed to check Polza balance:', e);
+        return '0.00';
     }
 }

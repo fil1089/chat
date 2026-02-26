@@ -171,13 +171,7 @@ export default function ModelSelector({ model, onModelChange, direction = 'up' }
                             );
                         })}
 
-                        {/* Имитация отключенной категории генерации картинок */}
-                        <div className="model-category-group disabled-feature">
-                            <div className="model-category-header" style={{ opacity: 0.5, cursor: 'not-allowed' }}>
-                                <span>Изображения</span>
-                                <span style={{ fontSize: '10px', background: 'var(--surface-border)', padding: '2px 6px', borderRadius: '4px', marginLeft: '8px' }}>В разработке</span>
-                            </div>
-                        </div>
+
                     </div>
                 </div>
             )}
