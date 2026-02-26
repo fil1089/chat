@@ -47,7 +47,7 @@ export interface Space {
     updatedAt?: number;
 }
 
-export type ContextMode = 'full' | 'last_n' | 'system_only';
+export type ContextMode = 'full' | 'last_n' | 'first_n' | 'system_only';
 
 export interface Settings {
     apiKey: string;
@@ -97,6 +97,18 @@ export interface AIModel {
     category: string;
     desc: string;
     isActual?: boolean;
+    subCategory?: 'thinking' | 'advanced' | 'fast';
+    pricing?: {
+        prompt: string;
+        completion: string;
+    };
+    capabilities?: {
+        text?: boolean;
+        image?: boolean;
+        file?: boolean;
+        audio?: boolean;
+        video?: boolean;
+    };
 }
 
 export interface StreamCallbacks {

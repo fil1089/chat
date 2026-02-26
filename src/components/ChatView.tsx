@@ -110,7 +110,9 @@ export default function ChatView() {
             ? baseMessages.filter(m => m.role === 'user').slice(-1)
             : contextMode === 'last_n'
                 ? baseMessages.slice(-(contextN * 2))
-                : baseMessages;
+                : contextMode === 'first_n'
+                    ? baseMessages.slice(0, contextN * 2)
+                    : baseMessages;
 
         let capturedUsage: { prompt_tokens: number; completion_tokens: number; total_tokens: number; cost_rub?: number } | null = null;
         let capturedReasoning = '';

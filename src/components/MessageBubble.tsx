@@ -306,7 +306,7 @@ export default function MessageBubble({ message, chatId, isLatest, isStreaming, 
                                         }
                                     }}
                                 >
-                                    {displayText}
+                                    {processedDisplayText}
                                 </ReactMarkdown>
                             </div>
                         ) : (
@@ -353,7 +353,7 @@ export default function MessageBubble({ message, chatId, isLatest, isStreaming, 
                                     }
                                 }}
                             >
-                                {displayText}
+                                {processedDisplayText}
                             </ReactMarkdown>
                         )
                     )}

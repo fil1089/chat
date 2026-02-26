@@ -1,9 +1,11 @@
 import { useState, useRef, useEffect, type ChangeEvent, type KeyboardEvent, type DragEvent } from 'react';
 import * as pdfjsLib from 'pdfjs-dist';
 import ModelSelector from './ModelSelector';
-import { IconSend, IconStop, IconAttachment, IconFileText, IconClose, IconSettings, IconChevronDown } from './Icons';
+import { IconSend, IconStop, IconAttachment, IconFileText, IconClose, IconSettings, IconChevronDown, IconImage, IconAudio, IconVideo } from './Icons';
 import type { Attachment, ContextMode } from '../types';
 import { useApp } from '../context/AppContext';
+import { ALL_POLZA_MODELS } from '../services/polzaApi';
+import { MODELS } from '../services/youApi';
 
 // Configure PDF.js worker via CDN (avoids Vite bundling issues)
 pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.8.69/pdf.worker.min.mjs';
@@ -285,7 +287,33 @@ export default function ChatInput({ onSend, model, onModelChange, isStreaming, o
                 <div className="chat-input-top">
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1 }}>
                         {!hideModelSelector && (
-                            <ModelSelector model={model} onModelChange={onModelChange} direction={direction} />
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                <ModelSelector model={model} onModelChange={onModelChange} direction={direction} />
+                                {state.settings.apiProvider === 'polza' && (
+                                    (() => {
+                                        const mInfo = ALL_POLZA_MODELS.find(m => m.id === model);
+                                        if (!mInfo) return null;
+                                        return (
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '0 4px', opacity: 0.7 }}>
+                                                {mInfo.pricing && (
+                                                    <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>
+                                                        {mInfo.pricing.prompt} / {mInfo.pricing.completion}
+                                                    </span>
+                                                )}
+                                                {mInfo.capabilities && (
+                                                    <div style={{ display: 'flex', gap: '6px' }}>
+                                                        {mInfo.capabilities.text && <IconFileText size={12} />}
+                                                        {mInfo.capabilities.image && <IconImage size={12} />}
+                                                        {mInfo.capabilities.file && <IconAttachment size={12} />}
+                                                        {mInfo.capabilities.audio && <IconAudio size={12} />}
+                                                        {mInfo.capabilities.video && <IconVideo size={12} />}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        );
+                                    })()
+                                )}
+                            </div>
                         )}
                     </div>
 
@@ -322,7 +350,7 @@ export default function ChatInput({ onSend, model, onModelChange, isStreaming, o
                                                     }}
                                                 >
                                                     <span>
-                                                        {contextMode === 'full' ? 'Полный' : contextMode === 'last_n' ? 'Последние сообщения' : 'Только системная инструкция'}
+                                                        {contextMode === 'full' ? 'Полный' : contextMode === 'last_n' ? 'Последние сообщения' : contextMode === 'first_n' ? 'Первые сообщения' : 'Только системная инструкция'}
                                                     </span>
                                                     <IconChevronDown size={14} />
                                                 </button>
@@ -336,6 +364,10 @@ export default function ChatInput({ onSend, model, onModelChange, isStreaming, o
                                                             className={`custom-select-option${contextMode === 'last_n' ? ' active' : ''}`}
                                                             onClick={(e) => { e.stopPropagation(); onContextModeChange('last_n'); setShowDropdown(false); }}
                                                         >Последние сообщения</div>
+                                                        <div
+                                                            className={`custom-select-option${contextMode === 'first_n' ? ' active' : ''}`}
+                                                            onClick={(e) => { e.stopPropagation(); onContextModeChange('first_n'); setShowDropdown(false); }}
+                                                        >Первые сообщения</div>
                                                         {hasSystemInstruction && (
                                                             <div
                                                                 className={`custom-select-option${contextMode === 'system_only' ? ' active' : ''}`}
@@ -346,7 +378,7 @@ export default function ChatInput({ onSend, model, onModelChange, isStreaming, o
                                                 )}
                                             </div>
                                         </div>
-                                        {contextMode === 'last_n' && (
+                                        {(contextMode === 'last_n' || contextMode === 'first_n') && (
                                             <div className="settings-field">
                                                 <label>Количество пар</label>
                                                 <input
