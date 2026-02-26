@@ -2,27 +2,34 @@ import { API_URLS } from './apiConfig';
 import type { AIModel } from '../types';
 
 export const POLZA_MODELS: AIModel[] = [
-    { id: 'openai/gpt-4o', name: 'GPT-4o', desc: 'Флагманская модель OpenAI', isActual: true, category: 'OpenAI' },
-    { id: 'openai/gpt-4o-mini', name: 'GPT-4o-mini', desc: 'Быстрая модель OpenAI', category: 'OpenAI' },
-    { id: 'anthropic/claude-3-5-sonnet', name: 'Claude 3.5 Sonnet', desc: 'Быстрая и умная модель Anthropic', isActual: true, category: 'Anthropic' },
-    { id: 'anthropic/claude-3-5-haiku', name: 'Claude 3.5 Haiku', desc: 'Самая быстрая модель Anthropic', category: 'Anthropic' },
-    { id: 'google/gemini-2.5-pro-preview', name: 'Gemini 2.5 Pro (Preview)', desc: 'Новейшая модель Google', isActual: true, category: 'Google' },
-    { id: 'google/gemini-2.5-flash-preview', name: 'Gemini 2.5 Flash (Preview)', desc: 'Быстрая модель Google', category: 'Google' },
-    { id: 'google/gemini-exp-1206', name: 'Gemini Experimental', desc: 'Экспериментальная модель', category: 'Google' },
-    { id: 'meta-llama/llama-3.3-70b', name: 'Llama 3.3 70B', desc: 'Open-weight модель от Meta', category: 'Meta' },
-    { id: 'x-ai/grok-2', name: 'Grok 2', desc: 'Модель от xAI', category: 'xAI' },
-    { id: 'deepseek/deepseek-chat', name: 'DeepSeek V3', desc: 'Мощная китайская модель', category: 'DeepSeek' },
-    { id: 'deepseek/deepseek-reasoner', name: 'DeepSeek R1', desc: 'Модель с рассуждениями', isActual: true, category: 'DeepSeek' },
-    { id: 'openai/o1-mini', name: 'o1-mini', desc: 'Компактная reasoning модель', category: 'Reasoning' },
-    { id: 'openai/o3-mini', name: 'o3-mini', desc: 'Новая reasoning модель', isActual: true, category: 'Reasoning' },
+    // ── OpenAI ──
+    { id: 'openai/gpt-4o', name: 'GPT-4o', category: 'OpenAI', desc: 'Мощная мультимодальная модель с поддержкой текста, изображений и аудио.', isActual: true },
+    { id: 'openai/gpt-4o-mini', name: 'GPT-4o Mini', category: 'OpenAI', desc: 'Быстрая и экономичная версия GPT-4o для повседневных задач.', isActual: true },
+    { id: 'openai/o3-mini', name: 'o3 Mini', category: 'OpenAI', desc: 'Компактная версия o3 для сложных рассуждений.', isActual: true },
+    { id: 'openai/o1-mini', name: 'o1 Mini', category: 'OpenAI', desc: 'Компактная reasoning модель для кода и логики.', isActual: true },
+
+    // ── Google ──
+    { id: 'google/gemini-2.5-flash', name: 'Gemini 2.5 Flash', category: 'Google', desc: 'Быстрая и экономичная модель Google с большим контекстным окном.', isActual: true },
+    { id: 'google/gemini-2.5-pro', name: 'Gemini 2.5 Pro', category: 'Google', desc: 'Мощная профессиональная модель Google для сложного анализа и программирования.', isActual: true },
+
+    // ── Anthropic ──
+    { id: 'anthropic/claude-3.7-sonnet', name: 'Claude 3.7 Sonnet', category: 'Anthropic', desc: 'Продвинутая модель Claude с превосходным пониманием ньюансов.', isActual: true },
+    { id: 'anthropic/claude-3.5-sonnet', name: 'Claude 3.5 Sonnet', category: 'Anthropic', desc: 'Сбалансированная модель Anthropic с отличным соотношением качества и скорости.' },
+    { id: 'anthropic/claude-3.5-haiku', name: 'Claude 3.5 Haiku', category: 'Anthropic', desc: 'Быстрая и экономичная Claude для массовых запросов.' },
+
+    // ── DeepSeek ──
+    { id: 'deepseek/deepseek-chat', name: 'DeepSeek V3', category: 'DeepSeek', desc: 'Универсальная языковая модель с качеством на уровне лидеров рынка.', isActual: true },
+    { id: 'deepseek/deepseek-reasoner', name: 'DeepSeek R1', category: 'DeepSeek', desc: 'Модель рассуждения для конкурентоспособных результатов в логике.', isActual: true },
+
+    // ── X.AI ──
+    { id: 'x-ai/grok-2', name: 'Grok 2', category: 'X.AI', desc: 'Флагманская модель xAI с глубоким способностью к многоступенчатому анализу.', isActual: true },
 ];
 
 export const POLZA_IMAGE_MODELS: AIModel[] = [
-    { id: 'openai/dall-e-3', name: 'DALL-E 3', desc: 'Генератор изображений OpenAI', isActual: true, category: 'Изображения' },
-    { id: 'black-forest-labs/flux-1.1-pro-ultra', name: 'Flux 1.1 Pro Ultra', desc: 'Лучшая модель Flux', isActual: true, category: 'Изображения' },
-    { id: 'black-forest-labs/flux-1-schnell', name: 'Flux 1 Schnell', desc: 'Быстрая модель Flux', category: 'Изображения' },
-    { id: 'stability-ai/stable-diffusion-3.5-large', name: 'Stable Diffusion 3.5', desc: 'Модель от Stability AI', category: 'Изображения' },
-    { id: 'midjourney', name: 'Midjourney', desc: 'Генератор от Midjourney', isActual: true, category: 'Изображения' },
+    { id: 'openai/dall-e-3', name: 'DALL-E 3', desc: 'Передовой генератор изображений от OpenAI.', isActual: true, category: 'Изображения' },
+    { id: 'midjourney', name: 'Midjourney', desc: 'Генератор изображений непревзойденного художественного качества.', isActual: true, category: 'Изображения' },
+    { id: 'black-forest-labs/flux-1.1-pro-ultra', name: 'Flux 1.1 Pro Ultra', desc: 'Высокоскоростной генератор нового поколения от FLUX.', isActual: true, category: 'Изображения' },
+    { id: 'stability-ai/stable-diffusion-3.5-large', name: 'Stable Diffusion 3.5', desc: 'Открытая модель от Stability AI для гибкой настройки.', category: 'Изображения' },
 ];
 
 // Combine all for easy search
