@@ -6,6 +6,7 @@ const isDev = import.meta.env.DEV;
 
 export const API_URLS = {
     neuro: isDev ? '/api/neuro' : 'https://neuroapi.host',
+    polza: isDev ? '/api/polza' : 'https://polza.ai',
     youSearch: isDev ? '/api/you-search' : 'https://ydc-index.io',
     youAgent: isDev ? '/api/you-agent' : 'https://api.you.com',
 } as const;

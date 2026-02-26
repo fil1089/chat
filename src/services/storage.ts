@@ -114,8 +114,12 @@ export async function deleteSpace(spaceId: string): Promise<Space[]> {
 const DEFAULT_SETTINGS: Settings = {
     apiKey: '',
     youApiKey: '',
+    polzaApiKey: '',
+    apiProvider: 'neuro',
     defaultModel: 'gpt-4o',
     theme: 'dark',
+    imageSize: '1024x1024',
+    imageQuality: 'high',
 };
 
 export async function getSettings(): Promise<Settings> {

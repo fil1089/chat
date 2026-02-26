@@ -17,8 +17,12 @@ const initialState: AppState = {
     settings: {
         apiKey: '',
         youApiKey: '',
+        polzaApiKey: '',
+        apiProvider: 'neuro',
         defaultModel: 'gpt-4o',
         theme: 'dark',
+        imageSize: '1024x1024',
+        imageQuality: 'high',
     },
     sidebarOpen: true,
     storageReady: false,

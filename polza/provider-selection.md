@@ -1,0 +1,297 @@
+> ## Documentation Index
+> Fetch the complete documentation index at: https://polza.ai/docs/llms.txt
+> Use this file to discover all available pages before exploring further.
+
+# Выбор провайдера
+
+> Как выбирать и переключаться между провайдерами моделей
+
+Polza.ai предоставляет доступ к моделям от разных провайдеров. В этом гайде вы узнаете, как выбирать оптимального провайдера для ваших задач.
+
+## Что такое провайдер?
+
+Провайдер — это компания или сервис, предоставляющий доступ к AI моделям. Одна и та же модель может быть доступна через разных провайдеров с разной ценой, скоростью и доступностью.
+
+## Доступные провайдеры
+
+<CardGroup cols={3}>
+  <Card title="OpenAI" icon="robot">
+    GPT-4o, GPT-4o-mini, o3 и др.
+  </Card>
+
+  <Card title="Anthropic" icon="brain">
+    Claude Sonnet, Claude Opus и др.
+  </Card>
+
+  <Card title="Google" icon="google">
+    Gemini Pro, Gemini Flash и др.
+  </Card>
+
+  <Card title="Meta" icon="meta">
+    Llama и др.
+  </Card>
+
+  <Card title="DeepSeek" icon="magnifying-glass">
+    DeepSeek V3, DeepSeek R1 и др.
+  </Card>
+
+  <Card title="Другие" icon="ellipsis">
+    Mistral, Qwen и др.
+  </Card>
+</CardGroup>
+
+## Как выбрать провайдера
+
+### Автоматический выбор (рекомендуется)
+
+По умолчанию Polza.ai автоматически выбирает оптимального провайдера на основе доступности, скорости и стоимости. Не нужно передавать параметр `provider` — система сама определит лучший вариант.
+
+<CodeGroup>
+  ```typescript TypeScript theme={null}
+  // Автоматический выбор провайдера — ничего указывать не нужно
+  const completion = await openai.chat.completions.create({
+    model: 'openai/gpt-4o',
+    messages: [{ role: 'user', content: 'Привет!' }]
+  });
+  ```
+
+  ```python Python theme={null}
+  # Автоматический выбор провайдера — ничего указывать не нужно
+  completion = client.chat.completions.create(
+      model="openai/gpt-4o",
+      messages=[{"role": "user", "content": "Привет!"}]
+  )
+  ```
+</CodeGroup>
+
+### Параметр `provider`
+
+Для управления выбором провайдера передайте объект `provider` в запросе:
+
+| Поле              | Тип       | Описание                                                 |
+| ----------------- | --------- | -------------------------------------------------------- |
+| `order`           | string\[] | Приоритетный порядок провайдеров                         |
+| `only`            | string\[] | Белый список — использовать только указанных провайдеров |
+| `ignore`          | string\[] | Чёрный список — исключить указанных провайдеров          |
+| `sort`            | string    | Сортировка: `price`, `latency` или `throughput`          |
+| `max_price`       | object    | Максимальные цены (см. ниже)                             |
+| `allow_fallbacks` | boolean   | Разрешить фолбэк на другие провайдеры при ошибке         |
+
+### Поля `max_price`
+
+| Поле         | Тип    | Описание                                          |
+| ------------ | ------ | ------------------------------------------------- |
+| `prompt`     | number | Макс. цена за промпт (RUB за миллион токенов)     |
+| `completion` | number | Макс. цена за completion (RUB за миллион токенов) |
+| `image`      | number | Макс. цена за изображение (RUB)                   |
+| `audio`      | number | Макс. цена за аудио (RUB за миллион токенов)      |
+| `request`    | number | Макс. цена за запрос (RUB)                        |
+
+## Примеры
+
+### Приоритет провайдеров
+
+Укажите предпочтительный порядок провайдеров. Если первый недоступен — запрос уйдёт ко второму.
+
+<CodeGroup>
+  ```typescript TypeScript theme={null}
+  const completion = await openai.chat.completions.create({
+    model: 'openai/gpt-4o',
+    messages: [{ role: 'user', content: 'Привет!' }],
+    // @ts-ignore - расширенный параметр Polza.ai
+    provider: {
+      order: ['OpenAI', 'Anthropic'],
+      allow_fallbacks: true
+    }
+  });
+  ```
+
+  ```python Python theme={null}
+  completion = client.chat.completions.create(
+      model="openai/gpt-4o",
+      messages=[{"role": "user", "content": "Привет!"}],
+      extra_body={
+          "provider": {
+              "order": ["OpenAI", "Anthropic"],
+              "allow_fallbacks": True
+          }
+      }
+  )
+  ```
+
+  ```bash cURL theme={null}
+  curl -X POST "https://polza.ai/api/v1/chat/completions" \
+    -H "Authorization: Bearer <POLZA_AI_API_KEY>" \
+    -H "Content-Type: application/json" \
+    -d '{
+      "model": "openai/gpt-4o",
+      "messages": [{"role": "user", "content": "Привет!"}],
+      "provider": {
+        "order": ["OpenAI", "Anthropic"],
+        "allow_fallbacks": true
+      }
+    }'
+  ```
+</CodeGroup>
+
+### Белый список (only)
+
+Ограничьте запрос только указанными провайдерами:
+
+<CodeGroup>
+  ```typescript TypeScript theme={null}
+  const completion = await openai.chat.completions.create({
+    model: 'openai/gpt-4o',
+    messages: [{ role: 'user', content: 'Привет!' }],
+    // @ts-ignore
+    provider: {
+      only: ['OpenAI']
+    }
+  });
+  ```
+
+  ```python Python theme={null}
+  completion = client.chat.completions.create(
+      model="openai/gpt-4o",
+      messages=[{"role": "user", "content": "Привет!"}],
+      extra_body={
+          "provider": {
+              "only": ["OpenAI"]
+          }
+      }
+  )
+  ```
+
+  ```bash cURL theme={null}
+  curl -X POST "https://polza.ai/api/v1/chat/completions" \
+    -H "Authorization: Bearer <POLZA_AI_API_KEY>" \
+    -H "Content-Type: application/json" \
+    -d '{
+      "model": "openai/gpt-4o",
+      "messages": [{"role": "user", "content": "Привет!"}],
+      "provider": {
+        "only": ["OpenAI"]
+      }
+    }'
+  ```
+</CodeGroup>
+
+### Чёрный список (ignore)
+
+Исключите определённых провайдеров:
+
+```json  theme={null}
+{
+  "provider": {
+    "ignore": ["DeepInfra", "Together"]
+  }
+}
+```
+
+### Сортировка по цене / скорости
+
+<CodeGroup>
+  ```json Самый дешёвый theme={null}
+  {
+    "provider": {
+      "sort": "price"
+    }
+  }
+  ```
+
+  ```json Самый быстрый (задержка) theme={null}
+  {
+    "provider": {
+      "sort": "latency"
+    }
+  }
+  ```
+
+  ```json Самый быстрый (пропускная способность) theme={null}
+  {
+    "provider": {
+      "sort": "throughput"
+    }
+  }
+  ```
+</CodeGroup>
+
+### Фильтрация по максимальной цене
+
+Ограничьте стоимость запроса:
+
+```json  theme={null}
+{
+  "provider": {
+    "sort": "price",
+    "max_price": {
+      "prompt": 10,
+      "completion": 20
+    }
+  }
+}
+```
+
+### Комбинирование параметров
+
+Все параметры можно комбинировать:
+
+```json  theme={null}
+{
+  "provider": {
+    "only": ["OpenAI", "Anthropic"],
+    "sort": "price",
+    "max_price": {
+      "prompt": 15,
+      "completion": 30
+    },
+    "allow_fallbacks": true
+  }
+}
+```
+
+## Получение информации о провайдере
+
+В ответе API можно увидеть, какой провайдер обработал запрос:
+
+```json  theme={null}
+{
+  "id": "gen_123",
+  "model": "openai/gpt-4o",
+  "provider": "openai-direct",
+  "choices": [...],
+  "usage": {...}
+}
+```
+
+## Советы и лучшие практики
+
+<AccordionGroup>
+  <Accordion title="Используйте автовыбор для production" icon="robot">
+    Автоматический выбор провайдера обеспечивает лучшую доступность и оптимальную цену. При недоступности одного провайдера система автоматически переключится на другой.
+  </Accordion>
+
+  <Accordion title="Используйте allow_fallbacks" icon="shield">
+    При явном выборе провайдера включайте `allow_fallbacks: true`, чтобы запрос не упал при временной недоступности выбранного провайдера.
+  </Accordion>
+
+  <Accordion title="Тестируйте на разных провайдерах" icon="flask">
+    При разработке проверяйте, что ваш код работает с разными провайдерами — могут быть небольшие различия в ответах.
+  </Accordion>
+
+  <Accordion title="Мониторьте затраты" icon="chart-line">
+    Разные провайдеры имеют разные цены. Используйте [статистику использования](/osobennosti/usage) для контроля расходов.
+  </Accordion>
+</AccordionGroup>
+
+## Следующие шаги
+
+<CardGroup cols={2}>
+  <Card title="Каталог моделей" icon="microchip" href="/gaidy/models">
+    Полный список доступных моделей
+  </Card>
+
+  <Card title="Статистика" icon="chart-line" href="/osobennosti/usage">
+    Мониторинг использования и затрат
+  </Card>
+</CardGroup>

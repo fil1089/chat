@@ -3,6 +3,7 @@ import { useApp } from '../context/AppContext';
 import { getGroupedChatModels, MODELS } from '../services/youApi';
 import { IconChevronDown, IconChevronUp, IconCheck, IconSearch } from './Icons';
 import type { AIModel } from '../types';
+import { getGroupedPolzaModels, ALL_POLZA_MODELS } from '../services/polzaApi';
 
 interface ModelSelectorProps {
     model: string;
@@ -48,8 +49,14 @@ export default function ModelSelector({ model, onModelChange, direction = 'up' }
         }
     }, [open]);
 
-    const currentModel = MODELS.find((m) => m.id === model);
-    const grouped = getGroupedChatModels();
+    const { state } = useApp();
+    const isPolza = state.settings.apiProvider === 'polza';
+
+    const currentModel = isPolza
+        ? ALL_POLZA_MODELS.find((m) => m.id === model)
+        : MODELS.find((m) => m.id === model);
+
+    const grouped = isPolza ? getGroupedPolzaModels() : getGroupedChatModels();
 
     const filterModels = (models: AIModel[]): AIModel[] => {
         if (!search) return models;

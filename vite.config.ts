@@ -13,6 +13,11 @@ export default defineConfig({
                 changeOrigin: true,
                 rewrite: (path) => path.replace(/^\/api\/neuro/, ''),
             },
+            '/api/polza': {
+                target: 'https://polza.ai',
+                changeOrigin: true,
+                rewrite: (path) => path.replace(/^\/api\/polza/, ''),
+            },
             '/api/you-search': {
                 target: 'https://ydc-index.io',
                 changeOrigin: true,

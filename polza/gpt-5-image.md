@@ -1,0 +1,46 @@
+> ## Documentation Index
+> Fetch the complete documentation index at: https://polza.ai/docs/llms.txt
+> Use this file to discover all available pages before exploring further.
+
+# OpenAI GPT-5 Image
+
+> Генерация изображений с моделью OpenAI GPT-5 Image
+
+Мультимодальная модель OpenAI: текст и изображения на входе, текст и изображения на выходе. Контекст до 400K токенов, промпт до 32 000 символов, до 10 изображений.
+
+<Note>
+  Полная документация API: [Генерация медиа](/api-reference/media/create)
+</Note>
+
+## Обзор
+
+| Характеристика | Значение             |
+| -------------- | -------------------- |
+| ID модели      | `openai/gpt-5-image` |
+| Контекст       | 400 000 токенов      |
+| Max prompt     | 32 000 символов      |
+| images         | 0–10                 |
+
+## Параметры
+
+| Параметр | Обязательный | Описание                  |
+| -------- | ------------ | ------------------------- |
+| `model`  | Да           | `openai/gpt-5-image`      |
+| `prompt` | Нет          | Текст, до 32 000 символов |
+| `images` | Нет          | До 10 изображений         |
+
+## Пример запроса (cURL)
+
+```bash  theme={null}
+curl -X POST "https://polza.ai/api/v1/media" \
+  -H "Authorization: Bearer <POLZA_AI_API_KEY>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "openai/gpt-5-image",
+    "input": {
+      "prompt": "Описание изображения",
+      "images": []
+    },
+    "async": true
+  }'
+```

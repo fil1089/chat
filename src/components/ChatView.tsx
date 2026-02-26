@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useApp } from '../context/AppContext';
 import { streamResponse, MODELS } from '../services/youApi';
+import { streamResponsePolza } from '../services/polzaApi';
 import ChatInput from './ChatInput';
 import MessageBubble from './MessageBubble';
 import ThreadNav from './ThreadNav';
@@ -109,7 +110,46 @@ export default function ChatView() {
 
         let capturedUsage: { prompt_tokens: number; completion_tokens: number; total_tokens: number } | null = null;
 
-        const controller = streamResponse({
+        const isPolza = state.settings.apiProvider === 'polza';
+
+        const streamCallback = isPolza ? streamResponsePolza({
+            apiKey: state.settings.polzaApiKey,
+            model: currentModel,
+            messages: messagesToSend.map(m => ({ role: m.role, content: m.content })),
+            onUpdate: (fullText: string) => {
+                fullResponse = fullText;
+                let updatedMessages;
+                if (targetMessageId) {
+                    updatedMessages = chat.messages.map(m => {
+                        if (m.id !== targetMessageId) return m;
+                        const versions = [...(m.versions || [])];
+                        const activeIdx = m.activeVersion ?? 0;
+                        if (versions[activeIdx]) {
+                            versions[activeIdx] = {
+                                ...versions[activeIdx],
+                                content: fullResponse,
+                                model: currentModel,
+                                usage: capturedUsage || undefined,
+                                timestamp: Date.now()
+                            };
+                        }
+                        return { ...m, content: fullResponse, versions, usage: capturedUsage || undefined };
+                    });
+                } else {
+                    updatedMessages = [...chat.messages, { ...assistantMessage, content: fullResponse, model: currentModel, usage: capturedUsage || undefined }];
+                }
+
+                const updatedChat: Chat = {
+                    ...chat,
+                    messages: updatedMessages,
+                    updatedAt: Date.now(),
+                };
+                dispatch({ type: 'UPDATE_CHAT', payload: updatedChat });
+            },
+            onUsage: (usage) => {
+                capturedUsage = usage;
+            },
+        }) : streamResponse({
             apiKey: state.settings.apiKey,
             youApiKey: state.settings.youApiKey,
             model: currentModel,
@@ -213,8 +253,67 @@ export default function ChatView() {
             },
         });
 
-        controllerRef.current = controller;
-    }, [state.settings.apiKey, state.settings.youApiKey, model, contextMode, contextN, activeSpace, dispatch]);
+        // Polza doesn't return an AbortController in the same way right now, but we'll mock the completion chain
+        if (isPolza) {
+            (streamCallback as Promise<void>).then(() => {
+                setIsStreaming(false);
+                setStreamStatus(null);
+
+                let finalMessages;
+                if (targetMessageId) {
+                    finalMessages = chat.messages.map(m => {
+                        if (m.id !== targetMessageId) return m;
+                        const versions = [...(m.versions || [])];
+                        const activeIdx = m.activeVersion ?? 0;
+                        if (versions[activeIdx]) {
+                            versions[activeIdx] = {
+                                ...versions[activeIdx],
+                                content: fullResponse,
+                                model: currentModel,
+                                usage: capturedUsage || undefined,
+                                timestamp: Date.now()
+                            };
+                        }
+                        return { ...m, content: fullResponse, versions, usage: capturedUsage || undefined };
+                    });
+                } else {
+                    finalMessages = [...chat.messages, { ...assistantMessage, content: fullResponse, model: currentModel, usage: capturedUsage || undefined }];
+                }
+
+                const finalChat: Chat = {
+                    ...chat,
+                    messages: finalMessages,
+                    updatedAt: Date.now(),
+                };
+                dispatch({ type: 'UPDATE_CHAT', payload: finalChat });
+            }).catch((error: any) => {
+                setIsStreaming(false);
+                setStreamStatus(null);
+                const errorText = `Ошибка: ${error.message || error}`;
+
+                let errorMessages;
+                if (targetMessageId) {
+                    errorMessages = chat.messages.map(m => {
+                        if (m.id !== targetMessageId) return m;
+                        return { ...m, content: errorText };
+                    });
+                } else {
+                    errorMessages = [...chat.messages, { ...assistantMessage, content: errorText }];
+                }
+
+                const errorChat: Chat = {
+                    ...chat,
+                    messages: errorMessages,
+                    updatedAt: Date.now(),
+                };
+                dispatch({ type: 'UPDATE_CHAT', payload: errorChat });
+            });
+        } else {
+            // TypeScript type narrowing for Neuro API controller
+            controllerRef.current = streamCallback as unknown as AbortController;
+        }
+
+    }, [state.settings.apiKey, state.settings.youApiKey, state.settings.polzaApiKey, state.settings.apiProvider, model, contextMode, contextN, activeSpace, dispatch]);
 
     // Auto-trigger response for new chats from dashboard
     useEffect(() => {

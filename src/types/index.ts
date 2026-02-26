@@ -48,6 +48,8 @@ export type ContextMode = 'full' | 'last_n' | 'system_only';
 export interface Settings {
     apiKey: string;
     youApiKey: string;
+    polzaApiKey: string;
+    apiProvider: 'neuro' | 'polza';
     defaultModel: string;
     theme: string;
     imageSize?: string;

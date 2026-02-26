@@ -28,14 +28,24 @@ export default function SettingsPage() {
         setTestResult(null);
 
         try {
-            const response = await fetch(`${API_URLS.neuro}/v1/chat/completions`, {
+            const isPolza = state.settings.apiProvider === 'polza';
+            const apiUrl = isPolza ? API_URLS.polza : API_URLS.neuro;
+            const apiKeyToTest = isPolza ? state.settings.polzaApiKey : state.settings.apiKey;
+
+            if (!apiKeyToTest) {
+                setTestResult({ ok: false, msg: 'Введите ключ' });
+                setTesting(false);
+                return;
+            }
+
+            const response = await fetch(`${apiUrl}/v1/chat/completions`, {
                 method: 'POST',
                 headers: {
-                    Authorization: `Bearer ${state.settings.apiKey}`,
+                    Authorization: `Bearer ${apiKeyToTest}`,
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    model: 'gpt-4.1-nano',
+                    model: isPolza ? 'openai/gpt-4o-mini' : 'gpt-4.1-nano',
                     messages: [{ role: 'user', content: 'Hi' }],
                     max_tokens: 5,
                 }),
@@ -114,22 +124,47 @@ export default function SettingsPage() {
 
             <div className="settings-section">
                 <h2>API Конфигурация</h2>
+
                 <div className="setting-row">
-                    <label>API Ключ (NeuroAPI)</label>
+                    <label>Провайдер API</label>
+                    <div className="settings-model-wrapper">
+                        <select
+                            className="setting-select"
+                            value={state.settings.apiProvider || 'neuro'}
+                            onChange={(e) => handleSave('apiProvider', e.target.value)}
+                            style={{ padding: '8px 12px', borderRadius: '8px', background: 'var(--surface)', color: 'var(--text-primary)', border: '1px solid var(--border)', fontSize: '14px', width: '100%', outline: 'none', cursor: 'pointer' }}
+                        >
+                            <option value="neuro">Neuro API</option>
+                            <option value="polza">Polza API</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div className="setting-row">
+                    <label>API Ключ ({state.settings.apiProvider === 'polza' ? 'Polza API' : 'Neuro API'})</label>
                     <div className="api-key-input">
-                        <input
-                            type={showKey ? 'text' : 'password'}
-                            value={state.settings.apiKey || ''}
-                            onChange={(e) => handleSave('apiKey', e.target.value)}
-                            placeholder="Ваш API ключ"
-                        />
+                        {state.settings.apiProvider === 'polza' ? (
+                            <input
+                                type={showKey ? 'text' : 'password'}
+                                value={state.settings.polzaApiKey || ''}
+                                onChange={(e) => handleSave('polzaApiKey', e.target.value)}
+                                placeholder="Ваш API ключ Polza.ai"
+                            />
+                        ) : (
+                            <input
+                                type={showKey ? 'text' : 'password'}
+                                value={state.settings.apiKey || ''}
+                                onChange={(e) => handleSave('apiKey', e.target.value)}
+                                placeholder="Ваш API ключ Neuro API"
+                            />
+                        )}
                         <button className="btn-ghost" onClick={() => setShowKey(!showKey)} title={showKey ? 'Скрыть' : 'Показать'}>
                             {showKey ? <IconEyeOff size={18} /> : <IconEye size={18} />}
                         </button>
                         <button
                             className="btn-secondary"
                             onClick={handleTestKey}
-                            disabled={testing || !state.settings.apiKey}
+                            disabled={testing || (state.settings.apiProvider === 'polza' ? !state.settings.polzaApiKey : !state.settings.apiKey)}
                         >
                             {testing ? '...' : 'Проверить'}
                         </button>
@@ -140,10 +175,11 @@ export default function SettingsPage() {
                         </div>
                     )}
                     <p className="setting-hint">
-                        Получите ключ на{' '}
-                        <a href="https://neuroapi.host/dashboard/tokens" target="_blank" rel="noopener noreferrer">
-                            neuroapi.host
-                        </a>
+                        {state.settings.apiProvider === 'polza' ? (
+                            <>Получите ключ на <a href="https://polza.ai/dashboard/api-keys" target="_blank" rel="noopener noreferrer">polza.ai</a></>
+                        ) : (
+                            <>Получите ключ на <a href="https://neuroapi.host/dashboard/tokens" target="_blank" rel="noopener noreferrer">neuroapi.host</a></>
+                        )}
                     </p>
                 </div>
 

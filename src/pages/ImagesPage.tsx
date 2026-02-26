@@ -10,12 +10,21 @@ import type { Chat, Attachment, ContextMode } from '../types';
 export default function ImagesPage() {
     const navigate = useNavigate();
     const { state, dispatch } = useApp();
+    const isPolza = state.settings.apiProvider === 'polza';
+    const defaultImageModel = isPolza ? 'openai/dall-e-3' : 'gemini-3-pro-image-preview';
+
     const [editingChatId, setEditingChatId] = useState<string | null>(null);
     const [editTitle, setEditTitle] = useState('');
+    const [imageModel, setImageModel] = useState(defaultImageModel);
     const [contextMode, setContextMode] = useState<ContextMode>('full');
     const [contextN, setContextN] = useState(20);
 
-    const imageChats = state.chats.filter((c) => c.model === 'gemini-3-pro-image-preview');
+    const imageChats = state.chats.filter((c) => {
+        // Find chats that use image models (for Neuro it's gemini-3-pro-image-preview, for Polza we track any model in Image category)
+        const isNeuroImage = c.model === 'gemini-3-pro-image-preview';
+        const isPolzaImage = c.model === 'openai/dall-e-3' || c.model.includes('flux') || c.model.includes('midjourney') || c.model.includes('stable-diffusion');
+        return isNeuroImage || isPolzaImage;
+    });
 
     const handleNewChat = (initialText?: string, attachments: Attachment[] = []) => {
         if (!initialText && attachments.length === 0) return;
@@ -31,7 +40,7 @@ export default function ImagesPage() {
                 fullAttachments: attachments,
                 timestamp: Date.now(),
             }] : [],
-            model: 'gemini-3-pro-image-preview',
+            model: imageModel,
             timestamp: Date.now(),
             createdAt: Date.now(),
             updatedAt: Date.now(),
@@ -90,7 +99,7 @@ export default function ImagesPage() {
                         <div>
                             <h1 style={{ margin: 0, fontSize: '24px' }}>Генерация изображений</h1>
                             <p className="page-subtitle" style={{ margin: '4px 0 0' }}>
-                                Создавайте изображения с помощью модели Gemini 3 Pro Image Preview.
+                                Создавайте изображения с помощью лучших моделей: Gemini, DALL-E 3, Flux и Midjourney.
                             </p>
                         </div>
                     </div>
@@ -152,11 +161,11 @@ export default function ImagesPage() {
                     <ChatInput
                         onSend={(text, attachments) => handleNewChat(text, attachments)}
                         placeholder="Опишите изображение..."
-                        model="gemini-3-pro-image-preview"
-                        onModelChange={() => { }}
+                        model={imageModel}
+                        onModelChange={setImageModel}
                         isStreaming={false}
                         onStop={() => { }}
-                        hideModelSelector={true}
+                        hideModelSelector={false}
                         contextMode={contextMode}
                         contextN={contextN}
                         onContextModeChange={setContextMode}
@@ -177,8 +186,8 @@ export default function ImagesPage() {
                     </div>
                     <p style={{ fontSize: '13px', lineHeight: '1.5', color: 'var(--text-secondary)', marginTop: '12px' }}>
                         Этот раздел предназначен исключительно для расширенной генерации изображений.
-                        Здесь используется специализированная модель `gemini-3-pro-image-preview`,
-                        которая позволяет точно настраивать разрешение и качество картинки прямо над строкой ввода.
+                        Здесь вы можете выбрать специализированную модель,
+                        которая позволяет настраивать разрешение и качество картинки прямо над строкой ввода.
                     </p>
                 </div>
 
@@ -187,7 +196,6 @@ export default function ImagesPage() {
                 <div className="sidebar-section">
                     <h3>Особенности</h3>
                     <ul style={{ fontSize: '13px', lineHeight: '1.5', color: 'var(--text-secondary)', marginTop: '12px', paddingLeft: '20px' }}>
-                        <li style={{ marginBottom: '8px' }}>Отсутствие селектора модели</li>
                         <li style={{ marginBottom: '8px' }}>Быстрый выбор пропорций (например, 16:9, 1:1, 9:16)</li>
                         <li style={{ marginBottom: '8px' }}>Настройка качества от 1K до 4K</li>
                     </ul>
