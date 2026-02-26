@@ -1,8 +1,8 @@
 {
     "rewrites": [
         {
-            "source": "/api/polza/(.*)",
-            "destination": "https://polza.ai/$1"
+            "source": "/api/polza/:path*",
+            "destination": "https://polza.ai/:path*"
         },
         {
             "source": "/api/(.*)",
