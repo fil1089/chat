@@ -368,7 +368,7 @@ export default function ChatInput({ onSend, model, onModelChange, isStreaming, o
                                         {state.settings.apiProvider === 'polza' && onReasoningChange && (
                                             <div className="settings-field" style={{ marginTop: '8px', paddingTop: '12px', borderTop: '1px solid var(--border)' }}>
                                                 <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', cursor: 'pointer', margin: 0 }}>
-                                                    <span style={{ fontSize: '13px' }}>Токены рассуждений</span>
+                                                    <span style={{ fontSize: '13px', textTransform: 'none', fontWeight: 600 }}>Токены рассуждений</span>
                                                     <div className="toggle-switch" style={{ transform: 'scale(0.8)', transformOrigin: 'right center', margin: 0 }}>
                                                         <input
                                                             type="checkbox"
@@ -383,7 +383,7 @@ export default function ChatInput({ onSend, model, onModelChange, isStreaming, o
                                         {state.settings.apiProvider === 'polza' && onWebSearchChange && (
                                             <div className="settings-field" style={{ marginTop: '8px', paddingTop: '12px', borderTop: '1px solid var(--border)' }}>
                                                 <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', cursor: 'pointer', margin: 0 }}>
-                                                    <span style={{ fontSize: '13px' }}>Поиск в интернете</span>
+                                                    <span style={{ fontSize: '13px', textTransform: 'none', fontWeight: 600 }}>Поиск в интернете</span>
                                                     <div className="toggle-switch" style={{ transform: 'scale(0.8)', transformOrigin: 'right center', margin: 0 }}>
                                                         <input
                                                             type="checkbox"
