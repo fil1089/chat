@@ -116,26 +116,69 @@ export default function ChatView() {
         let capturedReasoning = '';
         let capturedAnnotations: any[] = [];
 
-        const isPolza = state.settings.apiProvider === 'polza';
+        let lastUpdateTime = Date.now();
+        const THROTTLE_MS = 150;
 
+        const updateUI = (content: string, reasoning: string, anns: any[], usage: any) => {
+            let updatedMessages;
+            if (targetMessageId) {
+                updatedMessages = chat.messages.map(m => {
+                    if (m.id !== targetMessageId) return m;
+                    const versions = [...(m.versions || [])];
+                    const activeIdx = m.activeVersion ?? 0;
+                    if (versions[activeIdx]) {
+                        versions[activeIdx] = {
+                            ...versions[activeIdx],
+                            content,
+                            model: currentModel,
+                            usage: usage || undefined,
+                            timestamp: Date.now(),
+                            reasoningContent: reasoning || undefined,
+                            annotations: anns.length > 0 ? anns : undefined
+                        };
+                    }
+                    return {
+                        ...m,
+                        content,
+                        versions,
+                        usage: usage || undefined,
+                        reasoningContent: reasoning || undefined,
+                        annotations: anns.length > 0 ? anns : undefined
+                    };
+                });
+            } else {
+                updatedMessages = [...chat.messages, {
+                    ...assistantMessage,
+                    content,
+                    model: currentModel,
+                    usage: usage || undefined,
+                    reasoningContent: reasoning || undefined,
+                    annotations: anns.length > 0 ? anns : undefined
+                }];
+            }
+
+            const updatedChat: Chat = {
+                ...chat,
+                messages: updatedMessages,
+                updatedAt: Date.now(),
+            };
+            dispatch({ type: 'UPDATE_CHAT', payload: updatedChat });
+        };
+
+        const isPolza = state.settings.apiProvider === 'polza';
         const streamCallback = isPolza ? streamResponsePolza({
             apiKey: state.settings.polzaApiKey,
             model: currentModel,
             messages: messagesToSend.map(m => {
                 const parts: any[] = [];
                 if (m.content) parts.push({ type: 'text', text: m.content });
-
                 if (m.fullAttachments) {
                     m.fullAttachments.forEach(att => {
-                        if (att.type === 'image') {
-                            parts.push({ type: 'image_url', image_url: { url: att.content } });
-                        } else if (att.type === 'file') {
-                            parts.push({ type: 'file', file: { filename: att.name, file_data: att.content } });
-                        }
+                        if (att.type === 'image') parts.push({ type: 'image_url', image_url: { url: att.content } });
+                        else if (att.type === 'file') parts.push({ type: 'file', file: { filename: att.name, file_data: att.content } });
                     });
                 }
-                const finalContent = (m.fullAttachments && m.fullAttachments.length > 0) ? parts : m.content;
-                return { role: m.role, content: finalContent };
+                return { role: m.role, content: (m.fullAttachments?.length ? parts : m.content) };
             }),
             enableReasoning: state.settings.enableReasoning,
             enableWebSearch: state.settings.enableWebSearch,
@@ -144,75 +187,21 @@ export default function ChatView() {
             signal: controllerRef.current?.signal,
             onUpdate: (fullText: string) => {
                 fullResponse = fullText;
-                let updatedMessages;
-                if (targetMessageId) {
-                    updatedMessages = chat.messages.map(m => {
-                        if (m.id !== targetMessageId) return m;
-                        const versions = [...(m.versions || [])];
-                        const activeIdx = m.activeVersion ?? 0;
-                        if (versions[activeIdx]) {
-                            versions[activeIdx] = {
-                                ...versions[activeIdx],
-                                content: fullResponse,
-                                model: currentModel,
-                                usage: capturedUsage || undefined,
-                                timestamp: Date.now(),
-                                reasoningContent: capturedReasoning || undefined,
-                                annotations: capturedAnnotations.length > 0 ? capturedAnnotations : undefined
-                            };
-                        }
-                        return { ...m, content: fullResponse, versions, usage: capturedUsage || undefined, reasoningContent: capturedReasoning || undefined, annotations: capturedAnnotations.length > 0 ? capturedAnnotations : undefined };
-                    });
-                } else {
-                    updatedMessages = [...chat.messages, { ...assistantMessage, content: fullResponse, model: currentModel, usage: capturedUsage || undefined, reasoningContent: capturedReasoning || undefined, annotations: capturedAnnotations.length > 0 ? capturedAnnotations : undefined }];
+                const now = Date.now();
+                if (now - lastUpdateTime > THROTTLE_MS) {
+                    updateUI(fullResponse, capturedReasoning, capturedAnnotations, capturedUsage);
+                    lastUpdateTime = now;
                 }
-
-                const updatedChat: Chat = {
-                    ...chat,
-                    messages: updatedMessages,
-                    updatedAt: Date.now(),
-                };
-                dispatch({ type: 'UPDATE_CHAT', payload: updatedChat });
             },
-            onUsage: (usage) => {
-                capturedUsage = usage;
-            },
-            onAnnotations: (anns: any[]) => {
-                capturedAnnotations = [...capturedAnnotations, ...anns];
-            },
+            onUsage: (usage) => { capturedUsage = usage; },
+            onAnnotations: (anns: any[]) => { capturedAnnotations = [...capturedAnnotations, ...anns]; },
             onStatus: (status) => {
                 if (status.type === 'reasoning') {
                     capturedReasoning += status.message;
-                    // Trigger UI update specifically for reasoning if text hasn't started yet
-                    if (!fullResponse) {
-                        let updatedMessages;
-                        if (targetMessageId) {
-                            updatedMessages = chat.messages.map(m => {
-                                if (m.id !== targetMessageId) return m;
-                                const versions = [...(m.versions || [])];
-                                const activeIdx = m.activeVersion ?? 0;
-                                if (versions[activeIdx]) {
-                                    versions[activeIdx] = {
-                                        ...versions[activeIdx],
-                                        content: fullResponse,
-                                        model: currentModel,
-                                        usage: capturedUsage || undefined,
-                                        timestamp: Date.now(),
-                                        reasoningContent: capturedReasoning || undefined,
-                                        annotations: capturedAnnotations.length > 0 ? capturedAnnotations : undefined
-                                    };
-                                }
-                                return { ...m, content: fullResponse, versions, usage: capturedUsage || undefined, reasoningContent: capturedReasoning || undefined, annotations: capturedAnnotations.length > 0 ? capturedAnnotations : undefined };
-                            });
-                        } else {
-                            updatedMessages = [...chat.messages, { ...assistantMessage, content: fullResponse, model: currentModel, usage: capturedUsage || undefined, reasoningContent: capturedReasoning || undefined, annotations: capturedAnnotations.length > 0 ? capturedAnnotations : undefined }];
-                        }
-                        const updatedChat: Chat = {
-                            ...chat,
-                            messages: updatedMessages,
-                            updatedAt: Date.now(),
-                        };
-                        dispatch({ type: 'UPDATE_CHAT', payload: updatedChat });
+                    const now = Date.now();
+                    if (now - lastUpdateTime > THROTTLE_MS) {
+                        updateUI(fullResponse, capturedReasoning, capturedAnnotations, capturedUsage);
+                        lastUpdateTime = now;
                     }
                 } else {
                     setStreamStatus(status as any);
@@ -364,34 +353,7 @@ export default function ChatView() {
             (streamCallback as Promise<void>).then(() => {
                 setIsStreaming(false);
                 setStreamStatus(null);
-
-                let finalMessages;
-                if (targetMessageId) {
-                    finalMessages = chat.messages.map(m => {
-                        if (m.id !== targetMessageId) return m;
-                        const versions = [...(m.versions || [])];
-                        const activeIdx = m.activeVersion ?? 0;
-                        if (versions[activeIdx]) {
-                            versions[activeIdx] = {
-                                ...versions[activeIdx],
-                                content: fullResponse,
-                                model: currentModel,
-                                usage: capturedUsage || undefined,
-                                timestamp: Date.now()
-                            };
-                        }
-                        return { ...m, content: fullResponse, versions, usage: capturedUsage || undefined };
-                    });
-                } else {
-                    finalMessages = [...chat.messages, { ...assistantMessage, content: fullResponse, model: currentModel, usage: capturedUsage || undefined }];
-                }
-
-                const finalChat: Chat = {
-                    ...chat,
-                    messages: finalMessages,
-                    updatedAt: Date.now(),
-                };
-                dispatch({ type: 'UPDATE_CHAT', payload: finalChat });
+                updateUI(fullResponse, capturedReasoning, capturedAnnotations, capturedUsage);
             }).catch((error: any) => {
                 setIsStreaming(false);
                 setStreamStatus(null);
