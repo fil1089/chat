@@ -86,9 +86,11 @@ function Layout() {
         );
     }
 
+    const { showAuthModal } = useGlobalAuthModal();
+
     return (
         <div className={`app-layout ${state.sidebarOpen ? '' : 'sidebar-collapsed'}`}>
-            <Sidebar onLogout={logout} userEmail={user?.email} />
+            <Sidebar onLogout={logout} onLogin={() => showAuthModal('Вход в аккаунт')} userEmail={user?.email} />
             <main className="main-content">
                 <button
                     className="mobile-menu-btn"

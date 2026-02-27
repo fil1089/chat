@@ -1,16 +1,17 @@
 import { useState } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
-import { IconPlus, IconSidebar, IconMessage, IconFolder, IconHistory, IconSettings, IconSearch, IconTrash, IconLogo, SpaceIcon, IconRobot, IconChevronDown, IconClose, IconImage } from './Icons';
+import { IconPlus, IconSidebar, IconMessage, IconFolder, IconHistory, IconSettings, IconSearch, IconTrash, IconLogo, SpaceIcon, IconRobot, IconChevronDown, IconClose, IconImage, IconUser } from './Icons';
 import { v4 as uuidv4 } from 'uuid';
 import type { Chat } from '../types';
 
 interface SidebarProps {
     onLogout?: () => void;
+    onLogin?: () => void;
     userEmail?: string;
 }
 
-export default function Sidebar({ onLogout, userEmail }: SidebarProps) {
+export default function Sidebar({ onLogout, onLogin, userEmail }: SidebarProps) {
     const { state, dispatch } = useApp();
     const navigate = useNavigate();
     const location = useLocation();
@@ -201,19 +202,24 @@ export default function Sidebar({ onLogout, userEmail }: SidebarProps) {
                     </button>
                 </div>
 
-                {(userEmail || onLogout) && (
-                    <div className="sidebar-user-block">
-                        {userEmail && (
+                <div className="sidebar-user-block">
+                    {userEmail ? (
+                        <>
                             <div className="sidebar-user-email" title={userEmail}>{userEmail}</div>
-                        )}
-                        {onLogout && (
-                            <button className="sidebar-logout-btn" onClick={onLogout} title="Выйти">
-                                <IconClose size={14} />
-                                <span>Выйти</span>
-                            </button>
-                        )}
-                    </div>
-                )}
+                            {onLogout && (
+                                <button className="sidebar-logout-btn" onClick={onLogout} title="Выйти">
+                                    <IconClose size={14} />
+                                    <span>Выйти</span>
+                                </button>
+                            )}
+                        </>
+                    ) : (
+                        <button className="sidebar-login-btn" onClick={onLogin}>
+                            <IconUser size={16} />
+                            <span>Войти</span>
+                        </button>
+                    )}
+                </div>
             </aside>
         </>
     );

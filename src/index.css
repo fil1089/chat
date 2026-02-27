@@ -4702,6 +4702,29 @@ input:checked+.toggle-slider:before {
   color: #ff4d4d;
 }
 
+.sidebar-login-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: var(--surface-glass);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.sidebar-login-btn:hover {
+  background: var(--surface-glass-hover);
+  border-color: var(--border-accent);
+  transform: translateY(-1px);
+}
+
 /* Sidebar nav group with collapse toggle */
 .nav-group {
   display: flex;
