@@ -289,30 +289,6 @@ export default function ChatInput({ onSend, model, onModelChange, isStreaming, o
                         {!hideModelSelector && (
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                                 <ModelSelector model={model} onModelChange={onModelChange} direction={direction} />
-                                {state.settings.apiProvider === 'polza' && (
-                                    (() => {
-                                        const mInfo = ALL_POLZA_MODELS.find(m => m.id === model);
-                                        if (!mInfo) return null;
-                                        return (
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '0 4px', opacity: 0.7 }}>
-                                                {mInfo.pricing && (
-                                                    <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>
-                                                        {mInfo.pricing.prompt} / {mInfo.pricing.completion}
-                                                    </span>
-                                                )}
-                                                {mInfo.capabilities && (
-                                                    <div style={{ display: 'flex', gap: '6px' }}>
-                                                        {mInfo.capabilities.text && <IconFileText size={12} />}
-                                                        {mInfo.capabilities.image && <IconImage size={12} />}
-                                                        {mInfo.capabilities.file && <IconAttachment size={12} />}
-                                                        {mInfo.capabilities.audio && <IconAudio size={12} />}
-                                                        {mInfo.capabilities.video && <IconVideo size={12} />}
-                                                    </div>
-                                                )}
-                                            </div>
-                                        );
-                                    })()
-                                )}
                             </div>
                         )}
                     </div>
@@ -503,6 +479,6 @@ export default function ChatInput({ onSend, model, onModelChange, isStreaming, o
                     />
                 </div>
             </div>
-        </div>
+        </div >
     );
 }

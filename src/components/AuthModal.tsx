@@ -9,7 +9,7 @@ interface AuthModalProps {
 
 export default function AuthModal({ onClose, title = "Необходима авторизация" }: AuthModalProps) {
     const { login } = useAuth();
-    const [tab, setTab] = useState<'login' | 'register'>('login');
+    const [tab, setTab] = useState<'login' | 'register' | 'forgot'>('login');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
@@ -22,6 +22,22 @@ export default function AuthModal({ onClose, title = "Необходима ав�
         setLoading(true);
 
         try {
+            if (tab === 'forgot') {
+                const res = await fetch('/api/auth/forgot-password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: email.trim() })
+                });
+                const data = await res.json();
+                if (!res.ok) {
+                    setError(data.error || 'Ошибка сервера');
+                    return;
+                }
+                alert('Инструкции по восстановлению отправлены на ' + email);
+                setTab('login');
+                return;
+            }
+
             const endpoint = tab === 'login' ? '/api/auth/login' : '/api/auth/register';
             const res = await fetch(endpoint, {
                 method: 'POST',
@@ -94,32 +110,57 @@ export default function AuthModal({ onClose, title = "Необходима ав�
                         />
                     </div>
 
-                    <div className="auth-field">
-                        <label>Пароль</label>
-                        <div className="auth-password-wrapper">
-                            <input
-                                type={showPassword ? 'text' : 'password'}
-                                value={password}
-                                onChange={e => setPassword(e.target.value)}
-                                placeholder={tab === 'register' ? 'Минимум 6 символов' : 'Введите пароль'}
-                                required
-                            />
-                            <button
-                                type="button"
-                                className="auth-eye-btn"
-                                onClick={() => setShowPassword(!showPassword)}
-                                tabIndex={-1}
-                            >
-                                {showPassword ? <IconEyeOff size={16} /> : <IconEye size={16} />}
-                            </button>
+                    {tab !== 'forgot' && (
+                        <div className="auth-field">
+                            <label>Пароль</label>
+                            <div className="auth-password-wrapper">
+                                <input
+                                    type={showPassword ? 'text' : 'password'}
+                                    value={password}
+                                    onChange={e => setPassword(e.target.value)}
+                                    placeholder={tab === 'register' ? 'Минимум 6 символов' : 'Введите пароль'}
+                                    required
+                                />
+                                <button
+                                    type="button"
+                                    className="auth-eye-btn"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                    tabIndex={-1}
+                                >
+                                    {showPassword ? <IconEyeOff size={16} /> : <IconEye size={16} />}
+                                </button>
+                            </div>
+                            {tab === 'login' && (
+                                <div style={{ textAlign: 'right', marginTop: '4px' }}>
+                                    <button
+                                        type="button"
+                                        onClick={() => { setTab('forgot'); setError(''); }}
+                                        style={{ background: 'none', border: 'none', color: 'var(--accent-light)', fontSize: '12px', cursor: 'pointer' }}
+                                    >
+                                        Забыли пароль?
+                                    </button>
+                                </div>
+                            )}
                         </div>
-                    </div>
+                    )}
 
                     {error && <div className="auth-error">{error}</div>}
 
                     <button type="submit" className="btn-primary auth-submit" disabled={loading}>
-                        {loading ? 'Загрузка...' : tab === 'login' ? 'Войти' : 'Создать аккаунт'}
+                        {loading ? 'Загрузка...' : tab === 'login' ? 'Войти' : tab === 'register' ? 'Создать аккаунт' : 'Отправить'}
                     </button>
+
+                    {tab === 'forgot' && (
+                        <div style={{ textAlign: 'center', marginTop: '12px' }}>
+                            <button
+                                type="button"
+                                onClick={() => { setTab('login'); setError(''); }}
+                                style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', fontSize: '13px', cursor: 'pointer' }}
+                            >
+                                Вернуться ко входу
+                            </button>
+                        </div>
+                    )}
                 </form>
             </div>
         </div>

@@ -68,9 +68,9 @@ function Layout() {
     const { state, dispatch } = useApp();
     const { logout, user } = useAuth();
     const navigate = useNavigate();
-    const [modalDismissed, setModalDismissed] = useState(false);
+    const [modalDismissed, setModalDismissed] = useState(true); // default true so it never shows eagerly
 
-    const showNoApiModal = state.storageReady && !state.settings.apiKey && !modalDismissed;
+    const showNoApiModal = false; // We use Context to trigger it manually now instead of Layout intercept
 
     const handleGoSettings = () => {
         setModalDismissed(true);
@@ -122,6 +122,7 @@ import AuthModal from './components/AuthModal';
 
 export const GlobalAuthModalContext = React.createContext<{
     showAuthModal: (title?: string) => void;
+    showApiModal: () => void;
 } | null>(null);
 
 export function useGlobalAuthModal() {
@@ -135,9 +136,27 @@ function MainApp() {
     const [authModalVisible, setAuthModalVisible] = useState(false);
     const [authModalTitle, setAuthModalTitle] = useState('Необходима авторизация');
 
+    // For manual triggering of API modal
+    const [apiModalVisible, setApiModalVisible] = useState(false);
+
+    // Show Auth Modal on first load if no user
+    React.useEffect(() => {
+        if (!isLoading && !user) {
+            const hasSeen = sessionStorage.getItem('hasSeenAuthModal');
+            if (!hasSeen) {
+                setAuthModalVisible(true);
+                sessionStorage.setItem('hasSeenAuthModal', '1');
+            }
+        }
+    }, [isLoading, user]);
+
     const showAuthModal = (title?: string) => {
         if (title) setAuthModalTitle(title);
         setAuthModalVisible(true);
+    };
+
+    const showApiModal = () => {
+        setApiModalVisible(true);
     };
 
     if (isLoading) {
@@ -150,13 +169,23 @@ function MainApp() {
     }
 
     return (
-        <GlobalAuthModalContext.Provider value={{ showAuthModal }}>
+        <GlobalAuthModalContext.Provider value={{ showAuthModal, showApiModal }}>
             <AppProvider>
                 <Layout />
                 {(!user && authModalVisible) && (
                     <AuthModal
                         onClose={() => setAuthModalVisible(false)}
                         title={authModalTitle}
+                    />
+                )}
+                {apiModalVisible && (
+                    <NoApiKeyModal
+                        onClose={() => setApiModalVisible(false)}
+                        onGoSettings={() => {
+                            setApiModalVisible(false);
+                            window.location.hash = '#/settings';
+                            // Quick hack since navigate is in Layout, but works for now or user can just click
+                        }}
                     />
                 )}
             </AppProvider>

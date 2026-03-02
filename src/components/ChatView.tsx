@@ -7,7 +7,7 @@ import { streamResponsePolza, ALL_POLZA_MODELS } from '../services/polzaApi';
 import ChatInput from './ChatInput';
 import MessageBubble from './MessageBubble';
 import ThreadNav from './ThreadNav';
-import { IconBrain, IconFolder, IconMessage, IconArrowUp, IconArrowDown } from './Icons';
+import { IconBrain, IconFolder, IconMessage, IconArrowUp, IconArrowDown, IconFileText, IconImage, IconAttachment, IconAudio, IconVideo } from './Icons';
 import { v4 as uuidv4 } from 'uuid';
 import type { Message, Chat, Attachment, StatusEvent, Space, ContextMode } from '../types';
 
@@ -19,7 +19,7 @@ interface StreamStatus {
 export default function ChatView() {
     const { state, dispatch } = useApp();
     const { user } = useAuth();
-    const { showAuthModal } = useGlobalAuthModal();
+    const { showAuthModal, showApiModal } = useGlobalAuthModal();
     const [isStreaming, setIsStreaming] = useState(false);
     const [streamStatus, setStreamStatus] = useState<StreamStatus | null>(null);
     const controllerRef = useRef<AbortController | null>(null);
@@ -80,6 +80,11 @@ export default function ChatView() {
     };
 
     const runStreaming = useCallback(async (chat: Chat, targetMessageId?: string, overrideModel?: string, bypassCache?: boolean) => {
+        if (!state.settings.apiKey) {
+            showApiModal();
+            return;
+        }
+        if (isStreaming) return;
         setIsStreaming(true);
         setStreamStatus(null);
         let fullResponse = '';
@@ -383,14 +388,14 @@ export default function ChatView() {
             controllerRef.current = streamCallback as unknown as AbortController;
         }
 
-    }, [state.settings.apiKey, state.settings.youApiKey, state.settings.polzaApiKey, state.settings.apiProvider, model, contextMode, contextN, activeSpace, dispatch]);
+    }, [state.settings.apiKey, state.settings.youApiKey, state.settings.polzaApiKey, state.settings.apiProvider, model, contextMode, contextN, activeSpace, dispatch, showApiModal]);
 
     // Auto-trigger response for new chats from dashboard
     useEffect(() => {
         if (activeChat && activeChat.messages.length === 1 && activeChat.messages[0].role === 'user' && !isStreaming) {
             runStreaming(activeChat);
         }
-    }, [activeChat?.id]);
+    }, [activeChat?.id, runStreaming, isStreaming]);
 
     const handleSend = useCallback(async (text: string, attachments: Attachment[] = []) => {
         if (!user) {
@@ -577,6 +582,28 @@ export default function ChatView() {
                                 <div className="model-info-label">Модель</div>
                                 <div className="model-info-name">{currentModel.name}</div>
                                 <div className="model-info-desc">{currentModel.desc}</div>
+                                {(currentModel.pricing || currentModel.capabilities) && (
+                                    <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid var(--border-light)', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                        {currentModel.pricing && (
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '11px', color: 'var(--text-secondary)' }}>
+                                                <span>Стоимость (1M):</span>
+                                                <span style={{ fontWeight: 500, color: 'var(--text-primary)' }}>{currentModel.pricing.prompt} / {currentModel.pricing.completion}</span>
+                                            </div>
+                                        )}
+                                        {currentModel.capabilities && (
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '11px', color: 'var(--text-secondary)' }}>
+                                                <span>Возможности:</span>
+                                                <div style={{ display: 'flex', gap: '6px', opacity: 0.8, color: 'var(--accent-light)' }}>
+                                                    {currentModel.capabilities.text && <span title="Текст"><IconFileText size={14} /></span>}
+                                                    {currentModel.capabilities.image && <span title="Изображения"><IconImage size={14} /></span>}
+                                                    {currentModel.capabilities.file && <span title="Файлы"><IconAttachment size={14} /></span>}
+                                                    {currentModel.capabilities.audio && <span title="Аудио"><IconAudio size={14} /></span>}
+                                                    {currentModel.capabilities.video && <span title="Видео"><IconVideo size={14} /></span>}
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
                             </div>
                         ) : null;
                     })()}
