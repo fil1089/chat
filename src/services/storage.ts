@@ -86,17 +86,38 @@ export async function saveChat(chat: Chat): Promise<Chat[]> {
     const dbChats = chats.map(c => ({
         ...c,
         messages: c.messages.map(m => {
-            if (!m.fullAttachments || m.fullAttachments.length === 0) return m;
-            return {
-                ...m,
-                fullAttachments: m.fullAttachments.map(a => {
-                    // Strip content if larger than ~256 KB. It will stay in RAM but not bloat DB.
+            // First, strip large fullAttachments data
+            let newM = { ...m };
+            if (newM.fullAttachments && newM.fullAttachments.length > 0) {
+                newM.fullAttachments = newM.fullAttachments.map(a => {
+                    // Strip content if larger than ~256 KB
                     if (a.content && a.content.length > 256 * 1024) {
                         return { ...a, content: '' };
                     }
                     return a;
-                })
-            };
+                });
+            }
+
+            // Second, check text 'content' itself 
+            // Often text files or base64 are embedded directly into the prompt text
+            if (newM.content && newM.content.length > 256 * 1024) {
+                const half = 120 * 1024;
+                newM.content = newM.content.substring(0, half) + '\n\n...[TRUNCATED_LARGE_PAYLOAD_FOR_DB_STORAGE]...\n\n' + newM.content.slice(-half);
+            }
+
+            // Third, do the same for message 'versions' content strings
+            if (newM.versions && newM.versions.length > 0) {
+                newM.versions = newM.versions.map(v => {
+                    let newV = { ...v };
+                    if (newV.content && newV.content.length > 256 * 1024) {
+                        const half = 120 * 1024;
+                        newV.content = newV.content.substring(0, half) + '\n\n...[TRUNCATED_LARGE_PAYLOAD_FOR_DB_STORAGE]...\n\n' + newV.content.slice(-half);
+                    }
+                    return newV;
+                });
+            }
+
+            return newM;
         })
     }));
 

@@ -207,11 +207,14 @@ function formatMessages(messages: Message[], systemInstructions: string, fileCon
         const imageAttachments = fullAttachments.filter(a => a.type === 'image');
         const textAttachments = fullAttachments.filter(a => a.type === 'text');
 
-        if (msg.role === 'user' && imageAttachments.length > 0) {
+        if (msg.role === 'user' && (imageAttachments.length > 0 || textAttachments.length > 0)) {
             const contentParts: ContentPart[] = [];
             let textContent = msg.displayContent || msg.content;
+
             if (textAttachments.length > 0) {
-                textContent += '\n\n' + textAttachments.filter(a => a.content).map(a => `[Файл: ${a.name}]\n${a.content}`).join('\n\n');
+                // if they are not stripped
+                const validText = textAttachments.filter(a => a.content).map(a => `[Файл: ${a.name}]\n${a.content}`).join('\n\n');
+                if (validText) textContent += '\n\n' + validText;
             }
             if (textContent.trim()) {
                 contentParts.push({ type: 'text', text: textContent });

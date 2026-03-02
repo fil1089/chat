@@ -414,11 +414,11 @@ export default function ChatView() {
             id: uuidv4(),
             role: 'user',
             content: textAttachments.length > 0
-                ? `${text}\n\n${textAttachments.map(a => `[Файл: ${a.name}]\n${a.content}`).join('\n\n')}`
+                ? `${text}\n\n${textAttachments.map(a => `[Прикреплен текстовый файл: ${a.name}]`).join('\n')}`
                 : text,
             displayContent: text,
             attachments: attachments.map(a => ({ name: a.name, size: a.size })),
-            fullAttachments: nonTextAttachments.length > 0 ? nonTextAttachments : undefined,
+            fullAttachments: attachments.length > 0 ? attachments : undefined,
             timestamp: Date.now(),
         };
 
