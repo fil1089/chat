@@ -80,7 +80,27 @@ export async function saveChat(chat: Chat): Promise<Chat[]> {
     } else {
         chats.unshift({ ...chat, createdAt: Date.now(), updatedAt: Date.now() });
     }
-    await apiSet(KEYS.CHATS, chats);
+
+    // Strip extremely large base64 attachments before saving to DB 
+    // to prevent hitting Vercel's strict 4.5MB request size limit.
+    const dbChats = chats.map(c => ({
+        ...c,
+        messages: c.messages.map(m => {
+            if (!m.fullAttachments || m.fullAttachments.length === 0) return m;
+            return {
+                ...m,
+                fullAttachments: m.fullAttachments.map(a => {
+                    // Strip content if larger than ~256 KB. It will stay in RAM but not bloat DB.
+                    if (a.content && a.content.length > 256 * 1024) {
+                        return { ...a, content: '' };
+                    }
+                    return a;
+                })
+            };
+        })
+    }));
+
+    await apiSet(KEYS.CHATS, dbChats);
     return chats;
 }
 
@@ -103,7 +123,22 @@ export async function saveSpace(space: Space): Promise<Space[]> {
     } else {
         spaces.unshift({ ...space, createdAt: Date.now(), updatedAt: Date.now() });
     }
-    await apiSet(KEYS.SPACES, spaces);
+
+    // Strip large attachments to prevent Vercel 4.5MB error
+    const dbSpaces = spaces.map(s => {
+        if (!s.files || s.files.length === 0) return s;
+        return {
+            ...s,
+            files: s.files.map(f => {
+                if (f.content && f.content.length > 256 * 1024) {
+                    return { ...f, content: '' };
+                }
+                return f;
+            })
+        };
+    });
+
+    await apiSet(KEYS.SPACES, dbSpaces);
     return spaces;
 }
 

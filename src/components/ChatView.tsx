@@ -181,8 +181,10 @@ export default function ChatView() {
                 if (m.content) parts.push({ type: 'text', text: m.content });
                 if (m.fullAttachments) {
                     m.fullAttachments.forEach(att => {
-                        if (att.type === 'image') parts.push({ type: 'image_url', image_url: { url: att.content } });
-                        else if (att.type === 'file') parts.push({ type: 'file', file: { filename: att.name, file_data: att.content } });
+                        if (att.content) {
+                            if (att.type === 'image') parts.push({ type: 'image_url', image_url: { url: att.content } });
+                            else if (att.type === 'file') parts.push({ type: 'file', file: { filename: att.name, file_data: att.content } });
+                        }
                     });
                 }
                 return { role: m.role, content: (m.fullAttachments?.length ? parts : m.content) };

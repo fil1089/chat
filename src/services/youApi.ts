@@ -211,13 +211,15 @@ function formatMessages(messages: Message[], systemInstructions: string, fileCon
             const contentParts: ContentPart[] = [];
             let textContent = msg.displayContent || msg.content;
             if (textAttachments.length > 0) {
-                textContent += '\n\n' + textAttachments.map(a => `[Файл: ${a.name}]\n${a.content}`).join('\n\n');
+                textContent += '\n\n' + textAttachments.filter(a => a.content).map(a => `[Файл: ${a.name}]\n${a.content}`).join('\n\n');
             }
             if (textContent.trim()) {
                 contentParts.push({ type: 'text', text: textContent });
             }
             imageAttachments.forEach(a => {
-                contentParts.push({ type: 'image_url', image_url: { url: a.content } });
+                if (a.content) {
+                    contentParts.push({ type: 'image_url', image_url: { url: a.content } });
+                }
             });
             formatted.push({ role: msg.role, content: contentParts });
         } else {
