@@ -249,6 +249,26 @@ export default function ChatInput({ onSend, model, onModelChange, isStreaming, o
         }
     };
 
+    const handlePaste = async (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
+        const items = Array.from(e.clipboardData.items || []);
+        const files: File[] = [];
+
+        items.forEach(item => {
+            if (item.kind === 'file') {
+                const file = item.getAsFile();
+                if (file) files.push(file);
+            }
+        });
+
+        if (files.length > 0) {
+            e.preventDefault(); // Prevent default if we found files, let text paste naturally otherwise
+            const isPolza = state.settings.apiProvider === 'polza';
+            const results = await Promise.all(files.map(f => readFile(f, isPolza)));
+            const newAttachments = results.flat();
+            setAttachments(prev => [...prev, ...newAttachments]);
+        }
+    };
+
     // Add click outside handler for settings and dropdown
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -474,6 +494,7 @@ export default function ChatInput({ onSend, model, onModelChange, isStreaming, o
                         value={text}
                         onChange={(e) => setText(e.target.value)}
                         onKeyDown={handleKeyDown}
+                        onPaste={handlePaste}
                         rows={1}
                         disabled={isStreaming}
                     />

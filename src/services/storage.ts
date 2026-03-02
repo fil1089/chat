@@ -83,9 +83,8 @@ export async function saveChat(chat: Chat): Promise<Chat[]> {
 
     // Strip extremely large base64 attachments before saving to DB 
     // to prevent hitting Vercel's strict 4.5MB request size limit.
-    const dbChats = chats.map(c => ({
-        ...c,
-        messages: c.messages.map(m => {
+    const dbChats = chats.map(c => {
+        const dbM = c.messages.map(m => {
             // First, strip large fullAttachments data
             let newM = { ...m };
             if (newM.fullAttachments && newM.fullAttachments.length > 0) {
@@ -118,8 +117,9 @@ export async function saveChat(chat: Chat): Promise<Chat[]> {
             }
 
             return newM;
-        })
-    }));
+        });
+        return { ...c, messages: dbM };
+    });
 
     await apiSet(KEYS.CHATS, dbChats);
     return chats;

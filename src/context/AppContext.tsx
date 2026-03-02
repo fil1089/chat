@@ -141,6 +141,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
     const asyncDispatch = useCallback(async (action: AppAction) => {
         dispatch(action);
         switch (action.type) {
+            case 'NEW_CHAT': {
+                await storage.saveChat(action.payload);
+                break;
+            }
             case 'UPDATE_CHAT': {
                 const chat = action.payload;
                 // Debounce: cancel pending save for this chat and schedule a new one
