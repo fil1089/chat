@@ -1780,7 +1780,7 @@ input:checked+.toggle-slider:before {
   position: absolute;
   bottom: calc(100% + 16px);
   left: 0;
-  width: 600px;
+  width: 750px;
   max-width: calc(100vw - 32px);
   background: #1a1a24;
   border: 1px solid var(--border-light);
