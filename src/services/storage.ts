@@ -83,43 +83,56 @@ export async function saveChat(chat: Chat): Promise<Chat[]> {
 
     // Strip extremely large base64 attachments before saving to DB 
     // to prevent hitting Vercel's strict 4.5MB request size limit.
-    const dbChats = chats.map(c => {
-        const dbM = c.messages.map(m => {
-            // First, strip large fullAttachments data
-            let newM = { ...m };
-            if (newM.fullAttachments && newM.fullAttachments.length > 0) {
-                newM.fullAttachments = newM.fullAttachments.map(a => {
-                    // Strip content if larger than ~256 KB
-                    if (a.content && a.content.length > 256 * 1024) {
-                        return { ...a, content: '' };
+    // Optimization: only process if the stringified JSON indicates it's huge
+    let dbChats = chats;
+    try {
+        const chatsJsonSize = JSON.stringify(chats).length;
+        if (chatsJsonSize > 1024 * 1024) { // Only do heavy mapping if total size > 1MB
+            dbChats = chats.map(c => {
+                const dbM = c.messages.map(m => {
+                    let newM = m;
+                    let needsClone = false;
+
+                    // 1. Strip attachments
+                    if (m.fullAttachments && m.fullAttachments.some(a => a.content && a.content.length > 256 * 1024)) {
+                        needsClone = true;
+                        newM = { ...newM, fullAttachments: m.fullAttachments.map(a => (a.content && a.content.length > 256 * 1024) ? { ...a, content: '' } : a) };
                     }
-                    return a;
-                });
-            }
 
-            // Second, check text 'content' itself 
-            // Often text files or base64 are embedded directly into the prompt text
-            if (newM.content && newM.content.length > 256 * 1024) {
-                const half = 120 * 1024;
-                newM.content = newM.content.substring(0, half) + '\n\n...[TRUNCATED_LARGE_PAYLOAD_FOR_DB_STORAGE]...\n\n' + newM.content.slice(-half);
-            }
-
-            // Third, do the same for message 'versions' content strings
-            if (newM.versions && newM.versions.length > 0) {
-                newM.versions = newM.versions.map(v => {
-                    let newV = { ...v };
-                    if (newV.content && newV.content.length > 256 * 1024) {
+                    // 2. Strip text content
+                    if (m.content && m.content.length > 256 * 1024) {
+                        needsClone = true;
                         const half = 120 * 1024;
-                        newV.content = newV.content.substring(0, half) + '\n\n...[TRUNCATED_LARGE_PAYLOAD_FOR_DB_STORAGE]...\n\n' + newV.content.slice(-half);
+                        newM = { ...newM, content: m.content.substring(0, half) + '\n\n...[TRUNCATED_LARGE_PAYLOAD_FOR_DB_STORAGE]...\n\n' + m.content.slice(-half) };
                     }
-                    return newV;
-                });
-            }
 
-            return newM;
-        });
-        return { ...c, messages: dbM };
-    });
+                    // 3. Strip version content
+                    if (m.versions && m.versions.some(v => v.content && v.content.length > 256 * 1024)) {
+                        needsClone = true;
+                        newM = {
+                            ...newM, versions: m.versions.map(v => {
+                                if (v.content && v.content.length > 256 * 1024) {
+                                    const half = 120 * 1024;
+                                    return { ...v, content: v.content.substring(0, half) + '\n\n...[TRUNCATED_LARGE_PAYLOAD_FOR_DB_STORAGE]...\n\n' + v.content.slice(-half) };
+                                }
+                                return v;
+                            })
+                        };
+                    }
+
+                    return needsClone ? newM : m;
+                });
+
+                // Only clone the chat if any of its messages were actually modified
+                if (dbM.some((m, idx) => m !== c.messages[idx])) {
+                    return { ...c, messages: dbM };
+                }
+                return c;
+            });
+        }
+    } catch (err) {
+        console.error("Error optimizing chat DB payload:", err);
+    }
 
     await apiSet(KEYS.CHATS, dbChats);
     return chats;
