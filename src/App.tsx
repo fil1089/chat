@@ -90,6 +90,10 @@ function Layout() {
 
     return (
         <div className={`app-layout ${state.sidebarOpen ? '' : 'sidebar-collapsed'}`}>
+            <div
+                className="sidebar-overlay"
+                onClick={() => state.sidebarOpen && dispatch({ type: 'TOGGLE_SIDEBAR' })}
+            />
             <Sidebar onLogout={logout} onLogin={() => showAuthModal('Вход в аккаунт')} userEmail={user?.email} />
             <main className="main-content">
                 <button

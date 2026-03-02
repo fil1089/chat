@@ -7,9 +7,10 @@ import { streamResponsePolza, ALL_POLZA_MODELS } from '../services/polzaApi';
 import ChatInput from './ChatInput';
 import MessageBubble from './MessageBubble';
 import ThreadNav from './ThreadNav';
-import { IconBrain, IconFolder, IconMessage, IconArrowUp, IconArrowDown, IconFileText, IconImage, IconAttachment, IconAudio, IconVideo } from './Icons';
+import { IconBrain, IconFolder, IconMessage, IconArrowUp, IconArrowDown, IconFileText, IconImage, IconAttachment, IconAudio, IconVideo, IconMenu, IconEdit } from './Icons';
 import { v4 as uuidv4 } from 'uuid';
 import type { Message, Chat, Attachment, StatusEvent, Space, ContextMode } from '../types';
+import ModelSelector from './ModelSelector';
 
 interface StreamStatus {
     type: string;
@@ -498,8 +499,30 @@ export default function ChatView() {
     return (
         <div className="chat-layout-with-nav">
             <div className="chat-main-area">
+                <div className="mobile-chat-header">
+                    <button className="mobile-menu-btn" onClick={() => dispatch({ type: 'TOGGLE_SIDEBAR' })}>
+                        <IconMenu size={20} />
+                    </button>
+                    {!isSearch && !activeSpace && (
+                        <div className="mobile-model-selector">
+                            <ModelSelector
+                                model={model}
+                                onModelChange={setModel}
+                                isMobileHeader={true}
+                            />
+                        </div>
+                    )}
+                    {activeSpace && <div className="mobile-space-title">{activeSpace.name}</div>}
+                    <button className="mobile-new-chat-btn" onClick={() => {
+                        dispatch({ type: 'SET_ACTIVE_CHAT', payload: null });
+                        dispatch({ type: 'SET_ACTIVE_SPACE', payload: null });
+                    }}>
+                        <IconEdit size={20} />
+                    </button>
+                </div>
+
                 {activeSpace && (
-                    <div className="space-banner">
+                    <div className="space-banner desktop-only">
                         <IconFolder size={16} className="space-banner-icon" />
                         {activeSpace.name}
                     </div>

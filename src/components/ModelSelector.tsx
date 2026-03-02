@@ -9,9 +9,10 @@ interface ModelSelectorProps {
     model: string;
     onModelChange: (model: string) => void;
     direction?: 'up' | 'down';
+    isMobileHeader?: boolean;
 }
 
-export default function ModelSelector({ model, onModelChange, direction = 'up' }: ModelSelectorProps) {
+export default function ModelSelector({ model, onModelChange, direction = 'up', isMobileHeader = false }: ModelSelectorProps) {
     const { state } = useApp();
     const isPolza = state.settings.apiProvider === 'polza';
 
