@@ -4887,6 +4887,20 @@ input:checked+.toggle-slider:before {
   }
 }
 
+.mobile-chat-header {
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  height: 56px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-primary);
+  position: sticky;
+  top: 0;
+  z-index: 90;
+  flex-shrink: 0;
+}
+
 /* ===== Mobile adaptation ===== */
 @media (max-width: 768px) {
   .sidebar {
@@ -4913,16 +4927,6 @@ input:checked+.toggle-slider:before {
 
   .mobile-chat-header {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 10px 16px;
-    height: 56px;
-    border-bottom: 1px solid var(--border);
-    background: var(--bg-primary);
-    position: sticky;
-    top: 0;
-    z-index: 90;
-    flex-shrink: 0;
   }
 
   .mobile-chat-header .mobile-menu-btn {
