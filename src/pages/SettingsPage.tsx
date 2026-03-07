@@ -166,6 +166,9 @@ export default function SettingsPage() {
                                 value={state.settings.polzaApiKey || ''}
                                 onChange={(e) => handleSave('polzaApiKey', e.target.value)}
                                 placeholder="Ваш API ключ Polza.ai"
+                                autoComplete="off"
+                                data-1p-ignore
+                                data-lpignore="true"
                             />
                         ) : (
                             <input
@@ -173,6 +176,9 @@ export default function SettingsPage() {
                                 value={state.settings.apiKey || ''}
                                 onChange={(e) => handleSave('apiKey', e.target.value)}
                                 placeholder="Ваш API ключ Neuro API"
+                                autoComplete="off"
+                                data-1p-ignore
+                                data-lpignore="true"
                             />
                         )}
                         <button className="btn-ghost" onClick={() => setShowKey(!showKey)} title={showKey ? 'Скрыть' : 'Показать'}>

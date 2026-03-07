@@ -139,6 +139,7 @@ export default function Sidebar({ onLogout, onLogin, userEmail }: SidebarProps) 
                         placeholder="Поиск чатов..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
+                        autoComplete="off"
                     />
                 </div>
 
