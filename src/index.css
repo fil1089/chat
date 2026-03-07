@@ -3079,45 +3079,7 @@ input:checked+.toggle-slider:before {
   cursor: pointer;
 }
 
-/* ===== Responsive ===== */
-@media (max-width: 768px) {
-  .sidebar {
-    position: fixed;
-    left: 0;
-    top: 0;
-    z-index: 1000;
-    box-shadow: var(--shadow-lg);
-  }
-
-  .sidebar.closed {
-    transform: translateX(-100%);
-  }
-
-  .mobile-menu-btn {
-    display: flex;
-  }
-
-  .message {
-    padding-left: 16px;
-    padding-right: 16px;
-  }
-
-  .chat-input-container {
-    padding: 0 12px 16px;
-  }
-
-  .page {
-    padding: 20px 16px;
-  }
-
-  .spaces-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .data-actions {
-    flex-direction: column;
-  }
-}
+/* ===== Responsive (see end of file for mobile rules) ===== */
 
 /* ===== highlight.js theme override ===== */
 .hljs {
@@ -4903,30 +4865,63 @@ input:checked+.toggle-slider:before {
 
 /* ===== Mobile adaptation ===== */
 @media (max-width: 768px) {
+
+  /* ===== Sidebar as overlay panel ===== */
   .sidebar {
     position: fixed;
     top: 0;
     left: 0;
+    bottom: 0;
+    width: 85%;
+    max-width: 320px;
     z-index: 1000;
     transform: translateX(-100%);
     box-shadow: var(--shadow-xl);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    background: linear-gradient(180deg, #0d0d12 0%, #0a0a0e 100%);
+  }
+
+  .sidebar::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 160px;
+    pointer-events: none;
+    background: radial-gradient(ellipse at top center, rgba(124, 92, 252, 0.08) 0%, transparent 70%);
+    z-index: 0;
   }
 
   .sidebar:not(.closed) {
     transform: translateX(0);
   }
 
-  .mobile-menu-btn {
-    display: none;
-    /* hidden because we now have a mobile-chat-header */
+  .sidebar-header,
+  .sidebar-nav,
+  .sidebar-search,
+  .sidebar-user-block,
+  .chat-list,
+  .new-chat-btn {
+    position: relative;
+    z-index: 1;
   }
 
-  .chat-layout-with-nav {
-    flex-direction: column;
+  .sidebar-toggle-fixed {
+    display: none !important;
+  }
+
+  /* ===== Mobile Header with glass effect ===== */
+  .mobile-menu-btn {
+    display: none;
   }
 
   .mobile-chat-header {
     display: flex;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    background: rgba(10, 10, 12, 0.7);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
   }
 
   .mobile-chat-header .mobile-menu-btn {
@@ -4986,16 +4981,22 @@ input:checked+.toggle-slider:before {
     display: none;
   }
 
-  .sidebar-toggle-fixed {
+  /* ===== Dialogue sidebar hidden on mobile ===== */
+  .dialogue-nav-sidebar {
     display: none !important;
   }
 
+  .chat-layout-with-nav {
+    flex-direction: column;
+  }
+
+  /* ===== Chat Input Area with glass effect ===== */
   .chat-input-container {
-    padding: 10px;
+    padding: 8px 12px;
     background: transparent;
     border-top: none;
     position: fixed;
-    bottom: 0px;
+    bottom: 0;
     left: 0;
     right: 0;
     z-index: 100;
@@ -5003,23 +5004,170 @@ input:checked+.toggle-slider:before {
 
   .chat-input-wrapper {
     border-radius: 20px;
-    background: var(--bg-elevated);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
-    border: 1px solid var(--border);
+    background: rgba(20, 20, 24, 0.95);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.08);
     padding: 4px 8px;
     margin-bottom: constant(safe-area-inset-bottom);
     margin-bottom: env(safe-area-inset-bottom);
+  }
+
+  .chat-input-wrapper:focus-within {
+    border-color: rgba(124, 92, 252, 0.3);
   }
 
   .chat-input-actions {
     gap: 4px;
   }
 
+  /* Gradient fade above input */
+  .chat-input-container::before {
+    content: '';
+    position: absolute;
+    top: -32px;
+    left: 0;
+    right: 0;
+    height: 32px;
+    background: linear-gradient(to top, var(--bg-primary), transparent);
+    pointer-events: none;
+  }
+
+  /* ===== Messages ===== */
+  .message {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .messages-container {
+    padding-bottom: 100px;
+    /* Space for fixed input */
+  }
+
   .chat-scroll-buttons {
-    bottom: 140px;
+    bottom: 100px;
+    right: 12px;
+  }
+
+  /* ===== Empty Chat ===== */
+  .chat-empty-content {
+    padding: 24px 16px;
+  }
+
+  .chat-empty-icon {
+    font-size: 40px;
+    margin-bottom: 16px;
+  }
+
+  .chat-empty h2 {
+    font-size: 20px;
+  }
+
+  .chat-empty p {
+    font-size: 13px;
+  }
+
+  /* ===== Pages general ===== */
+  .page {
+    padding: 20px 16px;
+  }
+
+  /* ===== Settings Page — card-based sections ===== */
+  .settings-section {
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 16px;
+    padding: 20px 16px;
+    margin-bottom: 16px;
+  }
+
+  .settings-section h2 {
+    font-size: 16px;
+    margin-bottom: 16px;
+  }
+
+  .setting-row label {
+    font-size: 13px;
+  }
+
+  .api-key-input {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .api-key-input input {
+    border-radius: 12px;
+    padding: 12px 14px;
+    font-size: 14px;
+    background: rgba(10, 10, 12, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .data-actions {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .data-actions button,
+  .data-actions .file-label {
+    width: 100%;
+    text-align: center;
+    justify-content: center;
+    border-radius: 12px;
+    padding: 12px;
+  }
+
+  .settings-model-wrapper {
+    width: 100%;
+  }
+
+  /* ===== Spaces Grid ===== */
+  .spaces-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* ===== Auth Forms ===== */
+  .auth-card {
+    width: 95vw;
+    max-width: 400px;
+    border-radius: 20px;
+    padding: 24px 20px;
+  }
+
+  .auth-field input {
+    border-radius: 12px;
+    padding: 12px 14px;
+  }
+
+  .auth-submit {
+    border-radius: 12px;
+    padding: 12px;
+  }
+
+  /* ===== Thread nav hidden ===== */
+  .thread-nav {
+    display: none;
+  }
+
+  /* ===== History page ===== */
+  .page-header h1 {
+    font-size: 22px;
+  }
+
+  /* ===== Code blocks overflow ===== */
+  .code-block-wrapper {
+    max-width: calc(100vw - 48px);
+  }
+
+  .message-content pre code {
+    font-size: 12px;
   }
 }
 
+/* ===== Sidebar overlay backdrop ===== */
 .sidebar-overlay {
   display: none;
 }
@@ -5032,9 +5180,10 @@ input:checked+.toggle-slider:before {
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.6);
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
     z-index: 999;
-    backdrop-filter: blur(2px);
     animation: fade-in 0.2s ease-out;
   }
 }
