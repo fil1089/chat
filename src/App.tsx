@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import { HashRouter as Router, Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { AppProvider } from './context/AppContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Sidebar from './components/Sidebar';
@@ -31,12 +31,12 @@ function NoApiKeyModal({ onClose, onGoSettings }: { onClose: () => void; onGoSet
                 </p>
                 <div style={{ display: 'flex', gap: '8px', marginBottom: '16px', justifyContent: 'center' }}>
                     <button
-                        className={`auth-tab ${provider === 'polza' ? 'active' : ''}`}
+                        className={`auth - tab ${provider === 'polza' ? 'active' : ''} `}
                         onClick={() => setProvider('polza')}
                         style={{ flex: 1 }}
                     >Polza API</button>
                     <button
-                        className={`auth-tab ${provider === 'neuro' ? 'active' : ''}`}
+                        className={`auth - tab ${provider === 'neuro' ? 'active' : ''} `}
                         onClick={() => setProvider('neuro')}
                         style={{ flex: 1 }}
                     >Neuro API</button>
@@ -87,21 +87,37 @@ function Layout() {
     }
 
     const { showAuthModal } = useGlobalAuthModal();
+    const location = useLocation();
+
+    // Determine the title for the mobile header based on the current route
+    let mobileHeaderTitle = '';
+    if (location.pathname === '/settings') mobileHeaderTitle = 'Настройки';
+    else if (location.pathname === '/history') mobileHeaderTitle = 'История';
+    else if (location.pathname === '/spaces') mobileHeaderTitle = 'Пространства';
+    else if (location.pathname === '/images') mobileHeaderTitle = 'Изображения';
+    else if (location.pathname.startsWith('/space/')) mobileHeaderTitle = 'Пространство';
+
+    const showMobileHeader = location.pathname !== '/';
 
     return (
-        <div className={`app-layout ${state.sidebarOpen ? '' : 'sidebar-collapsed'}`}>
+        <div className={`app - layout ${state.sidebarOpen ? '' : 'sidebar-collapsed'} `}>
             <div
                 className="sidebar-overlay"
                 onClick={() => state.sidebarOpen && dispatch({ type: 'TOGGLE_SIDEBAR' })}
             />
             <Sidebar onLogout={logout} onLogin={() => showAuthModal('Вход в аккаунт')} userEmail={user?.email} />
             <main className="main-content">
-                <button
-                    className="mobile-menu-btn"
-                    onClick={() => dispatch({ type: 'TOGGLE_SIDEBAR' })}
-                >
-                    <IconMenu size={24} />
-                </button>
+                {showMobileHeader && (
+                    <div className="mobile-chat-header">
+                        <button className="mobile-menu-btn-header" onClick={() => dispatch({ type: 'TOGGLE_SIDEBAR' })}>
+                            <IconMenu size={20} />
+                        </button>
+                        <div className="mobile-space-title" style={{ fontWeight: 500, flex: 1, textAlign: 'center' }}>
+                            {mobileHeaderTitle}
+                        </div>
+                        <div style={{ width: '36px' }}></div> {/* Spacer for centering */}
+                    </div>
+                )}
                 <Routes>
                     <Route path="/" element={<ChatView />} />
                     <Route path="/space/:id" element={<SpaceDashboard />} />
@@ -190,10 +206,10 @@ function MainApp() {
 
 export default function App() {
     return (
-        <BrowserRouter>
+        <Router>
             <AuthProvider>
                 <MainApp />
             </AuthProvider>
-        </BrowserRouter>
+        </Router>
     );
 }

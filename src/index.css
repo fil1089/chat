@@ -4947,7 +4947,8 @@ input:checked+.toggle-slider:before {
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
   }
 
-  .mobile-chat-header .mobile-menu-btn {
+  .mobile-chat-header .mobile-menu-btn,
+  .mobile-chat-header .mobile-menu-btn-header {
     display: flex;
     position: static;
     border: none;

@@ -307,7 +307,7 @@ export default function ChatInput({ onSend, model, onModelChange, isStreaming, o
                 <div className="chat-input-top">
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1 }}>
                         {!hideModelSelector && (
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                            <div className="desktop-only" style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                                 <ModelSelector model={model} onModelChange={onModelChange} direction={direction} />
                             </div>
                         )}
