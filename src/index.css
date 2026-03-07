@@ -2886,8 +2886,9 @@ input:checked+.toggle-slider:before {
 
 /* ===== Settings Page ===== */
 .settings-page {
-  max-width: 720px;
-  margin: 0 auto;
+  max-width: 800px;
+  margin: 0;
+  padding: 32px 40px;
 }
 
 .settings-section {
@@ -2896,6 +2897,16 @@ input:checked+.toggle-slider:before {
   border-radius: var(--radius-lg);
   padding: 24px;
   margin-bottom: 20px;
+}
+
+.settings-model-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.settings-model-wrapper .model-selector-dropdown {
+  width: 100%;
+  max-width: 100%;
 }
 
 .settings-section h2 {
