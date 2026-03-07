@@ -2886,8 +2886,9 @@ input:checked+.toggle-slider:before {
 
 /* ===== Settings Page ===== */
 .settings-page {
-  max-width: 800px;
-  margin: 0;
+  width: 100%;
+  max-width: 840px;
+  margin: 0 auto;
   padding: 32px 40px;
 }
 
