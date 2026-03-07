@@ -7,7 +7,7 @@ import { streamResponsePolza, ALL_POLZA_MODELS } from '../services/polzaApi';
 import ChatInput from './ChatInput';
 import MessageBubble from './MessageBubble';
 import ThreadNav from './ThreadNav';
-import { IconBrain, IconFolder, IconMessage, IconArrowUp, IconArrowDown, IconFileText, IconImage, IconAttachment, IconAudio, IconVideo, IconMenu, IconEdit } from './Icons';
+import { IconBrain, IconFolder, IconMessage, IconArrowUp, IconArrowDown, IconFileText, IconImage, IconAttachment, IconAudio, IconVideo, IconMenu, IconSidebarRight, IconClose } from './Icons';
 import { v4 as uuidv4 } from 'uuid';
 import type { Message, Chat, Attachment, StatusEvent, Space, ContextMode } from '../types';
 import ModelSelector from './ModelSelector';
@@ -39,6 +39,7 @@ export default function ChatView() {
     const [model, setModel] = useState(initialModel);
     const [contextMode, setContextMode] = useState<ContextMode>('full');
     const [contextN, setContextN] = useState(5);
+    const [rightPanelOpen, setRightPanelOpen] = useState(false);
 
     const activeChat = state.chats.find((c) => c.id === state.activeChat);
     const activeSpace = state.spaces.find((s) => s.id === state.activeSpace) as Space | undefined;
@@ -513,11 +514,8 @@ export default function ChatView() {
                         </div>
                     )}
                     {activeSpace && <div className="mobile-space-title">{activeSpace.name}</div>}
-                    <button className="mobile-new-chat-btn" onClick={() => {
-                        dispatch({ type: 'SET_ACTIVE_CHAT', payload: null });
-                        dispatch({ type: 'SET_ACTIVE_SPACE', payload: null });
-                    }}>
-                        <IconEdit size={20} />
+                    <button className="mobile-right-panel-btn" onClick={() => setRightPanelOpen(true)}>
+                        <IconSidebarRight size={20} />
                     </button>
                 </div>
 
@@ -597,7 +595,11 @@ export default function ChatView() {
                 />
             </div>
 
-            <div className="dialogue-nav-sidebar">
+            {rightPanelOpen && <div className="right-panel-overlay" onClick={() => setRightPanelOpen(false)} />}
+            <div className={`dialogue-nav-sidebar ${rightPanelOpen ? 'mobile-open' : ''}`}>
+                <div className="right-panel-close-btn" onClick={() => setRightPanelOpen(false)}>
+                    <IconClose size={18} />
+                </div>
                 <div className="sidebar-section" style={{ padding: '24px' }}>
                     {(() => {
                         const allModels = [...MODELS, ...ALL_POLZA_MODELS];
