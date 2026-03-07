@@ -25,8 +25,7 @@ lerna-debug.log*
 *.sln
 *.sw?
 
-# Sensitive files
-.env
+# Sensitive files (secrets in .env.local, .env.production etc.)
 .env.*
 
 # Old directories
