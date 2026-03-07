@@ -1,25 +1,14 @@
-import jwt from 'jsonwebtoken';
-import { getDb, setCors, getToken } from '../_db.js';
-
-function verifyToken(req) {
-    const token = getToken(req);
-    if (!token) return null;
-    try {
-        return jwt.verify(token, process.env.JWT_SECRET);
-    } catch {
-        return null;
-    }
-}
+import { getDb, setCors, verifySupabaseToken } from '../_db.js';
 
 export default async function handler(req, res) {
     setCors(res);
     if (req.method === 'OPTIONS') return res.status(200).end();
 
-    const payload = verifyToken(req);
+    const payload = verifySupabaseToken(req);
     if (!payload) return res.status(401).json({ error: 'Unauthorized' });
 
     const { key } = req.query;
-    const userId = payload.userId;
+    const userId = payload.sub; // Supabase stores user ID in "sub" claim
     const sql = getDb();
 
     if (req.method === 'GET') {

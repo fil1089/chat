@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { IconLogo, IconEye, IconEyeOff } from '../components/Icons';
 
 export default function AuthPage() {
-    const { login } = useAuth();
+    const { login, register } = useAuth();
     const [tab, setTab] = useState<'login' | 'register'>('login');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -17,20 +17,13 @@ export default function AuthPage() {
         setLoading(true);
 
         try {
-            const endpoint = tab === 'login' ? '/api/auth/login' : '/api/auth/register';
-            const res = await fetch(endpoint, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email: email.trim(), password }),
-            });
-            const data = await res.json();
+            const result = tab === 'login'
+                ? await login(email, password)
+                : await register(email, password);
 
-            if (!res.ok) {
-                setError(data.error || 'Ошибка сервера');
-                return;
+            if (result.error) {
+                setError(result.error);
             }
-
-            login(data.token, data.user);
         } catch {
             setError('Ошибка соединения с сервером');
         } finally {

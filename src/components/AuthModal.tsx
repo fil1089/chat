@@ -8,7 +8,7 @@ interface AuthModalProps {
 }
 
 export default function AuthModal({ onClose, title = "Необходима авторизация" }: AuthModalProps) {
-    const { login } = useAuth();
+    const { login, register, resetPassword } = useAuth();
     const [tab, setTab] = useState<'login' | 'register' | 'forgot'>('login');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -23,14 +23,9 @@ export default function AuthModal({ onClose, title = "Необходима ав�
 
         try {
             if (tab === 'forgot') {
-                const res = await fetch('/api/auth/forgot-password', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email: email.trim() })
-                });
-                const data = await res.json();
-                if (!res.ok) {
-                    setError(data.error || 'Ошибка сервера');
+                const result = await resetPassword(email);
+                if (result.error) {
+                    setError(result.error);
                     return;
                 }
                 alert('Инструкции по восстановлению отправлены на ' + email);
@@ -38,20 +33,15 @@ export default function AuthModal({ onClose, title = "Необходима ав�
                 return;
             }
 
-            const endpoint = tab === 'login' ? '/api/auth/login' : '/api/auth/register';
-            const res = await fetch(endpoint, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email: email.trim(), password }),
-            });
-            const data = await res.json();
+            const result = tab === 'login'
+                ? await login(email, password)
+                : await register(email, password);
 
-            if (!res.ok) {
-                setError(data.error || 'Ошибка сервера');
+            if (result.error) {
+                setError(result.error);
                 return;
             }
 
-            login(data.token, data.user);
             onClose();
         } catch {
             setError('Ошибка соединения с сервером');

@@ -1,4 +1,5 @@
 import type { Chat, Space, Settings } from '../types';
+import { supabase } from '../lib/supabase';
 
 const KEYS = {
     CHATS: 'aggregator_chats',
@@ -6,8 +7,9 @@ const KEYS = {
     SETTINGS: 'aggregator_settings',
 } as const;
 
-function authHeaders(): Record<string, string> {
-    const token = localStorage.getItem('auth_token');
+async function authHeaders(): Promise<Record<string, string>> {
+    const { data: { session } } = await supabase.auth.getSession();
+    const token = session?.access_token;
     return token
         ? { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }
         : { 'Content-Type': 'application/json' };
@@ -18,7 +20,7 @@ async function apiGet<T>(key: string): Promise<T | null> {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 10000);
         const res = await fetch(`/api/store/${key}`, {
-            headers: authHeaders(),
+            headers: await authHeaders(),
             signal: controller.signal
         });
         clearTimeout(timeoutId);
@@ -43,7 +45,7 @@ async function apiSet(key: string, value: unknown): Promise<void> {
 
         await fetch(`/api/store/${key}`, {
             method: 'POST',
-            headers: authHeaders(),
+            headers: await authHeaders(),
             body,
             signal: controller.signal
         });
@@ -58,7 +60,7 @@ async function apiDelete(key: string): Promise<void> {
         const timeoutId = setTimeout(() => controller.abort(), 10000);
         await fetch(`/api/store/${key}`, {
             method: 'DELETE',
-            headers: authHeaders(),
+            headers: await authHeaders(),
             signal: controller.signal
         });
         clearTimeout(timeoutId);
