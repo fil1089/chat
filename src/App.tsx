@@ -143,16 +143,7 @@ function MainApp() {
     // For manual triggering of API modal
     const [apiModalVisible, setApiModalVisible] = useState(false);
 
-    // Show Auth Modal on first load if no user
-    React.useEffect(() => {
-        if (!isLoading && !user) {
-            const hasSeen = sessionStorage.getItem('hasSeenAuthModal');
-            if (!hasSeen) {
-                setAuthModalVisible(true);
-                sessionStorage.setItem('hasSeenAuthModal', '1');
-            }
-        }
-    }, [isLoading, user]);
+    // Auth modal is only shown when manually triggered (e.g. from sidebar login button)
 
     const showAuthModal = (title?: string) => {
         if (title) setAuthModalTitle(title);

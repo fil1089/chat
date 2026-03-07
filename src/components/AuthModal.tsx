@@ -14,11 +14,13 @@ export default function AuthModal({ onClose, title = "Необходима ав�
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState('');
+    const [successMessage, setSuccessMessage] = useState('');
     const [loading, setLoading] = useState(false);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
+        setSuccessMessage('');
         setLoading(true);
 
         try {
@@ -28,20 +30,30 @@ export default function AuthModal({ onClose, title = "Необходима ав�
                     setError(result.error);
                     return;
                 }
-                alert('Инструкции по восстановлению отправлены на ' + email);
-                setTab('login');
+                setSuccessMessage('Инструкции по восстановлению отправлены на ' + email);
                 return;
             }
 
-            const result = tab === 'login'
-                ? await login(email, password)
-                : await register(email, password);
+            if (tab === 'register') {
+                const result = await register(email, password);
+                if (result.error) {
+                    setError(result.error);
+                    return;
+                }
+                if (result.confirmEmail) {
+                    setSuccessMessage('Проверьте почту — мы отправили ссылку для подтверждения на ' + email);
+                    return;
+                }
+                onClose();
+                return;
+            }
 
+            // login
+            const result = await login(email, password);
             if (result.error) {
                 setError(result.error);
                 return;
             }
-
             onClose();
         } catch {
             setError('Ошибка соединения с сервером');
@@ -97,6 +109,7 @@ export default function AuthModal({ onClose, title = "Необходима ав�
                             placeholder="you@example.com"
                             required
                             autoFocus
+                            autoComplete="email"
                         />
                     </div>
 
@@ -110,6 +123,7 @@ export default function AuthModal({ onClose, title = "Необходима ав�
                                     onChange={e => setPassword(e.target.value)}
                                     placeholder={tab === 'register' ? 'Минимум 6 символов' : 'Введите пароль'}
                                     required
+                                    autoComplete={tab === 'register' ? 'new-password' : 'current-password'}
                                 />
                                 <button
                                     type="button"
@@ -135,6 +149,7 @@ export default function AuthModal({ onClose, title = "Необходима ав�
                     )}
 
                     {error && <div className="auth-error">{error}</div>}
+                    {successMessage && <div style={{ padding: '10px 14px', borderRadius: '8px', background: 'rgba(34, 197, 94, 0.12)', color: '#4ade80', fontSize: '13px', marginBottom: '12px' }}>{successMessage}</div>}
 
                     <button type="submit" className="btn-primary auth-submit" disabled={loading}>
                         {loading ? 'Загрузка...' : tab === 'login' ? 'Войти' : tab === 'register' ? 'Создать аккаунт' : 'Отправить'}

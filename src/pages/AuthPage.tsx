@@ -10,17 +10,29 @@ export default function AuthPage() {
     const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+    const [successMessage, setSuccessMessage] = useState('');
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
+        setSuccessMessage('');
         setLoading(true);
 
         try {
-            const result = tab === 'login'
-                ? await login(email, password)
-                : await register(email, password);
+            if (tab === 'register') {
+                const result = await register(email, password);
+                if (result.error) {
+                    setError(result.error);
+                    return;
+                }
+                if (result.confirmEmail) {
+                    setSuccessMessage('Проверьте почту — мы отправили ссылку для подтверждения на ' + email);
+                    return;
+                }
+                return;
+            }
 
+            const result = await login(email, password);
             if (result.error) {
                 setError(result.error);
             }
@@ -66,6 +78,7 @@ export default function AuthPage() {
                             placeholder="you@example.com"
                             required
                             autoFocus
+                            autoComplete="email"
                         />
                     </div>
 
@@ -78,6 +91,7 @@ export default function AuthPage() {
                                 onChange={e => setPassword(e.target.value)}
                                 placeholder={tab === 'register' ? 'Минимум 6 символов' : 'Введите пароль'}
                                 required
+                                autoComplete={tab === 'register' ? 'new-password' : 'current-password'}
                             />
                             <button
                                 type="button"
@@ -91,6 +105,7 @@ export default function AuthPage() {
                     </div>
 
                     {error && <div className="auth-error">{error}</div>}
+                    {successMessage && <div style={{ padding: '10px 14px', borderRadius: '8px', background: 'rgba(34, 197, 94, 0.12)', color: '#4ade80', fontSize: '13px', marginBottom: '12px' }}>{successMessage}</div>}
 
                     <button type="submit" className="btn-primary auth-submit" disabled={loading}>
                         {loading ? 'Загрузка...' : tab === 'login' ? 'Войти' : 'Создать аккаунт'}

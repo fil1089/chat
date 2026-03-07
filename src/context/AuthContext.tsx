@@ -12,7 +12,7 @@ interface AuthContextValue {
     token: string | null;
     isLoading: boolean;
     login: (email: string, password: string) => Promise<{ error?: string }>;
-    register: (email: string, password: string) => Promise<{ error?: string }>;
+    register: (email: string, password: string) => Promise<{ error?: string; confirmEmail?: boolean }>;
     resetPassword: (email: string) => Promise<{ error?: string }>;
     logout: () => void;
 }
@@ -57,17 +57,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return {};
     };
 
-    const register = async (email: string, password: string): Promise<{ error?: string }> => {
-        const { error } = await supabase.auth.signUp({
+    const register = async (email: string, password: string): Promise<{ error?: string; confirmEmail?: boolean }> => {
+        const { data, error } = await supabase.auth.signUp({
             email: email.trim(),
             password,
+            options: {
+                emailRedirectTo: 'https://chat-murex-eta.vercel.app',
+            },
         });
         if (error) return { error: error.message };
-        return {};
+        // If user needs email confirmation (identities array is empty)
+        const needsConfirm = data.user && (!data.user.identities || data.user.identities.length === 0 || !data.session);
+        return { confirmEmail: !!needsConfirm };
     };
 
     const resetPassword = async (email: string): Promise<{ error?: string }> => {
-        const { error } = await supabase.auth.resetPasswordForEmail(email.trim());
+        const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+            redirectTo: 'https://chat-murex-eta.vercel.app',
+        });
         if (error) return { error: error.message };
         return {};
     };
