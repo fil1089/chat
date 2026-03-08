@@ -7,6 +7,33 @@ const KEYS = {
     SETTINGS: 'aggregator_settings',
 } as const;
 
+const LS_PREFIX = 'app_';
+
+// --- localStorage helpers ---
+function lsGet<T>(key: string): T | null {
+    try {
+        const raw = localStorage.getItem(LS_PREFIX + key);
+        if (!raw) return null;
+        return JSON.parse(raw) as T;
+    } catch {
+        return null;
+    }
+}
+
+function lsSet(key: string, value: unknown): void {
+    try {
+        localStorage.setItem(LS_PREFIX + key, JSON.stringify(value));
+    } catch (e) {
+        console.warn('[Storage LS] write error:', e);
+    }
+}
+
+function lsDelete(key: string): void {
+    try {
+        localStorage.removeItem(LS_PREFIX + key);
+    } catch { }
+}
+
 async function authHeaders(): Promise<Record<string, string>> {
     const { data: { session } } = await supabase.auth.getSession();
     const token = session?.access_token;
@@ -25,16 +52,28 @@ async function apiGet<T>(key: string): Promise<T | null> {
         });
         clearTimeout(timeoutId);
 
-        if (!res.ok) return null;
+        if (!res.ok) {
+            // Fallback to localStorage on auth/server error
+            return lsGet<T>(key);
+        }
 
         const data = await res.json();
-        return data.value as T;
+        const value = data.value as T;
+        // Sync successful API read to localStorage as backup
+        if (value !== null && value !== undefined) {
+            lsSet(key, value);
+        }
+        return value;
     } catch {
-        return null;
+        // Network error — fallback to localStorage
+        return lsGet<T>(key);
     }
 }
 
 async function apiSet(key: string, value: unknown): Promise<void> {
+    // Always save to localStorage first (instant, reliable)
+    lsSet(key, value);
+
     try {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 10000);
@@ -51,10 +90,11 @@ async function apiSet(key: string, value: unknown): Promise<void> {
         });
         clearTimeout(timeoutId);
     } catch (e) {
-        console.error('Storage write error:', e);
+        console.warn('[Storage API] write failed, data saved to localStorage:', e);
     }
 }
 async function apiDelete(key: string): Promise<void> {
+    lsDelete(key);
     try {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 10000);
