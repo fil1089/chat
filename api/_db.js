@@ -24,11 +24,19 @@ export function getToken(req) {
  */
 export function verifySupabaseToken(req) {
     const token = getToken(req);
-    if (!token) return null;
+    if (!token) {
+        console.error('[Auth] No Bearer token in request');
+        return null;
+    }
+    if (!process.env.SUPABASE_JWT_SECRET) {
+        console.error('[Auth] SUPABASE_JWT_SECRET is not set in environment!');
+        return null;
+    }
     try {
         const payload = jwt.verify(token, process.env.SUPABASE_JWT_SECRET);
         return payload;
-    } catch {
+    } catch (err) {
+        console.error('[Auth] JWT verification failed:', err.message);
         return null;
     }
 }
