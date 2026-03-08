@@ -82,7 +82,8 @@ export default function ChatView() {
     };
 
     const runStreaming = useCallback(async (chat: Chat, targetMessageId?: string, overrideModel?: string, bypassCache?: boolean) => {
-        if (!state.settings.apiKey) {
+        const currentApiKey = state.settings.apiProvider === 'polza' ? state.settings.polzaApiKey : state.settings.apiKey;
+        if (!currentApiKey) {
             showApiModal();
             return;
         }

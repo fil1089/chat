@@ -40,20 +40,15 @@ export default function SettingsPage() {
     };
 
     const handleTestKey = async () => {
-        if (!state.settings.apiKey) return;
+        const isPolza = state.settings.apiProvider === 'polza';
+        const apiKeyToTest = isPolza ? state.settings.polzaApiKey : state.settings.apiKey;
+
+        if (!apiKeyToTest) return;
         setTesting(true);
         setTestResult(null);
 
         try {
-            const isPolza = state.settings.apiProvider === 'polza';
             const apiUrl = isPolza ? API_URLS.polza : API_URLS.neuro;
-            const apiKeyToTest = isPolza ? state.settings.polzaApiKey : state.settings.apiKey;
-
-            if (!apiKeyToTest) {
-                setTestResult({ ok: false, msg: 'Введите ключ' });
-                setTesting(false);
-                return;
-            }
 
             const response = await fetch(`${apiUrl}/v1/chat/completions`, {
                 method: 'POST',
