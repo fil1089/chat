@@ -1,5 +1,6 @@
 import { createContext, useContext, useReducer, useEffect, useCallback, useRef, type ReactNode, type Dispatch } from 'react';
 import * as storage from '../services/storage';
+import { useAuth } from './AuthContext';
 import type { AppState, AppAction, Settings, Chat, Space } from '../types';
 
 interface AppContextValue {
@@ -122,7 +123,9 @@ function reducer(state: AppState, action: AppAction): AppState {
 
 export function AppProvider({ children }: { children: ReactNode }) {
     const [state, dispatch] = useReducer(reducer, initialState);
+    const { token } = useAuth();
 
+    // Reload data when auth token changes (login/logout)
     useEffect(() => {
         async function loadData() {
             const [chats, spaces, settings] = await Promise.all([
@@ -133,7 +136,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
             dispatch({ type: 'LOAD_DATA', payload: { chats, spaces, settings } });
         }
         loadData();
-    }, []);
+    }, [token]);
 
     // Debounce timers for UPDATE_CHAT: keyed by chatId
     const saveChatTimers = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());

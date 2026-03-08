@@ -9,6 +9,13 @@ const KEYS = {
 
 const LS_PREFIX = 'app_';
 
+// --- Auth token (set from AuthContext) ---
+let _authToken: string | null = null;
+
+export function setAuthToken(token: string | null): void {
+    _authToken = token;
+}
+
 // --- localStorage helpers ---
 function lsGet<T>(key: string): T | null {
     try {
@@ -35,8 +42,15 @@ function lsDelete(key: string): void {
 }
 
 async function authHeaders(): Promise<Record<string, string>> {
-    const { data: { session } } = await supabase.auth.getSession();
-    const token = session?.access_token;
+    // 1. Use token pushed from AuthContext
+    let token = _authToken;
+    // 2. Fallback: try supabase.auth.getSession()
+    if (!token) {
+        try {
+            const { data: { session } } = await supabase.auth.getSession();
+            token = session?.access_token ?? null;
+        } catch { }
+    }
     return token
         ? { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }
         : { 'Content-Type': 'application/json' };

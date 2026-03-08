@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
 import { supabase } from '../lib/supabase';
+import { setAuthToken } from '../services/storage';
 import type { User as SupabaseUser, Session } from '@supabase/supabase-js';
 
 interface User {
@@ -33,7 +34,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // Get initial session
         supabase.auth.getSession().then(({ data: { session } }) => {
             setUser(mapUser(session?.user));
-            setToken(session?.access_token ?? null);
+            const t = session?.access_token ?? null;
+            setToken(t);
+            setAuthToken(t);
             setIsLoading(false);
         });
 
@@ -41,7 +44,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const { data: { subscription } } = supabase.auth.onAuthStateChange(
             (_event, session) => {
                 setUser(mapUser(session?.user));
-                setToken(session?.access_token ?? null);
+                const t = session?.access_token ?? null;
+                setToken(t);
+                setAuthToken(t);
             }
         );
 
@@ -83,6 +88,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         await supabase.auth.signOut();
         setUser(null);
         setToken(null);
+        setAuthToken(null);
     };
 
     return (
