@@ -5576,7 +5576,9 @@ input:checked+.toggle-slider:before {
   }
 
   .chat-empty {
-    margin-bottom: 20%;
+    margin-bottom: 0;
+    padding-bottom: 80px;
+    /* Offset for the fixed input area to keep content visually centered */
   }
 }
 
