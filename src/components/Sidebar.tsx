@@ -44,6 +44,13 @@ export default function Sidebar({ onLogout, onLogin, userEmail }: SidebarProps) 
 
 
 
+    const handleNav = (path: string) => {
+        if (window.innerWidth <= 768) {
+            dispatch({ type: 'SET_SIDEBAR', payload: false });
+        }
+        navigate(path);
+    };
+
     const handleSelectChat = (chatId: string) => {
         dispatch({ type: 'SET_ACTIVE_CHAT', payload: chatId });
         const chat = state.chats.find(c => c.id === chatId);
@@ -154,7 +161,7 @@ export default function Sidebar({ onLogout, onLogin, userEmail }: SidebarProps) 
                     </button> */}
                     <button
                         className={`nav-item ${location.pathname === '/history' ? 'active' : ''}`}
-                        onClick={() => navigate('/history')}
+                        onClick={() => handleNav('/history')}
                     >
                         <IconHistory size={16} />
                         <span>История</span>
@@ -225,7 +232,7 @@ export default function Sidebar({ onLogout, onLogin, userEmail }: SidebarProps) 
                 <div className="sidebar-nav bottom-nav">
                     <button
                         className={`nav-item ${location.pathname === '/settings' ? 'active' : ''}`}
-                        onClick={() => navigate('/settings')}
+                        onClick={() => handleNav('/settings')}
                     >
                         <IconSettings size={16} className="nav-icon" />
                         <span>Настройки</span>
@@ -237,14 +244,20 @@ export default function Sidebar({ onLogout, onLogin, userEmail }: SidebarProps) 
                         <>
                             <div className="sidebar-user-email" title={userEmail}>{userEmail}</div>
                             {onLogout && (
-                                <button className="sidebar-logout-btn" onClick={onLogout} title="Выйти">
+                                <button className="sidebar-logout-btn" onClick={() => {
+                                    if (window.innerWidth <= 768) dispatch({ type: 'SET_SIDEBAR', payload: false });
+                                    onLogout();
+                                }} title="Выйти">
                                     <IconClose size={14} />
                                     <span>Выйти</span>
                                 </button>
                             )}
                         </>
                     ) : (
-                        <button className="sidebar-login-btn" onClick={onLogin}>
+                        <button className="sidebar-login-btn" onClick={() => {
+                            if (window.innerWidth <= 768) dispatch({ type: 'SET_SIDEBAR', payload: false });
+                            if (onLogin) onLogin();
+                        }}>
                             <IconUser size={16} />
                             <span>Войти</span>
                         </button>

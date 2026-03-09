@@ -1818,6 +1818,19 @@ input:checked+.toggle-slider:before {
   border: 1px solid var(--border);
 }
 
+@media (max-width: 768px) {
+  .model-selector-dropdown:not(.inline) {
+    position: fixed;
+    top: 64px !important;
+    left: 16px !important;
+    right: 16px !important;
+    width: auto !important;
+    max-width: none !important;
+    bottom: auto !important;
+  }
+}
+
+
 .custom-model-selector.standalone .model-selector-dropdown {
   position: static;
   box-shadow: none;
@@ -5432,8 +5445,8 @@ input:checked+.toggle-slider:before {
     border-top: 1px solid var(--border);
     overflow: visible;
     height: auto;
-    padding-bottom: 300px;
-    /* Space for dropdown */
+    padding: 24px 20px 300px 20px;
+    /* Space for dropdown + restore side padding */
   }
 }
 
