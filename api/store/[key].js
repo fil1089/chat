@@ -4,16 +4,20 @@ export default async function handler(req, res) {
     setCors(res);
     if (req.method === 'OPTIONS') return res.status(200).end();
 
-    const token = req.headers['authorization']?.startsWith('Bearer ') ? req.headers['authorization'].slice(7) : null;
     const payload = await verifySupabaseToken(req);
-    if (!payload) {
-        const reason = !token ? 'no_token' : (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) ? 'no_secret' : 'invalid_token';
-        return res.status(401).json({ error: 'Unauthorized', reason });
+    if (payload && payload.error) {
+        return res.status(401).json({ error: 'Unauthorized', reason: payload.reason });
+    }
+
+    let sql;
+    try {
+        sql = getDb();
+    } catch (err) {
+        return res.status(500).json({ error: 'Database Config Error', details: err.message });
     }
 
     const { key } = req.query;
     const userId = payload.sub; // Supabase stores user ID in "sub" claim
-    const sql = getDb();
 
     if (req.method === 'GET') {
         try {
@@ -25,7 +29,7 @@ export default async function handler(req, res) {
             return res.status(200).json({ value: result.length > 0 ? result[0].value : null });
         } catch (err) {
             console.error('[store GET] error:', err);
-            return res.status(500).json({ error: 'Ошибка чтения' });
+            return res.status(500).json({ error: 'Ошибка чтения: ' + err.message });
         }
     }
 
@@ -41,7 +45,7 @@ export default async function handler(req, res) {
             return res.status(200).json({ ok: true });
         } catch (err) {
             console.error('[store POST] error:', err);
-            return res.status(500).json({ error: 'Ошибка записи' });
+            return res.status(500).json({ error: 'Ошибка записи: ' + err.message });
         }
     }
 
@@ -51,7 +55,7 @@ export default async function handler(req, res) {
             return res.status(200).json({ ok: true });
         } catch (err) {
             console.error('[store DELETE] error:', err);
-            return res.status(500).json({ error: 'Ошибка удаления' });
+            return res.status(500).json({ error: 'Ошибка удаления: ' + err.message });
         }
     }
 

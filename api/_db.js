@@ -1,15 +1,15 @@
 import { neon } from '@neondatabase/serverless';
 import { createClient } from '@supabase/supabase-js';
 
-// Server-side Supabase admin client (uses service_role key to verify user tokens)
-const supabaseAdmin = createClient(
-    process.env.SUPABASE_URL,
-    process.env.SUPABASE_SERVICE_ROLE_KEY
-);
+let supabaseAdmin = null;
 
 export function getDb() {
-    const sql = neon(process.env.SUPABASE_DATABASE_URL);
-    return sql;
+    const dbUrl = process.env.SUPABASE_DATABASE_URL;
+    if (!dbUrl) {
+        console.error('[DB] SUPABASE_DATABASE_URL is not set!');
+        throw new Error('Database URL is missing. Check Vercel Environment Variables.');
+    }
+    return neon(dbUrl);
 }
 
 export function setCors(res) {
@@ -26,27 +26,40 @@ export function getToken(req) {
 
 /**
  * Verify user's access token via Supabase Auth (server-side).
- * Returns user payload { sub, email, role } or null if invalid.
+ * Returns user payload { sub, email, role } or an error object { error, reason }.
  */
 export async function verifySupabaseToken(req) {
     const token = getToken(req);
     if (!token) {
-        console.error('[Auth] No Bearer token in request');
-        return null;
+        return { error: 'no_token', reason: 'No Bearer token in request' };
     }
-    if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
-        console.error('[Auth] SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY is not set!');
-        return null;
+
+    // Hardcoded project URL as fallback to be safe
+    const url = process.env.SUPABASE_URL || 'https://zhqpqkqfxnwwhqdyfapf.supabase.co';
+    const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+    if (!key) {
+        console.error('[Auth] SUPABASE_SERVICE_ROLE_KEY is not set!');
+        return { error: 'no_secret', reason: 'Service Role Key is missing on the server' };
     }
+
+    if (!supabaseAdmin) {
+        try {
+            supabaseAdmin = createClient(url, key);
+        } catch (err) {
+            console.error('[Auth] Error creating admin client:', err.message);
+            return { error: 'init_failed', reason: err.message };
+        }
+    }
+
     try {
         const { data: { user }, error } = await supabaseAdmin.auth.getUser(token);
         if (error || !user) {
-            console.error('[Auth] Token verification failed:', error?.message || 'no user');
-            return null;
+            return { error: 'invalid_token', reason: error?.message || 'Invalid user' };
         }
         return { sub: user.id, email: user.email, role: 'authenticated' };
     } catch (err) {
         console.error('[Auth] Unexpected error verifying token:', err.message);
-        return null;
+        return { error: 'verify_failed', reason: err.message };
     }
 }
