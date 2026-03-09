@@ -36,6 +36,9 @@ export default function Sidebar({ onLogout, onLogin, userEmail }: SidebarProps) 
     const handleNewChat = () => {
         dispatch({ type: 'SET_ACTIVE_CHAT', payload: null });
         dispatch({ type: 'SET_ACTIVE_SPACE', payload: null });
+        if (window.innerWidth <= 768) {
+            dispatch({ type: 'SET_SIDEBAR', payload: false });
+        }
         navigate('/');
     };
 
@@ -48,6 +51,9 @@ export default function Sidebar({ onLogout, onLogin, userEmail }: SidebarProps) 
             dispatch({ type: 'SET_ACTIVE_SPACE', payload: chat.spaceId });
         } else {
             dispatch({ type: 'SET_ACTIVE_SPACE', payload: null });
+        }
+        if (window.innerWidth <= 768) {
+            dispatch({ type: 'SET_SIDEBAR', payload: false });
         }
         navigate('/');
     };

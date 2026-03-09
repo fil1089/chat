@@ -5409,17 +5409,31 @@ input:checked+.toggle-slider:before {
 }
 
 @media (max-width: 1024px) {
+  .settings-page {
+    overflow-y: auto;
+  }
+
   .settings-layout {
     flex-direction: column;
-    overflow-y: auto;
+    overflow: visible;
     margin: 0;
     height: auto;
+  }
+
+  .settings-main {
+    overflow: visible;
+    height: auto;
+    padding: 24px 20px;
   }
 
   .settings-sidebar {
     width: 100%;
     border-left: none;
     border-top: 1px solid var(--border);
+    overflow: visible;
+    height: auto;
+    padding-bottom: 300px;
+    /* Space for dropdown */
   }
 }
 

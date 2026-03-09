@@ -80,7 +80,7 @@ export function calcCost(modelId: string, promptTokens: number, completionTokens
 }
 
 // ===== Available Models =====
-export const MODELS: AIModel[] = [
+const RAW_MODELS: AIModel[] = [
     // ── OpenAI ──
     { id: 'gpt-4.1', name: 'GPT-4 (Neuro)', category: 'GPT', desc: 'Улучшенная версия GPT-4 с повышенной точностью.' },
     { id: 'gpt-4.1-mini', name: 'GPT-4 Turbo (Neuro)', category: 'GPT', desc: 'Быстрая версия GPT-4.' },
@@ -114,6 +114,30 @@ export const MODELS: AIModel[] = [
     // ── You.com ──
     { id: 'you-research', name: 'You Research', category: 'You.com', desc: 'Продвинутый ИИ-агент с итеративным поиском в интернете.' },
 ];
+
+export const MODELS: AIModel[] = RAW_MODELS.map(m => {
+    // Attempt to calculate input/output cost for 1M tokens natively using the unified function.
+    const promptCost = calcCost(m.id, 1000000, 0);
+    const completionCost = calcCost(m.id, 0, 1000000);
+
+    // Most general models support text/file natively. Image/audio/video inferred roughly from ID
+    const hasImage = m.category === 'GPT' && m.id.includes('o') || m.category === 'Gemini' || m.category === 'Claude';
+
+    return {
+        ...m,
+        pricing: {
+            prompt: promptCost + ' ₽',
+            completion: completionCost + ' ₽',
+        },
+        capabilities: {
+            text: true,
+            image: hasImage,
+            file: true,
+            audio: m.id.includes('audio'),
+            video: m.id.includes('video'),
+        }
+    };
+});
 
 export function getModelsByCategory(): Record<string, AIModel[]> {
     const groups: Record<string, AIModel[]> = {};
