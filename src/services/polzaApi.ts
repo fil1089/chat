@@ -129,9 +129,9 @@ export async function streamResponsePolza({
                         ...lastMsg,
                         content: translated
                     };
-                    // Добавляем инструкцию отвечать на английском для экономии
-                    systemInstructions = (systemInstructions ? systemInstructions + '\n\n' : '') +
-                        "IMPORTANT: Always respond in English to save tokens. Your response will be automatically translated back to the user's language.";
+                    // Минимальная инструкция для экономии токенов
+                    systemInstructions = (systemInstructions ? systemInstructions + '\n' : '') +
+                        "Respond in English.";
                 }
             }
         }

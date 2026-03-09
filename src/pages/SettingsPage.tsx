@@ -156,103 +156,81 @@ export default function SettingsPage() {
                         </div>
                     </div>
 
-                    <div className="settings-section">
-                        <h2>Опции</h2>
-                        <div className="setting-row">
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '20px' }}>
-                                <div style={{ flex: 1 }}>
-                                    <label style={{ marginBottom: '4px', display: 'block', fontWeight: 500 }}>Экономия токенов (Авто-перевод)</label>
-                                    <p className="setting-hint" style={{ marginTop: 0, fontSize: '12px' }}>
-                                        Автоматически переводит ваш запрос на английский и ответ обратно на русский.
-                                        Это позволяет экономить до 70% токенов на англоязычных моделях.
-                                    </p>
-                                </div>
-                                <div className="toggle-switch">
-                                    <input
-                                        type="checkbox"
-                                        id="auto-translate"
-                                        checked={state.settings.autoTranslate || false}
-                                        onChange={(e) => dispatch({ type: 'UPDATE_SETTINGS', payload: { autoTranslate: e.target.checked } as any })}
-                                    />
-                                    <label htmlFor="auto-translate"></label>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="settings-section">
-                        <h2>Данные</h2>
-                        <div className="setting-row">
-                            <div className="data-stats">
-                                <span><IconMessage size={16} /> {state.chats.length} чатов</span>
-                                <span><IconFolder size={16} /> {state.spaces.length} пространств</span>
-                            </div>
-                        </div>
-                        <div className="data-actions">
-                            <button className="btn-secondary" onClick={handleExport}>
-                                Экспорт данных
-                            </button>
-                            <label className="btn-secondary file-label">
-                                Импорт данных
-                                <input type="file" accept=".json" onChange={handleImport} hidden />
-                            </label>
-                            <button className="btn-danger" onClick={handleClear}>
-                                Очистить все данные
-                            </button>
-                        </div>
-                    </div>
                 </div>
 
-                <div className="settings-sidebar">
-                    <div className="sidebar-section">
-                        <h2 style={{ fontSize: '14px', marginBottom: '16px' }}>Модель по умолчанию</h2>
-                        {(() => {
-                            const allModels = [...MODELS, ...ALL_POLZA_MODELS];
-                            const currentModel = allModels.find(m => m.id === (state.settings.defaultModel || 'gpt-4o'));
-                            return currentModel ? (
-                                <div className="model-info-card" style={{ marginBottom: '20px' }}>
-                                    <div className="model-info-label">Активная модель</div>
-                                    <div className="model-info-name">{currentModel.name}</div>
-                                    <div className="model-info-desc">{currentModel.desc}</div>
-                                    {(currentModel.pricing || currentModel.capabilities) && (
-                                        <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid var(--border-light)', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                                            {currentModel.pricing && (
-                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '11px', color: 'var(--text-secondary)' }}>
-                                                    <span>Стоимость (1M):</span>
-                                                    <span style={{ fontWeight: 500, color: 'var(--text-primary)' }}>{currentModel.pricing.prompt} / {currentModel.pricing.completion}</span>
-                                                </div>
-                                            )}
-                                            {currentModel.capabilities && (
-                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '11px', color: 'var(--text-secondary)' }}>
-                                                    <span>Возможности:</span>
-                                                    <div style={{ display: 'flex', gap: '6px', opacity: 0.8, color: 'var(--accent-light)' }}>
-                                                        {currentModel.capabilities.text && <span title="Текст"><IconFileText size={14} /></span>}
-                                                        {currentModel.capabilities.image && <span title="Изображения"><IconImage size={14} /></span>}
-                                                        {currentModel.capabilities.file && <span title="Файлы"><IconAttachment size={14} /></span>}
-                                                        {currentModel.capabilities.audio && <span title="Аудио"><IconAudio size={14} /></span>}
-                                                        {currentModel.capabilities.video && <span title="Видео"><IconVideo size={14} /></span>}
-                                                    </div>
-                                                </div>
-                                            )}
-                                        </div>
-                                    )}
-                                </div>
-                            ) : null;
-                        })()}
-
-                        <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '12px' }}>
-                            Выберите модель, которая будет использоваться по умолчанию для новых чатов.
-                        </p>
-
-                        <ModelSelector
-                            model={state.settings.defaultModel || 'gpt-4o'}
-                            onModelChange={(val) => handleSave('defaultModel', val)}
-                            direction="down"
-                            inline={true}
-                        />
+                <div className="settings-section">
+                    <h2>Данные</h2>
+                    <div className="setting-row">
+                        <div className="data-stats">
+                            <span><IconMessage size={16} /> {state.chats.length} чатов</span>
+                            <span><IconFolder size={16} /> {state.spaces.length} пространств</span>
+                        </div>
+                    </div>
+                    <div className="data-actions">
+                        <button className="btn-secondary" onClick={handleExport}>
+                            Экспорт данных
+                        </button>
+                        <label className="btn-secondary file-label">
+                            Импорт данных
+                            <input type="file" accept=".json" onChange={handleImport} hidden />
+                        </label>
+                        <button className="btn-danger" onClick={handleClear}>
+                            Очистить все данные
+                        </button>
                     </div>
                 </div>
             </div>
+
+            <div className="settings-sidebar">
+                <div className="sidebar-section">
+                    <h2 style={{ fontSize: '14px', marginBottom: '16px' }}>Модель по умолчанию</h2>
+                    {(() => {
+                        const allModels = [...MODELS, ...ALL_POLZA_MODELS];
+                        const currentModel = allModels.find(m => m.id === (state.settings.defaultModel || 'gpt-4o'));
+                        return currentModel ? (
+                            <div className="model-info-card" style={{ marginBottom: '20px' }}>
+                                <div className="model-info-label">Активная модель</div>
+                                <div className="model-info-name">{currentModel.name}</div>
+                                <div className="model-info-desc">{currentModel.desc}</div>
+                                {(currentModel.pricing || currentModel.capabilities) && (
+                                    <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid var(--border-light)', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                        {currentModel.pricing && (
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '11px', color: 'var(--text-secondary)' }}>
+                                                <span>Стоимость (1M):</span>
+                                                <span style={{ fontWeight: 500, color: 'var(--text-primary)' }}>{currentModel.pricing.prompt} / {currentModel.pricing.completion}</span>
+                                            </div>
+                                        )}
+                                        {currentModel.capabilities && (
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '11px', color: 'var(--text-secondary)' }}>
+                                                <span>Возможности:</span>
+                                                <div style={{ display: 'flex', gap: '6px', opacity: 0.8, color: 'var(--accent-light)' }}>
+                                                    {currentModel.capabilities.text && <span title="Текст"><IconFileText size={14} /></span>}
+                                                    {currentModel.capabilities.image && <span title="Изображения"><IconImage size={14} /></span>}
+                                                    {currentModel.capabilities.file && <span title="Файлы"><IconAttachment size={14} /></span>}
+                                                    {currentModel.capabilities.audio && <span title="Аудио"><IconAudio size={14} /></span>}
+                                                    {currentModel.capabilities.video && <span title="Видео"><IconVideo size={14} /></span>}
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+                        ) : null;
+                    })()}
+
+                    <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '12px' }}>
+                        Выберите модель, которая будет использоваться по умолчанию для новых чатов.
+                    </p>
+
+                    <ModelSelector
+                        model={state.settings.defaultModel || 'gpt-4o'}
+                        onModelChange={(val) => handleSave('defaultModel', val)}
+                        direction="down"
+                        inline={true}
+                    />
+                </div>
+            </div>
         </div>
+        </div >
     );
 }
