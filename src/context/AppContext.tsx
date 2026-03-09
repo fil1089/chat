@@ -25,6 +25,7 @@ const initialState: AppState = {
         imageQuality: 'high',
         enableReasoning: false,
         enableWebSearch: false,
+        autoTranslate: false,
     },
     sidebarOpen: typeof window !== 'undefined' ? window.innerWidth > 768 : true,
     storageReady: false,

@@ -54,6 +54,44 @@ export interface PolzaStreamParams {
     onAnnotations?: (annotations: any[]) => void;
     onHistoryFix?: () => void;
     signal?: AbortSignal;
+    enableAutoTranslate?: boolean;
+}
+
+/**
+ * Вспомогательная функция для быстрого перевода текста через дешевую модель
+ */
+export async function translateText(text: string, targetLang: 'en' | 'ru', apiKey: string): Promise<string> {
+    if (!text || !text.trim()) return text;
+
+    // Используем максимально дешевую модель для перевода
+    // Gemma 3n 4B - отличный выбор (1.68 руб / 1М токенов)
+    const model = 'google/gemma-3-4b-it';
+
+    const prompt = targetLang === 'en'
+        ? `Translate the following text to English. Output ONLY the translation without any preamble or quotes:\n\n${text}`
+        : `Переведи следующий текст на русский язык. Выведи ТОЛЬКО перевод без лишних слов, вступлений и кавычек:\n\n${text}`;
+
+    try {
+        const response = await fetch(`${API_URLS.polza}/v1/chat/completions`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${apiKey}`,
+            },
+            body: JSON.stringify({
+                model,
+                messages: [{ role: 'user', content: prompt }],
+                temperature: 0.1,
+            }),
+        });
+
+        if (!response.ok) return text; // Fallback to original if translation fails
+        const data = await response.json();
+        return data.choices[0]?.message?.content?.trim() || text;
+    } catch (e) {
+        console.error('Translation failed:', e);
+        return text;
+    }
 }
 
 export async function streamResponsePolza({
@@ -69,6 +107,7 @@ export async function streamResponsePolza({
     onStatus,
     onAnnotations,
     signal,
+    enableAutoTranslate,
 }: PolzaStreamParams): Promise<void> {
     if (!apiKey) {
         throw new Error('Укажите API ключ Polza.ai в настройках');
@@ -76,6 +115,26 @@ export async function streamResponsePolza({
 
     try {
         let modifiedMessages = [...messages];
+
+        // Авто-перевод входящего сообщения
+        if (enableAutoTranslate && messages.length > 0) {
+            const lastMsg = messages[messages.length - 1];
+            if (lastMsg.role === 'user' && typeof lastMsg.content === 'string') {
+                // Простая проверка на наличие кириллицы
+                const hasCyrillic = /[а-яА-ЯёЁ]/.test(lastMsg.content);
+                if (hasCyrillic) {
+                    if (onStatus) onStatus({ type: 'info', message: 'Перевод запроса...' });
+                    const translated = await translateText(lastMsg.content, 'en', apiKey);
+                    modifiedMessages[modifiedMessages.length - 1] = {
+                        ...lastMsg,
+                        content: translated
+                    };
+                    // Добавляем инструкцию отвечать на английском для экономии
+                    systemInstructions = (systemInstructions ? systemInstructions + '\n\n' : '') +
+                        "IMPORTANT: Always respond in English to save tokens. Your response will be automatically translated back to the user's language.";
+                }
+            }
+        }
 
         // Prepend system prompt if provided
         let systemPrompt = '';
@@ -223,6 +282,14 @@ export async function streamResponsePolza({
                 }
             }
         }
+
+        // Авто-перевод исходящего сообщения в самом конце
+        if (enableAutoTranslate && fullContent.trim()) {
+            if (onStatus) onStatus({ type: 'info', message: 'Перевод ответа...' });
+            const translatedContent = await translateText(fullContent, 'ru', apiKey);
+            onUpdate(translatedContent);
+        }
+
     } catch (error: any) {
         console.error('[PolzaAPI] Error:', error);
         throw error;

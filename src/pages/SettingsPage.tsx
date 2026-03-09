@@ -157,6 +157,30 @@ export default function SettingsPage() {
                     </div>
 
                     <div className="settings-section">
+                        <h2>Опции</h2>
+                        <div className="setting-row">
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '20px' }}>
+                                <div style={{ flex: 1 }}>
+                                    <label style={{ marginBottom: '4px', display: 'block', fontWeight: 500 }}>Экономия токенов (Авто-перевод)</label>
+                                    <p className="setting-hint" style={{ marginTop: 0, fontSize: '12px' }}>
+                                        Автоматически переводит ваш запрос на английский и ответ обратно на русский.
+                                        Это позволяет экономить до 70% токенов на англоязычных моделях.
+                                    </p>
+                                </div>
+                                <div className="toggle-switch">
+                                    <input
+                                        type="checkbox"
+                                        id="auto-translate"
+                                        checked={state.settings.autoTranslate || false}
+                                        onChange={(e) => dispatch({ type: 'UPDATE_SETTINGS', payload: { autoTranslate: e.target.checked } as any })}
+                                    />
+                                    <label htmlFor="auto-translate"></label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="settings-section">
                         <h2>Данные</h2>
                         <div className="setting-row">
                             <div className="data-stats">

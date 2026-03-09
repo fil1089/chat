@@ -198,6 +198,7 @@ export default function ChatView() {
             systemInstructions: activeSpace?.instructions || '',
             fileContents: activeSpace?.files || [],
             signal: controllerRef.current?.signal,
+            enableAutoTranslate: state.settings.autoTranslate,
             onUpdate: (fullText: string) => {
                 fullResponse = fullText;
                 const now = Date.now();

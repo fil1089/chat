@@ -53,6 +53,7 @@ export interface Settings {
     polzaApiKey: string;
     youApiKey: string;
     hfToken: string;
+    autoTranslate?: boolean;
     defaultModel: string;
     theme: string;
     imageSize?: string;
