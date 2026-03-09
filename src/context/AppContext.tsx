@@ -19,7 +19,7 @@ const initialState: AppState = {
         polzaApiKey: '',
         youApiKey: '',
         hfToken: '',
-        defaultModel: 'gpt-4o',
+        defaultModel: 'openai/gpt-4o',
         theme: 'dark',
         imageSize: '1024x1024',
         imageQuality: 'high',

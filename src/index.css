@@ -1791,9 +1791,9 @@ input:checked+.toggle-slider:before {
 .model-selector-dropdown {
   position: absolute;
   bottom: calc(100% + 16px);
-  left: 0;
+  right: 0;
   width: 750px;
-  max-width: calc(100vw - 32px);
+  max-width: calc(100vw - 40px);
   background: #1a1a24;
   border: 1px solid var(--border-light);
   border-radius: var(--radius-lg);
@@ -1801,6 +1801,12 @@ input:checked+.toggle-slider:before {
   z-index: 10000;
   overflow: hidden;
   animation: fadeInUp 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* If parent is too small or if we want to ensure it doesn't go off-screen when left-aligned */
+.model-selector-dropdown.left-aligned {
+  left: 0;
+  right: auto;
 }
 
 .model-selector-dropdown.down {
@@ -2001,11 +2007,17 @@ input:checked+.toggle-slider:before {
   font-size: 13px;
   color: var(--text-primary);
   font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .model-item-type {
   font-size: 10px;
   color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .model-item.active .model-item-name {
@@ -2943,8 +2955,16 @@ input:checked+.toggle-slider:before {
 }
 
 .settings-model-wrapper .model-selector-dropdown {
-  width: 100%;
-  max-width: 100%;
+  width: 300px !important;
+  max-width: 300px !important;
+  min-width: 0 !important;
+  left: -24px !important;
+  right: auto !important;
+  box-sizing: border-box !important;
+  max-height: 70vh !important;
+  border-radius: 0 !important;
+  border-left: none !important;
+  border-right: none !important;
 }
 
 .settings-section h2 {
@@ -3843,7 +3863,8 @@ input:checked+.toggle-slider:before {
   background: var(--surface-glass);
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  overflow: visible;
+  /* Changed from hidden to allow dropdowns */
 }
 
 .right-panel-close-btn {
@@ -3861,6 +3882,8 @@ input:checked+.toggle-slider:before {
 .chat-layout-with-nav {
   display: flex;
   height: 100%;
+  width: 100% !important;
+  max-width: none !important;
   overflow: hidden;
 }
 
@@ -5384,45 +5407,44 @@ input:checked+.toggle-slider:before {
 
 /* ===== Phase 4 Layout Adjustments ===== */
 
-/* Settings Page Layout Redesign */
-.settings-layout {
-  display: flex;
-  flex: 1;
-  width: 100%;
-  height: 100%;
-  gap: 0;
-  margin: 0;
-}
-
+/* Settings Page Layout */
 .settings-main {
   flex: 1;
+  width: 100% !important;
+  max-width: none !important;
   overflow-y: auto;
-  padding: 32px 40px;
+  padding: 40px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .settings-main .page-header {
+  width: 100%;
   max-width: 680px;
   margin: 0 auto 28px auto;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 12px;
 }
 
 .settings-section {
+  width: 100%;
   max-width: 680px;
-  margin: 0 auto 24px auto;
   background: var(--bg-secondary);
   border: 1px solid var(--border);
   border-radius: var(--radius-xl);
   padding: 24px 32px;
+  margin: 0 auto 24px auto;
 }
 
-.settings-sidebar {
-  width: 320px;
-  min-width: 320px;
-  background: var(--bg-secondary);
-  border-left: 1px solid var(--border);
-  display: flex;
-  flex-direction: column;
-  padding: 24px;
-  overflow-y: auto;
+.settings-section h2 {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 18px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 12px;
 }
 
 @media (max-width: 1024px) {
@@ -5711,35 +5733,4 @@ input:checked+.toggle-slider:before {
 }
 
 /* ===== Settings Page Layout ===== */
-.settings-layout {
-  display: grid;
-  grid-template-columns: 1fr 340px;
-  gap: 32px;
-  align-items: start;
-}
-
-.settings-main {
-  min-width: 0;
-}
-
-.settings-sidebar {
-  position: sticky;
-  top: 24px;
-}
-
-.settings-sidebar .sidebar-section h2 {
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--text-primary);
-  margin-bottom: 16px;
-}
-
-@media (max-width: 900px) {
-  .settings-layout {
-    grid-template-columns: 1fr;
-  }
-
-  .settings-sidebar {
-    position: static;
-  }
-}
+/* Legacy settings grid removed */
