@@ -5,8 +5,8 @@ const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
     || import.meta.env.NEXT_PUBLIC_SUPABASE_URL
     || 'https://zhqpqkqfxnwwhqdyfapf.supabase.co';
 
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
-    || import.meta.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-    || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpocXBxa3FmeG53d2hxZHlmYXBmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5MDY2MzIsImV4cCI6MjA4ODQ4MjYzMn0.iMkDK_umIQUjPm3db4FsEFidIK9FN_GD40EcecjcPkw';
+const supabasePublishableKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
+    || import.meta.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+    || 'sb_publishable_F8junFMDzzXyUjk3Fyv39g_MZjNJn5Pnc8pI3w9YhXF2r';
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+export const supabase = createClient(supabaseUrl, supabasePublishableKey);
