@@ -2,7 +2,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { useApp } from '../context/AppContext';
 import { useAuth } from '../context/AuthContext';
 import { useGlobalAuthModal } from '../App';
-import { streamResponse, MODELS } from '../services/youApi';
+import { useNavigate } from 'react-router-dom';
 import { streamResponsePolza, ALL_POLZA_MODELS } from '../services/polzaApi';
 import ChatInput from './ChatInput';
 import MessageBubble from './MessageBubble';
@@ -20,7 +20,8 @@ interface StreamStatus {
 export default function ChatView() {
     const { state, dispatch } = useApp();
     const { user } = useAuth();
-    const { showAuthModal, showApiModal } = useGlobalAuthModal();
+    const { showAuthModal } = useGlobalAuthModal();
+    const navigate = useNavigate();
     const [isStreaming, setIsStreaming] = useState(false);
     const [streamStatus, setStreamStatus] = useState<StreamStatus | null>(null);
     const controllerRef = useRef<AbortController | null>(null);
@@ -82,9 +83,9 @@ export default function ChatView() {
     };
 
     const runStreaming = useCallback(async (chat: Chat, targetMessageId?: string, overrideModel?: string, bypassCache?: boolean) => {
-        const currentApiKey = state.settings.apiProvider === 'polza' ? state.settings.polzaApiKey : state.settings.apiKey;
+        const currentApiKey = state.settings.polzaApiKey;
         if (!currentApiKey) {
-            showApiModal();
+            navigate('/settings');
             return;
         }
         if (isStreaming) return;
@@ -175,8 +176,7 @@ export default function ChatView() {
             dispatch({ type: 'UPDATE_CHAT', payload: updatedChat });
         };
 
-        const isPolza = state.settings.apiProvider === 'polza';
-        const streamCallback = isPolza ? streamResponsePolza({
+        const streamCallback = streamResponsePolza({
             apiKey: state.settings.polzaApiKey,
             model: currentModel,
             messages: messagesToSend.map(m => {
@@ -219,181 +219,37 @@ export default function ChatView() {
                     setStreamStatus(status as any);
                 }
             }
-        }) : streamResponse({
-            apiKey: state.settings.apiKey,
-            youApiKey: state.settings.youApiKey,
-            model: currentModel,
-            messages: messagesToSend,
-            systemInstructions: activeSpace?.instructions || '',
-            fileContents: activeSpace?.files || [],
-            imageSize: state.settings.imageSize || '1024x1024',
-            imageQuality: state.settings.imageQuality || 'high',
-            enableReasoning: state.settings.enableReasoning,
-            bypassCache,
-            onDelta: (delta: string) => {
-                fullResponse += delta;
-
-                let updatedMessages;
-                if (targetMessageId) {
-                    updatedMessages = chat.messages.map(m => {
-                        if (m.id !== targetMessageId) return m;
-                        // Handle versions
-                        const versions = [...(m.versions || [])];
-                        const activeIdx = m.activeVersion ?? 0;
-                        if (versions[activeIdx]) {
-                            versions[activeIdx] = {
-                                ...versions[activeIdx],
-                                content: fullResponse,
-                                model: currentModel,
-                                usage: capturedUsage || undefined,
-                                timestamp: Date.now(),
-                                reasoningContent: capturedReasoning || undefined
-                            };
-                        }
-                        return { ...m, content: fullResponse, versions, usage: capturedUsage || undefined, reasoningContent: capturedReasoning || undefined };
-                    });
-                } else {
-                    updatedMessages = [...chat.messages, { ...assistantMessage, content: fullResponse, model: currentModel, usage: capturedUsage || undefined, reasoningContent: capturedReasoning || undefined }];
-                }
-
-                const updatedChat: Chat = {
-                    ...chat,
-                    messages: updatedMessages,
-                    updatedAt: Date.now(),
-                };
-                dispatch({ type: 'UPDATE_CHAT', payload: updatedChat });
-            },
-            onStatus: (status: StatusEvent) => {
-                if (status.type === 'reasoning') {
-                    capturedReasoning += status.message;
-                    // Trigger UI update
-                    if (!fullResponse) {
-                        let updatedMessages;
-                        if (targetMessageId) {
-                            updatedMessages = chat.messages.map(m => {
-                                if (m.id !== targetMessageId) return m;
-                                const versions = [...(m.versions || [])];
-                                const activeIdx = m.activeVersion ?? 0;
-                                if (versions[activeIdx]) {
-                                    versions[activeIdx] = {
-                                        ...versions[activeIdx],
-                                        content: fullResponse,
-                                        model: currentModel,
-                                        usage: capturedUsage || undefined,
-                                        timestamp: Date.now(),
-                                        reasoningContent: capturedReasoning || undefined
-                                    };
-                                }
-                                return { ...m, content: fullResponse, versions, usage: capturedUsage || undefined, reasoningContent: capturedReasoning || undefined };
-                            });
-                        } else {
-                            updatedMessages = [...chat.messages, { ...assistantMessage, content: fullResponse, model: currentModel, usage: capturedUsage || undefined, reasoningContent: capturedReasoning || undefined }];
-                        }
-                        const updatedChat: Chat = {
-                            ...chat,
-                            messages: updatedMessages,
-                            updatedAt: Date.now(),
-                        };
-                        dispatch({ type: 'UPDATE_CHAT', payload: updatedChat });
-                    }
-                } else {
-                    setStreamStatus(status);
-                }
-            },
-            onUsage: (usage) => {
-                capturedUsage = usage;
-            },
-            onDone: () => {
-                setIsStreaming(false);
-                setStreamStatus(null);
-
-                let finalMessages;
-                if (targetMessageId) {
-                    finalMessages = chat.messages.map(m => {
-                        if (m.id !== targetMessageId) return m;
-                        const versions = [...(m.versions || [])];
-                        const activeIdx = m.activeVersion ?? 0;
-                        if (versions[activeIdx]) {
-                            versions[activeIdx] = {
-                                ...versions[activeIdx],
-                                content: fullResponse,
-                                model: currentModel,
-                                usage: capturedUsage || undefined,
-                                timestamp: Date.now(),
-                                reasoningContent: capturedReasoning || undefined
-                            };
-                        }
-                        return { ...m, content: fullResponse, versions, usage: capturedUsage || undefined, reasoningContent: capturedReasoning || undefined };
-                    });
-                } else {
-                    finalMessages = [...chat.messages, { ...assistantMessage, content: fullResponse, model: currentModel, usage: capturedUsage || undefined, reasoningContent: capturedReasoning || undefined }];
-                }
-
-                const finalChat: Chat = {
-                    ...chat,
-                    messages: finalMessages,
-                    updatedAt: Date.now(),
-                };
-                dispatch({ type: 'UPDATE_CHAT', payload: finalChat });
-            },
-            onError: (error: string) => {
-                setIsStreaming(false);
-                setStreamStatus(null);
-                const errorText = `Ошибка: ${error}`;
-
-                let errorMessages;
-                if (targetMessageId) {
-                    errorMessages = chat.messages.map(m => {
-                        if (m.id !== targetMessageId) return m;
-                        return { ...m, content: errorText };
-                    });
-                } else {
-                    errorMessages = [...chat.messages, { ...assistantMessage, content: errorText }];
-                }
-
-                const errorChat: Chat = {
-                    ...chat,
-                    messages: errorMessages,
-                    updatedAt: Date.now(),
-                };
-                dispatch({ type: 'UPDATE_CHAT', payload: errorChat });
-            },
         });
 
         // Polza doesn't return an AbortController in the same way right now, but we'll mock the completion chain
-        if (isPolza) {
-            (streamCallback as Promise<void>).then(() => {
-                setIsStreaming(false);
-                setStreamStatus(null);
-                updateUI(fullResponse, capturedReasoning, capturedAnnotations, capturedUsage);
-            }).catch((error: any) => {
-                setIsStreaming(false);
-                setStreamStatus(null);
-                const errorText = `Ошибка: ${error.message || error}`;
+        (streamCallback as Promise<void>).then(() => {
+            setIsStreaming(false);
+            setStreamStatus(null);
+            updateUI(fullResponse, capturedReasoning, capturedAnnotations, capturedUsage);
+        }).catch((error: any) => {
+            setIsStreaming(false);
+            setStreamStatus(null);
+            const errorText = `Ошибка: ${error.message || error}`;
 
-                let errorMessages;
-                if (targetMessageId) {
-                    errorMessages = chat.messages.map(m => {
-                        if (m.id !== targetMessageId) return m;
-                        return { ...m, content: errorText };
-                    });
-                } else {
-                    errorMessages = [...chat.messages, { ...assistantMessage, content: errorText }];
-                }
+            let errorMessages;
+            if (targetMessageId) {
+                errorMessages = chat.messages.map(m => {
+                    if (m.id !== targetMessageId) return m;
+                    return { ...m, content: errorText };
+                });
+            } else {
+                errorMessages = [...chat.messages, { ...assistantMessage, content: errorText }];
+            }
 
-                const errorChat: Chat = {
-                    ...chat,
-                    messages: errorMessages,
-                    updatedAt: Date.now(),
-                };
-                dispatch({ type: 'UPDATE_CHAT', payload: errorChat });
-            });
-        } else {
-            // TypeScript type narrowing for Neuro API controller
-            controllerRef.current = streamCallback as unknown as AbortController;
-        }
+            const errorChat: Chat = {
+                ...chat,
+                messages: errorMessages,
+                updatedAt: Date.now(),
+            };
+            dispatch({ type: 'UPDATE_CHAT', payload: errorChat });
+        });
 
-    }, [state.settings.apiKey, state.settings.youApiKey, state.settings.polzaApiKey, state.settings.apiProvider, model, contextMode, contextN, activeSpace, dispatch, showApiModal]);
+    }, [state.settings.polzaApiKey, model, contextMode, contextN, activeSpace, dispatch, navigate]);
 
     // Auto-trigger response for new chats from dashboard
     useEffect(() => {
@@ -603,8 +459,7 @@ export default function ChatView() {
                 </div>
                 <div className="sidebar-section" style={{ padding: '24px' }}>
                     {(() => {
-                        const allModels = [...MODELS, ...ALL_POLZA_MODELS];
-                        const currentModel = allModels.find(m => m.id === model);
+                        const currentModel = ALL_POLZA_MODELS.find(m => m.id === model);
                         return currentModel ? (
                             <div className="model-info-card">
                                 <div className="model-info-label">Модель</div>

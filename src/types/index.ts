@@ -50,10 +50,9 @@ export interface Space {
 export type ContextMode = 'full' | 'last_n' | 'first_n' | 'system_only';
 
 export interface Settings {
-    apiKey: string;
-    youApiKey: string;
     polzaApiKey: string;
-    apiProvider: 'neuro' | 'polza';
+    youApiKey: string;
+    hfToken: string;
     defaultModel: string;
     theme: string;
     imageSize?: string;

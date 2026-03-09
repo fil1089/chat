@@ -10,11 +10,13 @@ interface ModelSelectorProps {
     onModelChange: (model: string) => void;
     direction?: 'up' | 'down';
     isMobileHeader?: boolean;
+    variant?: 'default' | 'transparent';
+    inline?: boolean;
 }
 
-export default function ModelSelector({ model, onModelChange, direction = 'up', isMobileHeader = false }: ModelSelectorProps) {
+export default function ModelSelector({ model, onModelChange, direction = 'up', isMobileHeader = false, variant = 'default', inline = false }: ModelSelectorProps) {
     const { state } = useApp();
-    const isPolza = state.settings.apiProvider === 'polza';
+    const isPolza = true;
 
     const currentModel = isPolza
         ? ALL_POLZA_MODELS.find((m) => m.id === model)
@@ -68,12 +70,21 @@ export default function ModelSelector({ model, onModelChange, direction = 'up', 
     const searchRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
+        if (!inline && open && searchRef.current) {
+            searchRef.current.focus();
+        }
+    }, [open, inline]);
+
+    useEffect(() => {
+        if (inline) return;
         const handleClickOutside = (e: MouseEvent) => {
-            if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+            if (ref.current && !ref.current.contains(e.target as Node)) {
+                setOpen(false);
+            }
         };
         document.addEventListener('mousedown', handleClickOutside);
         return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, []);
+    }, [inline]);
 
     useEffect(() => {
         if (open && searchRef.current) {
@@ -148,22 +159,24 @@ export default function ModelSelector({ model, onModelChange, direction = 'up', 
     };
 
     return (
-        <div className="custom-model-selector" ref={ref}>
-            <div
-                className={`model-selector-trigger ${open ? 'open' : ''}`}
-                onClick={() => setOpen(!open)}
-            >
-                <div className="model-trigger-content">
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <span className="model-name">{currentModel?.name || model}</span>
-                        {currentModel?.isActual && <span className="model-badge" style={{ background: 'rgba(255, 255, 255, 0.05)', color: 'var(--text-secondary)', border: '1px solid var(--border)', fontSize: '10px', padding: '2px 6px', fontWeight: 'normal', letterSpacing: '0.2px', textTransform: 'lowercase' }}>актуальная</span>}
+        <div className={`custom-model-selector ${inline ? 'inline-mode' : ''}`} ref={ref}>
+            {!inline && (
+                <div
+                    className={`model-selector-trigger ${open ? 'open' : ''} ${variant === 'transparent' ? 'transparent' : ''}`}
+                    onClick={() => setOpen(!open)}
+                >
+                    <div className="model-trigger-content">
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <span className="model-name">{currentModel?.name || model}</span>
+                            {currentModel?.isActual && <span className="model-badge" style={{ background: 'rgba(255, 255, 255, 0.05)', color: 'var(--text-secondary)', border: '1px solid var(--border)', fontSize: '10px', padding: '2px 6px', fontWeight: 'normal', letterSpacing: '0.2px', textTransform: 'lowercase' }}>актуальная</span>}
+                        </div>
                     </div>
+                    {direction === 'up' ? <IconChevronUp size={14} /> : <IconChevronDown size={14} />}
                 </div>
-                {direction === 'up' ? <IconChevronUp size={14} /> : <IconChevronDown size={14} />}
-            </div>
+            )}
 
-            {open && (
-                <div className={`model-selector-dropdown ${direction === 'down' ? 'down' : ''}`}>
+            {(open || inline) && (
+                <div className={`model-selector-dropdown ${direction === 'down' ? 'down' : ''} ${inline ? 'inline' : ''}`}>
                     <div style={{ padding: '8px', borderBottom: '1px solid var(--border)' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '6px 10px', background: 'rgba(255,255,255,0.04)', borderRadius: '8px', marginBottom: '8px' }}>
                             <IconSearch size={14} />

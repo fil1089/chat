@@ -1329,13 +1329,13 @@ input:checked+.toggle-slider:before {
 }
 
 .chat-input-wrapper {
-  background: var(--bg-elevated);
+  background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  transition: var(--transition);
-  position: relative;
+  border-radius: var(--radius-xl);
   display: flex;
   flex-direction: column;
+  position: relative;
+  /* Removed overflow: hidden so popup settings are visible outside the input pill bounds */
 }
 
 .chat-input-attachments {
@@ -1748,9 +1748,21 @@ input:checked+.toggle-slider:before {
   user-select: none;
 }
 
+.model-selector-trigger.transparent {
+  background: transparent;
+  border-color: transparent;
+  padding: 4px 8px;
+  /* Slightly compacted since there is no border */
+}
+
 .model-selector-trigger:hover {
   background: rgba(255, 255, 255, 0.08);
   border-color: var(--border-hover);
+}
+
+.model-selector-trigger.transparent:hover {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: transparent;
 }
 
 .model-selector-trigger.open {
@@ -1794,7 +1806,16 @@ input:checked+.toggle-slider:before {
 .model-selector-dropdown.down {
   bottom: auto;
   top: calc(100% + 8px);
+  transform-origin: top center;
   animation: fadeIn 0.2s ease-out;
+}
+
+.model-selector-dropdown.inline {
+  position: static;
+  width: 100%;
+  margin-top: 8px;
+  box-shadow: none;
+  border: 1px solid var(--border);
 }
 
 .custom-model-selector.standalone .model-selector-dropdown {
@@ -4689,12 +4710,31 @@ input:checked+.toggle-slider:before {
 
 /* ===== Sidebar User Block ===== */
 .sidebar-user-block {
-  padding: 8px 12px 12px;
+  padding: 16px;
   border-top: 1px solid var(--border);
   margin-top: auto;
   display: flex;
-  align-items: center;
+  flex-direction: column;
   gap: 8px;
+}
+
+.sidebar-balance-plate {
+  background: var(--surface-glass);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  margin: 4px 16px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.sidebar-balance-plate .balance-amount {
+  color: var(--text-primary);
+  font-weight: 600;
+  font-size: 14px;
 }
 
 .sidebar-user-email {

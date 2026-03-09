@@ -21,7 +21,7 @@ export default function Sidebar({ onLogout, onLogin, userEmail }: SidebarProps) 
     const [balance, setBalance] = useState<string | null>(null);
 
     useEffect(() => {
-        if (state.settings.apiProvider === 'polza' && state.settings.polzaApiKey && userEmail) {
+        if (state.settings.polzaApiKey && userEmail) {
             checkPolzaBalance(state.settings.polzaApiKey).then(b => {
                 if (b) {
                     const parsed = parseFloat(b);
@@ -31,7 +31,7 @@ export default function Sidebar({ onLogout, onLogin, userEmail }: SidebarProps) 
                 }
             });
         }
-    }, [state.settings.apiProvider, state.settings.polzaApiKey, userEmail]);
+    }, [state.settings.polzaApiKey, userEmail]);
 
     const handleNewChat = () => {
         dispatch({ type: 'SET_ACTIVE_CHAT', payload: null });
@@ -148,6 +148,13 @@ export default function Sidebar({ onLogout, onLogin, userEmail }: SidebarProps) 
                     </button>
                 </div>
 
+                {balance !== null && (
+                    <div className="sidebar-balance-plate">
+                        <span>Баланс Polza</span>
+                        <span className="balance-amount">{balance} ₽</span>
+                    </div>
+                )}
+
                 <div className="sidebar-search">
                     <input
                         type="text"
@@ -222,11 +229,6 @@ export default function Sidebar({ onLogout, onLogin, userEmail }: SidebarProps) 
                     {userEmail ? (
                         <>
                             <div className="sidebar-user-email" title={userEmail}>{userEmail}</div>
-                            {balance !== null && (
-                                <div className="sidebar-balance" style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '8px', padding: '0 8px' }}>
-                                    Баланс: <span style={{ color: 'var(--text-primary)', fontWeight: 500 }}>{balance} ₽</span>
-                                </div>
-                            )}
                             {onLogout && (
                                 <button className="sidebar-logout-btn" onClick={onLogout} title="Выйти">
                                     <IconClose size={14} />

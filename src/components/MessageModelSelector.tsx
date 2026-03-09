@@ -15,7 +15,7 @@ export default function MessageModelSelector({ onSelect }: MessageModelSelectorP
     const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
     const ref = useRef<HTMLDivElement>(null);
 
-    const isPolza = state.settings.apiProvider === 'polza';
+    const isPolza = true;
     const grouped = isPolza ? getPolzaModelsByCategory() : getChatModelsByCategory();
 
     useEffect(() => {

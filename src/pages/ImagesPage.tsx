@@ -10,7 +10,7 @@ import type { Chat, Attachment, ContextMode } from '../types';
 export default function ImagesPage() {
     const navigate = useNavigate();
     const { state, dispatch } = useApp();
-    const isPolza = state.settings.apiProvider === 'polza';
+    const isPolza = true;
     const defaultImageModel = isPolza ? 'openai/dall-e-3' : 'gemini-3-pro-image-preview';
 
     const [editingChatId, setEditingChatId] = useState<string | null>(null);

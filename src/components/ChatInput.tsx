@@ -201,7 +201,7 @@ export default function ChatInput({ onSend, model, onModelChange, isStreaming, o
         const files = Array.from(e.target.files || []);
         if (files.length === 0) return;
 
-        const isPolza = state.settings.apiProvider === 'polza';
+        const isPolza = true;
         const results = await Promise.all(files.map(f => readFile(f, isPolza)));
         const newAttachments = results.flat();
         setAttachments(prev => [...prev, ...newAttachments]);
@@ -242,7 +242,7 @@ export default function ChatInput({ onSend, model, onModelChange, isStreaming, o
         setIsDragging(false);
         const files = Array.from(e.dataTransfer.files || []);
         if (files.length > 0) {
-            const isPolza = state.settings.apiProvider === 'polza';
+            const isPolza = true;
             const results = await Promise.all(files.map(f => readFile(f, isPolza)));
             const newAttachments = results.flat();
             setAttachments(prev => [...prev, ...newAttachments]);
@@ -262,7 +262,7 @@ export default function ChatInput({ onSend, model, onModelChange, isStreaming, o
 
         if (files.length > 0) {
             e.preventDefault(); // Prevent default if we found files, let text paste naturally otherwise
-            const isPolza = state.settings.apiProvider === 'polza';
+            const isPolza = true;
             const results = await Promise.all(files.map(f => readFile(f, isPolza)));
             const newAttachments = results.flat();
             setAttachments(prev => [...prev, ...newAttachments]);
@@ -293,25 +293,26 @@ export default function ChatInput({ onSend, model, onModelChange, isStreaming, o
             <div className="chat-input-header-area" style={{ display: 'flex', alignItems: 'center', marginBottom: '8px', paddingLeft: '8px' }}>
                 {!hideModelSelector && (
                     <div className="desktop-only" style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                        <ModelSelector model={model} onModelChange={onModelChange} direction={direction} />
+                        <ModelSelector model={model} onModelChange={onModelChange} direction={direction} variant="transparent" />
                     </div>
                 )}
-            </div>
-
-            <div className="chat-input-wrapper" style={{ borderRadius: '24px', background: 'var(--bg-elevated)', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
                 {attachments.length > 0 && (
-                    <div className="chat-input-attachments" style={{ padding: '12px 16px 4px', display: 'flex', flexWrap: 'wrap', gap: '8px', borderBottom: '1px solid var(--border-light)' }}>
+                    <div className="chat-input-attachments-inline" style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginLeft: hideModelSelector ? '0' : '12px' }}>
                         {attachments.map((file, i) => (
-                            <div key={i} className="attachment-chip">
+                            <div key={i} className="attachment-chip" style={{ background: 'var(--surface-glass)', border: '1px solid var(--border)', borderRadius: '16px', padding: '4px 10px', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px' }}>
                                 <IconFileText size={14} />
-                                <span className="attachment-name">{file.name}</span>
-                                <button className="remove-attachment" onClick={() => removeAttachment(i)}>
+                                <span className="attachment-name" style={{ maxWidth: '150px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{file.name}</span>
+                                <button className="remove-attachment" onClick={() => removeAttachment(i)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: 0, display: 'flex' }}>
                                     <IconClose size={12} />
                                 </button>
                             </div>
                         ))}
                     </div>
                 )}
+            </div>
+
+            <div className="chat-input-wrapper" style={{ borderRadius: '24px', background: 'var(--bg-elevated)', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+                {/* Attachments relocated to header */}
 
                 <div className="chat-input-main-row" style={{ display: 'flex', alignItems: 'flex-end', padding: '8px 12px', gap: '8px' }}>
                     <button
@@ -408,7 +409,7 @@ export default function ChatInput({ onSend, model, onModelChange, isStreaming, o
                                                 </span>
                                             </div>
                                         )}
-                                        {state.settings.apiProvider === 'polza' && onReasoningChange && (
+                                        {true === true && onReasoningChange && (
                                             <div className="settings-field" style={{ marginTop: '8px', paddingTop: '12px', borderTop: '1px solid var(--border)' }}>
                                                 <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', cursor: 'pointer', margin: 0 }}>
                                                     <span style={{ fontSize: '13px', textTransform: 'none', fontWeight: 600 }}>Токены рассуждений</span>
@@ -423,7 +424,7 @@ export default function ChatInput({ onSend, model, onModelChange, isStreaming, o
                                                 </label>
                                             </div>
                                         )}
-                                        {state.settings.apiProvider === 'polza' && onWebSearchChange && (
+                                        {true === true && onWebSearchChange && (
                                             <div className="settings-field" style={{ marginTop: '8px', paddingTop: '12px', borderTop: '1px solid var(--border)' }}>
                                                 <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', cursor: 'pointer', margin: 0 }}>
                                                     <span style={{ fontSize: '13px', textTransform: 'none', fontWeight: 600 }}>Поиск в интернете</span>

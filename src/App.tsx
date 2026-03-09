@@ -11,71 +11,12 @@ import ImagesPage from './pages/ImagesPage';
 import HistoryPage from './pages/HistoryPage';
 import AuthPage from './pages/AuthPage';
 import { useApp } from './context/AppContext';
-import { IconMenu, IconSettings, IconClose, IconKey, IconLogo } from './components/Icons';
-
-function NoApiKeyModal({ onClose, onGoSettings }: { onClose: () => void; onGoSettings: () => void }) {
-    const [provider, setProvider] = useState<'neuro' | 'polza'>('polza'); // Default to Polza since it's the app default
-
-    return (
-        <div className="no-api-modal-overlay" onClick={onClose}>
-            <div className="no-api-modal" onClick={(e) => e.stopPropagation()}>
-                <button className="no-api-modal-close" onClick={onClose}>
-                    <IconClose size={18} />
-                </button>
-                <div className="no-api-modal-icon">
-                    <IconKey size={48} />
-                </div>
-                <h2 className="no-api-modal-title">Нужен API ключ</h2>
-                <p className="no-api-modal-desc" style={{ marginBottom: '16px' }}>
-                    Для работы с ИИ выберите провайдера и введите ключ в настройках.
-                </p>
-                <div style={{ display: 'flex', gap: '8px', marginBottom: '16px', justifyContent: 'center' }}>
-                    <button
-                        className={`auth - tab ${provider === 'polza' ? 'active' : ''} `}
-                        onClick={() => setProvider('polza')}
-                        style={{ flex: 1 }}
-                    >Polza API</button>
-                    <button
-                        className={`auth - tab ${provider === 'neuro' ? 'active' : ''} `}
-                        onClick={() => setProvider('neuro')}
-                        style={{ flex: 1 }}
-                    >Neuro API</button>
-                </div>
-                <div style={{ textAlign: 'center', marginBottom: '24px' }}>
-                    <a
-                        className="no-api-modal-link"
-                        href={provider === 'neuro' ? "https://neuroapi.host/dashboard/tokens" : "https://polza.ai/dashboard/api-keys"}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        style={{ fontSize: '15px' }}
-                    >
-                        {provider === 'neuro' ? "Получить ключ на neuroapi.host →" : "Получить ключ на polza.ai →"}
-                    </a>
-                </div>
-                <div className="no-api-modal-actions">
-                    <button className="btn-secondary" onClick={onClose}>Позже</button>
-                    <button className="btn-primary" onClick={onGoSettings}>
-                        <IconSettings size={16} />
-                        Открыть настройки
-                    </button>
-                </div>
-            </div>
-        </div>
-    );
-}
+import { IconMenu, IconLogo } from './components/Icons';
 
 function Layout() {
     const { state, dispatch } = useApp();
     const { logout, user } = useAuth();
     const navigate = useNavigate();
-    const [modalDismissed, setModalDismissed] = useState(true); // default true so it never shows eagerly
-
-    const showNoApiModal = false; // We use Context to trigger it manually now instead of Layout intercept
-
-    const handleGoSettings = () => {
-        setModalDismissed(true);
-        navigate('/settings');
-    };
 
     if (!state.storageReady) {
         return (
@@ -128,12 +69,6 @@ function Layout() {
                     <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>
             </main>
-            {showNoApiModal && (
-                <NoApiKeyModal
-                    onClose={() => setModalDismissed(true)}
-                    onGoSettings={handleGoSettings}
-                />
-            )}
         </div>
     );
 }
@@ -142,7 +77,6 @@ import AuthModal from './components/AuthModal';
 
 export const GlobalAuthModalContext = React.createContext<{
     showAuthModal: (title?: string) => void;
-    showApiModal: () => void;
 } | null>(null);
 
 export function useGlobalAuthModal() {
@@ -156,18 +90,9 @@ function MainApp() {
     const [authModalVisible, setAuthModalVisible] = useState(false);
     const [authModalTitle, setAuthModalTitle] = useState('Необходима авторизация');
 
-    // For manual triggering of API modal
-    const [apiModalVisible, setApiModalVisible] = useState(false);
-
-    // Auth modal is only shown when manually triggered (e.g. from sidebar login button)
-
     const showAuthModal = (title?: string) => {
         if (title) setAuthModalTitle(title);
         setAuthModalVisible(true);
-    };
-
-    const showApiModal = () => {
-        setApiModalVisible(true);
     };
 
     if (isLoading) {
@@ -180,23 +105,13 @@ function MainApp() {
     }
 
     return (
-        <GlobalAuthModalContext.Provider value={{ showAuthModal, showApiModal }}>
+        <GlobalAuthModalContext.Provider value={{ showAuthModal }}>
             <AppProvider>
                 <Layout />
                 {(!user && authModalVisible) && (
                     <AuthModal
                         onClose={() => setAuthModalVisible(false)}
                         title={authModalTitle}
-                    />
-                )}
-                {apiModalVisible && (
-                    <NoApiKeyModal
-                        onClose={() => setApiModalVisible(false)}
-                        onGoSettings={() => {
-                            setApiModalVisible(false);
-                            window.location.hash = '#/settings';
-                            // Quick hack since navigate is in Layout, but works for now or user can just click
-                        }}
                     />
                 )}
             </AppProvider>

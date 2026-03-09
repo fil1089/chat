@@ -2,10 +2,11 @@ import { useState, useEffect } from 'react';
 import { API_URLS } from '../services/apiConfig';
 import { useApp } from '../context/AppContext';
 import { getChatModelsByCategory } from '../services/youApi';
-import { checkPolzaBalance } from '../services/polzaApi';
-import { IconSettings, IconDownload, IconPlus, IconTrash, IconMessage, IconFolder, IconEye, IconEyeOff, IconCheck, IconError } from '../components/Icons';
+import { IconSettings, IconDownload, IconPlus, IconTrash, IconMessage, IconFolder, IconEye, IconEyeOff, IconCheck, IconError, IconFileText, IconImage, IconAttachment, IconAudio, IconVideo } from '../components/Icons';
 import ModelSelector from '../components/ModelSelector';
 import { exportAllData, importAllData, clearAllData } from '../services/storage';
+import { MODELS } from '../services/youApi';
+import { ALL_POLZA_MODELS } from '../services/polzaApi';
 import type { ChangeEvent } from 'react';
 
 interface TestResult {
@@ -18,37 +19,19 @@ export default function SettingsPage() {
     const [showKey, setShowKey] = useState(false);
     const [testResult, setTestResult] = useState<TestResult | null>(null);
     const [testing, setTesting] = useState(false);
-    const [balance, setBalance] = useState<string | null>(null);
-    const [isFetchingBalance, setIsFetchingBalance] = useState(false);
-
-    const fetchBalance = async () => {
-        if (state.settings.apiProvider !== 'polza' || !state.settings.polzaApiKey) return;
-        setIsFetchingBalance(true);
-        const result = await checkPolzaBalance(state.settings.polzaApiKey);
-        setBalance(result);
-        setIsFetchingBalance(false);
-    };
-
-    useEffect(() => {
-        if (state.settings.apiProvider === 'polza' && state.settings.polzaApiKey) {
-            fetchBalance();
-        }
-    }, [state.settings.apiProvider, state.settings.polzaApiKey]);
-
-    const handleSave = (key: string, value: string) => {
+    const [isEditingModel, setIsEditingModel] = useState(false); const handleSave = (key: string, value: string) => {
         dispatch({ type: 'UPDATE_SETTINGS', payload: { [key]: value } as Record<string, string> });
     };
 
     const handleTestKey = async () => {
-        const isPolza = state.settings.apiProvider === 'polza';
-        const apiKeyToTest = isPolza ? state.settings.polzaApiKey : state.settings.apiKey;
+        const apiKeyToTest = state.settings.polzaApiKey;
 
         if (!apiKeyToTest) return;
         setTesting(true);
         setTestResult(null);
 
         try {
-            const apiUrl = isPolza ? API_URLS.polza : API_URLS.neuro;
+            const apiUrl = API_URLS.polza;
 
             const response = await fetch(`${apiUrl}/v1/chat/completions`, {
                 method: 'POST',
@@ -57,7 +40,7 @@ export default function SettingsPage() {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    model: isPolza ? 'openai/gpt-4o-mini' : 'gpt-4.1-nano',
+                    model: 'openai/gpt-4o-mini',
                     messages: [{ role: 'user', content: 'Hi' }],
                     max_tokens: 5,
                 }),
@@ -138,51 +121,24 @@ export default function SettingsPage() {
                 <h2>API Конфигурация</h2>
 
                 <div className="setting-row">
-                    <label>Провайдер API</label>
-                    <div className="settings-model-wrapper">
-                        <select
-                            className="setting-select"
-                            value={state.settings.apiProvider || 'neuro'}
-                            onChange={(e) => handleSave('apiProvider', e.target.value)}
-                            style={{ padding: '8px 12px', borderRadius: '8px', background: 'var(--surface)', color: 'var(--text-primary)', border: '1px solid var(--border)', fontSize: '14px', width: '100%', outline: 'none', cursor: 'pointer' }}
-                        >
-                            <option value="neuro">Neuro API</option>
-                            <option value="polza">Polza API</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div className="setting-row">
-                    <label>API Ключ ({state.settings.apiProvider === 'polza' ? 'Polza API' : 'Neuro API'})</label>
+                    <label>API Ключ (Polza API)</label>
                     <div className="api-key-input">
-                        {state.settings.apiProvider === 'polza' ? (
-                            <input
-                                type={showKey ? 'text' : 'password'}
-                                value={state.settings.polzaApiKey || ''}
-                                onChange={(e) => handleSave('polzaApiKey', e.target.value)}
-                                placeholder="Ваш API ключ Polza.ai"
-                                autoComplete="off"
-                                data-1p-ignore
-                                data-lpignore="true"
-                            />
-                        ) : (
-                            <input
-                                type={showKey ? 'text' : 'password'}
-                                value={state.settings.apiKey || ''}
-                                onChange={(e) => handleSave('apiKey', e.target.value)}
-                                placeholder="Ваш API ключ Neuro API"
-                                autoComplete="off"
-                                data-1p-ignore
-                                data-lpignore="true"
-                            />
-                        )}
+                        <input
+                            type={showKey ? 'text' : 'password'}
+                            value={state.settings.polzaApiKey || ''}
+                            onChange={(e) => handleSave('polzaApiKey', e.target.value)}
+                            placeholder="Ваш API ключ Polza.ai"
+                            autoComplete="off"
+                            data-1p-ignore
+                            data-lpignore="true"
+                        />
                         <button className="btn-ghost" onClick={() => setShowKey(!showKey)} title={showKey ? 'Скрыть' : 'Показать'}>
                             {showKey ? <IconEyeOff size={18} /> : <IconEye size={18} />}
                         </button>
                         <button
                             className="btn-secondary"
                             onClick={handleTestKey}
-                            disabled={testing || (state.settings.apiProvider === 'polza' ? !state.settings.polzaApiKey : !state.settings.apiKey)}
+                            disabled={testing || !state.settings.polzaApiKey}
                         >
                             {testing ? '...' : 'Проверить'}
                         </button>
@@ -193,29 +149,9 @@ export default function SettingsPage() {
                         </div>
                     )}
                     <p className="setting-hint">
-                        {state.settings.apiProvider === 'polza' ? (
-                            <>Получите ключ на <a href="https://polza.ai/dashboard/api-keys" target="_blank" rel="noopener noreferrer">polza.ai</a></>
-                        ) : (
-                            <>Получите ключ на <a href="https://neuroapi.host/dashboard/tokens" target="_blank" rel="noopener noreferrer">neuroapi.host</a></>
-                        )}
+                        Получите ключ на <a href="https://polza.ai/dashboard/api-keys" target="_blank" rel="noopener noreferrer">polza.ai</a>
                     </p>
                 </div>
-
-                {state.settings.apiProvider === 'polza' && state.settings.polzaApiKey && (
-                    <div className="setting-row">
-                        <label>Баланс Polza.ai</label>
-                        <div className="balance-display" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <span style={{ fontWeight: 600, fontSize: '18px', color: 'var(--text-primary)' }}>
-                                {balance || '—'} ₽
-                            </span>
-                            <button className="btn-ghost" onClick={fetchBalance} title="Обновить баланс" disabled={isFetchingBalance}>
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ animation: isFetchingBalance ? 'spin 1s linear infinite' : 'none' }}>
-                                    <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.3" />
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
-                )}
 
 
             </div>
@@ -223,13 +159,63 @@ export default function SettingsPage() {
             <div className="settings-section">
                 <h2>Параметры по умолчанию</h2>
                 <div className="setting-row">
-                    <label>Модель по умолчанию</label>
-                    <div className="settings-model-wrapper">
-                        <ModelSelector
-                            model={state.settings.defaultModel || 'gpt-4o'}
-                            onModelChange={(val) => handleSave('defaultModel', val)}
-                            direction="down"
-                        />
+                    <label style={{ marginBottom: '12px', display: 'block' }}>Модель по умолчанию</label>
+                    <div className="settings-model-wrapper" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                        {(() => {
+                            const allModels = [...MODELS, ...ALL_POLZA_MODELS];
+                            const currentModel = allModels.find(m => m.id === (state.settings.defaultModel || 'gpt-4o'));
+                            return currentModel ? (
+                                <div className="model-info-card" style={{ background: 'var(--surface-glass)', border: '1px solid var(--border)', borderRadius: '12px', padding: '16px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
+                                    <div className="model-info-name" style={{ fontSize: '15px', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '4px' }}>{currentModel.name}</div>
+                                    <div className="model-info-desc" style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '12px' }}>{currentModel.desc}</div>
+                                    {(currentModel.pricing || currentModel.capabilities) && (
+                                        <div style={{ paddingTop: '12px', borderTop: '1px solid var(--border-light)', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                            {currentModel.pricing && (
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12px', color: 'var(--text-secondary)' }}>
+                                                    <span>Стоимость (вход / выход):</span>
+                                                    <span style={{ fontWeight: 500, color: 'var(--text-primary)' }}>{currentModel.pricing.prompt} / {currentModel.pricing.completion}</span>
+                                                </div>
+                                            )}
+                                            {currentModel.capabilities && (
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12px', color: 'var(--text-secondary)' }}>
+                                                    <span>Возможности:</span>
+                                                    <div style={{ display: 'flex', gap: '8px', opacity: 0.8, color: 'var(--accent)' }}>
+                                                        {currentModel.capabilities.text && <span title="Текст"><IconFileText size={16} /></span>}
+                                                        {currentModel.capabilities.image && <span title="Изображения"><IconImage size={16} /></span>}
+                                                        {currentModel.capabilities.file && <span title="Файлы"><IconAttachment size={16} /></span>}
+                                                        {currentModel.capabilities.audio && <span title="Аудио"><IconAudio size={16} /></span>}
+                                                        {currentModel.capabilities.video && <span title="Видео"><IconVideo size={16} /></span>}
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
+                            ) : null;
+                        })()}
+
+                        {isEditingModel ? (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                                    <button className="btn-ghost" onClick={() => setIsEditingModel(false)} style={{ padding: '4px 12px', fontSize: '13px' }}>
+                                        Отмена
+                                    </button>
+                                </div>
+                                <ModelSelector
+                                    model={state.settings.defaultModel || 'gpt-4o'}
+                                    onModelChange={(val) => {
+                                        handleSave('defaultModel', val);
+                                        setIsEditingModel(false);
+                                    }}
+                                    direction="down"
+                                    inline={true}
+                                />
+                            </div>
+                        ) : (
+                            <button className="btn-secondary" onClick={() => setIsEditingModel(true)} style={{ width: 'fit-content' }}>
+                                Изменить модель
+                            </button>
+                        )}
                     </div>
                 </div>
             </div>

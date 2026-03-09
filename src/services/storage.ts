@@ -242,11 +242,10 @@ export async function deleteSpace(spaceId: string): Promise<Space[]> {
 
 // --- Settings ---
 const DEFAULT_SETTINGS: Settings = {
-    apiKey: '',
     youApiKey: '',
     polzaApiKey: '',
-    apiProvider: 'polza',
-    defaultModel: 'openai/gpt-4o-mini',
+    hfToken: '',
+    defaultModel: 'gpt-4o',
     theme: 'dark',
     imageSize: '1024x1024',
     imageQuality: 'high',
