@@ -87,6 +87,13 @@ export default function Sidebar({ onLogout, onLogin, userEmail }: SidebarProps) 
                     </button>
                 </div>
 
+                {balance !== null && (
+                    <div className="sidebar-balance-plate" style={{ marginBottom: '12px' }}>
+                        <span>Баланс Polza</span>
+                        <span className="balance-amount">{Number(balance).toFixed(2)} ₽</span>
+                    </div>
+                )}
+
                 <button className="new-chat-btn" onClick={handleNewChat}>
                     <IconPlus size={16} />
                     Новый чат
@@ -147,12 +154,6 @@ export default function Sidebar({ onLogout, onLogin, userEmail }: SidebarProps) 
                         <span>История</span>
                     </button>
 
-                    {balance !== null && (
-                        <div className="sidebar-balance-plate">
-                            <span>Баланс Polza</span>
-                            <span className="balance-amount">{Number(balance).toFixed(2)} ₽</span>
-                        </div>
-                    )}
                 </div>
 
                 <div className="sidebar-search">

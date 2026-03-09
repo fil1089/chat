@@ -2421,10 +2421,11 @@ input:checked+.toggle-slider:before {
 .helpers-page {
   max-width: 900px;
   margin: 0 auto;
+  padding-top: 50px;
 }
 
-.helpers-page {
-  padding-top: 50px;
+.history-page {
+  max-width: 680px;
 }
 
 .helpers-topbar {
