@@ -3421,7 +3421,7 @@ input:checked+.toggle-slider:before {
 }
 
 .settings-model-wrapper {
-  width: 350px;
+  width: 100%;
 }
 
 
@@ -4432,6 +4432,7 @@ input:checked+.toggle-slider:before {
   color: var(--text-tertiary);
   letter-spacing: 0.05em;
   margin-bottom: 6px;
+  text-transform: none !important;
 }
 
 .model-info-card .model-info-name {
