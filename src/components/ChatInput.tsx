@@ -311,7 +311,7 @@ export default function ChatInput({ onSend, model, onModelChange, isStreaming, o
                 )}
             </div>
 
-            <div className="chat-input-wrapper" style={{ borderRadius: '24px', background: 'var(--bg-elevated)', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+            <div className="chat-input-wrapper" style={{ borderRadius: '24px', background: 'var(--bg-elevated)', display: 'flex', flexDirection: 'column' }}>
                 {/* Attachments relocated to header */}
 
                 <div className="chat-input-main-row" style={{ display: 'flex', alignItems: 'flex-end', padding: '8px 12px', gap: '8px' }}>
@@ -339,7 +339,7 @@ export default function ChatInput({ onSend, model, onModelChange, isStreaming, o
 
                     <div className="chat-input-actions-right" style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0, paddingBottom: '2px' }}>
                         {!(model.includes('image') || model.includes('image-preview')) && (
-                            <div className="chat-settings-wrapper" ref={settingsRef}>
+                            <div className="chat-settings-wrapper" ref={settingsRef} style={{ position: 'relative' }}>
                                 <button
                                     className="chat-settings-btn"
                                     onClick={() => setShowSettings(!showSettings)}
