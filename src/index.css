@@ -2936,7 +2936,7 @@ input:checked+.toggle-slider:before {
   padding: 0;
   width: 100%;
   height: 100%;
-  overflow: hidden;
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
 }
@@ -3905,7 +3905,8 @@ input:checked+.toggle-slider:before {
   flex: 1;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  position: relative;
+  overflow-y: auto;
 }
 
 
