@@ -1,4 +1,4 @@
-import { getDb, setCors, verifySupabaseToken } from '../_db.js';
+import { getSupabaseAdmin, setCors, verifySupabaseToken } from '../_db.js';
 
 export default async function handler(req, res) {
     setCors(res);
@@ -9,9 +9,9 @@ export default async function handler(req, res) {
         return res.status(401).json({ error: 'Unauthorized', reason: payload.reason });
     }
 
-    let sql;
+    let supabase;
     try {
-        sql = getDb();
+        supabase = getSupabaseAdmin();
     } catch (err) {
         return res.status(500).json({ error: 'Database Config Error', details: err.message });
     }
@@ -21,12 +21,15 @@ export default async function handler(req, res) {
 
     if (req.method === 'GET') {
         try {
-            const result = await sql`
-                SELECT value FROM user_store
-                WHERE user_id = ${userId} AND key = ${key}
-                LIMIT 1
-            `;
-            return res.status(200).json({ value: result.length > 0 ? result[0].value : null });
+            const { data, error } = await supabase
+                .from('user_store')
+                .select('value')
+                .eq('user_id', userId)
+                .eq('key', key)
+                .maybeSingle();
+
+            if (error) throw error;
+            return res.status(200).json({ value: data ? data.value : null });
         } catch (err) {
             console.error('[store GET] error:', err);
             return res.status(500).json({ error: 'Ошибка чтения: ' + err.message });
@@ -36,12 +39,18 @@ export default async function handler(req, res) {
     if (req.method === 'POST') {
         try {
             const { value } = req.body;
-            await sql`
-                INSERT INTO user_store (user_id, key, value, updated_at)
-                VALUES (${userId}, ${key}, ${JSON.stringify(value)}, NOW())
-                ON CONFLICT (user_id, key)
-                DO UPDATE SET value = ${JSON.stringify(value)}, updated_at = NOW()
-            `;
+            const { error } = await supabase
+                .from('user_store')
+                .upsert({
+                    user_id: userId,
+                    key: key,
+                    value: value,
+                    updated_at: new Date().toISOString()
+                }, {
+                    onConflict: 'user_id, key'
+                });
+
+            if (error) throw error;
             return res.status(200).json({ ok: true });
         } catch (err) {
             console.error('[store POST] error:', err);
@@ -51,7 +60,13 @@ export default async function handler(req, res) {
 
     if (req.method === 'DELETE') {
         try {
-            await sql`DELETE FROM user_store WHERE user_id = ${userId} AND key = ${key}`;
+            const { error } = await supabase
+                .from('user_store')
+                .delete()
+                .eq('user_id', userId)
+                .eq('key', key);
+
+            if (error) throw error;
             return res.status(200).json({ ok: true });
         } catch (err) {
             console.error('[store DELETE] error:', err);

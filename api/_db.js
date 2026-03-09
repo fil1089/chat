@@ -1,15 +1,18 @@
-import { neon } from '@neondatabase/serverless';
 import { createClient } from '@supabase/supabase-js';
 
 let supabaseAdmin = null;
 
-export function getDb() {
-    const dbUrl = process.env.SUPABASE_DATABASE_URL;
-    if (!dbUrl) {
-        console.error('[DB] SUPABASE_DATABASE_URL is not set!');
-        throw new Error('Database URL is missing. Check Vercel Environment Variables.');
+export function getSupabaseAdmin() {
+    if (!supabaseAdmin) {
+        const url = process.env.SUPABASE_URL || 'https://zhqpqkqfxnwwhqdyfapf.supabase.co';
+        const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+        if (!key) {
+            console.error('[DB] SUPABASE_SERVICE_ROLE_KEY is not set!');
+            throw new Error('Service Role Key is missing. Check Vercel Environment Variables.');
+        }
+        supabaseAdmin = createClient(url, key);
     }
-    return neon(dbUrl);
+    return supabaseAdmin;
 }
 
 export function setCors(res) {
@@ -34,26 +37,15 @@ export async function verifySupabaseToken(req) {
         return { error: 'no_token', reason: 'No Bearer token in request' };
     }
 
-    // Hardcoded project URL as fallback to be safe
-    const url = process.env.SUPABASE_URL || 'https://zhqpqkqfxnwwhqdyfapf.supabase.co';
-    const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-    if (!key) {
-        console.error('[Auth] SUPABASE_SERVICE_ROLE_KEY is not set!');
-        return { error: 'no_secret', reason: 'Service Role Key is missing on the server' };
-    }
-
-    if (!supabaseAdmin) {
-        try {
-            supabaseAdmin = createClient(url, key);
-        } catch (err) {
-            console.error('[Auth] Error creating admin client:', err.message);
-            return { error: 'init_failed', reason: err.message };
-        }
+    let admin;
+    try {
+        admin = getSupabaseAdmin();
+    } catch (err) {
+        return { error: 'init_failed', reason: err.message };
     }
 
     try {
-        const { data: { user }, error } = await supabaseAdmin.auth.getUser(token);
+        const { data: { user }, error } = await admin.auth.getUser(token);
         if (error || !user) {
             return { error: 'invalid_token', reason: error?.message || 'Invalid user' };
         }
