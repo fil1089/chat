@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useMemo } from 'react';
 import { useApp } from '../context/AppContext';
 import { getGroupedChatModels, MODELS } from '../services/youApi';
-import { IconChevronDown, IconChevronUp, IconCheck, IconSearch, IconFileText, IconImage, IconAttachment, IconAudio, IconVideo } from './Icons';
+import { IconChevronDown, IconChevronUp, IconCheck, IconSearch, IconFileText, IconImage, IconAttachment, IconAudio, IconVideo, IconFilter, IconSort } from './Icons';
 import type { AIModel } from '../types';
 import { getGroupedPolzaModels, ALL_POLZA_MODELS } from '../services/polzaApi';
 
@@ -65,6 +65,8 @@ export default function ModelSelector({ model, onModelChange, direction = 'up', 
     const [search, setSearch] = useState('');
     const [filterOption, setFilterOption] = useState('all');
     const [sortOption, setSortOption] = useState('default');
+    const [showFilters, setShowFilters] = useState(false);
+    const [showSort, setShowSort] = useState(false);
     const [expandedFamilies, setExpandedFamilies] = useState<Set<string>>(new Set());
     const ref = useRef<HTMLDivElement>(null);
     const searchRef = useRef<HTMLInputElement>(null);
@@ -102,6 +104,8 @@ export default function ModelSelector({ model, onModelChange, direction = 'up', 
             setSearch('');
             setFilterOption('all');
             setSortOption('default');
+            setShowFilters(false);
+            setShowSort(false);
         }
     }, [open, model, groupedModels]);
 
@@ -177,21 +181,37 @@ export default function ModelSelector({ model, onModelChange, direction = 'up', 
 
             {(open || inline) && (
                 <div className={`model-selector-dropdown ${direction === 'down' ? 'down' : ''} ${inline ? 'inline' : ''}`}>
-                    <div style={{ padding: '8px', borderBottom: '1px solid var(--border)' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '6px 10px', background: 'rgba(255,255,255,0.04)', borderRadius: '8px', marginBottom: '8px' }}>
-                            <IconSearch size={14} />
-                            <input
-                                ref={searchRef}
-                                type="text"
-                                placeholder="Поиск модели..."
-                                value={search}
-                                onChange={(e) => setSearch(e.target.value)}
-                                style={{ background: 'none', border: 'none', color: 'var(--text-primary)', outline: 'none', fontSize: '13px', width: '100%' }}
-                            />
+                    <div style={{ padding: '12px', borderBottom: '1px solid var(--border)' }}>
+                        <div className="model-selector-top-bar">
+                            <div className="model-search-container">
+                                <IconSearch size={14} />
+                                <input
+                                    ref={searchRef}
+                                    type="text"
+                                    placeholder="Поиск модели..."
+                                    value={search}
+                                    onChange={(e) => setSearch(e.target.value)}
+                                    onClick={(e) => e.stopPropagation()}
+                                />
+                            </div>
+                            <button
+                                className={`filter-sort-icon-btn ${showFilters ? 'active' : ''}`}
+                                onClick={(e) => { e.stopPropagation(); setShowFilters(!showFilters); setShowSort(false); }}
+                                title="Фильтры"
+                            >
+                                <IconFilter size={18} />
+                            </button>
+                            <button
+                                className={`filter-sort-icon-btn ${showSort ? 'active' : ''}`}
+                                onClick={(e) => { e.stopPropagation(); setShowSort(!showSort); setShowFilters(false); }}
+                                title="Сортировка"
+                            >
+                                <IconSort size={18} />
+                            </button>
                         </div>
 
-                        <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '8px' }}>
-                            <div style={{ flex: 1, display: 'flex', gap: '6px', overflowX: 'auto', paddingBottom: '4px', scrollbarWidth: 'none' }} className="hide-scrollbar">
+                        {showFilters && (
+                            <div className="model-filters-row hide-scrollbar">
                                 {[
                                     { id: 'all', label: 'Все' },
                                     { id: 'reasoning', label: 'Рассуждающие' },
@@ -204,34 +224,33 @@ export default function ModelSelector({ model, onModelChange, direction = 'up', 
                                         key={f.id}
                                         onClick={(e) => { e.stopPropagation(); setFilterOption(f.id); }}
                                         style={{
-                                            whiteSpace: 'nowrap', padding: '4px 10px', fontSize: '11px',
-                                            borderRadius: '12px', border: '1px solid var(--border)',
+                                            whiteSpace: 'nowrap', padding: '6px 12px', fontSize: '12px',
+                                            borderRadius: '16px', border: '1px solid var(--border)',
                                             background: filterOption === f.id ? 'var(--accent)' : 'var(--surface-glass)',
                                             color: filterOption === f.id ? '#fff' : 'var(--text-secondary)',
-                                            cursor: 'pointer'
+                                            cursor: 'pointer', transition: 'var(--transition)'
                                         }}
                                     >
                                         {f.label}
                                     </button>
                                 ))}
                             </div>
+                        )}
 
-                            <select
-                                value={sortOption}
-                                onChange={(e) => setSortOption(e.target.value)}
-                                onClick={(e) => e.stopPropagation()}
-                                style={{
-                                    background: 'var(--surface-glass)', color: 'var(--text-primary)',
-                                    border: '1px solid var(--border)', padding: '5px 8px',
-                                    borderRadius: '6px', fontSize: '11px', outline: 'none', cursor: 'pointer',
-                                    whiteSpace: 'nowrap', flexShrink: 0
-                                }}
-                            >
-                                <option value="default">Сортировка: По умолчанию</option>
-                                <option value="price_asc">По стоимости (деш.)</option>
-                                <option value="price_desc">По стоимости (дор.)</option>
-                            </select>
-                        </div>
+                        {showSort && (
+                            <div className="model-sort-row">
+                                <select
+                                    className="model-sort-select"
+                                    value={sortOption}
+                                    onChange={(e) => setSortOption(e.target.value)}
+                                    onClick={(e) => e.stopPropagation()}
+                                >
+                                    <option value="default">Сортировка: По умолчанию</option>
+                                    <option value="price_asc">По стоимости (деш.)</option>
+                                    <option value="price_desc">По стоимости (дор.)</option>
+                                </select>
+                            </div>
+                        )}
                     </div>
                     <div className="model-dropdown-scroll">
                         {(filterOption !== 'all' || sortOption !== 'default' || search) ? (

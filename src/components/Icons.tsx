@@ -526,3 +526,19 @@ export function IconVideo({ size = 16 }: IconProps) {
         </svg>
     );
 }
+
+export function IconFilter({ size = 18, className }: IconProps) {
+    return (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
+            <path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z" />
+        </svg>
+    );
+}
+
+export function IconSort({ size = 18, className }: IconProps) {
+    return (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
+            <path d="M11 5h10M11 9h7M11 13h4M3 17l3 3 3-3M6 18V4" />
+        </svg>
+    );
+}

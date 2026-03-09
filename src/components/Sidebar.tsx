@@ -146,14 +146,14 @@ export default function Sidebar({ onLogout, onLogin, userEmail }: SidebarProps) 
                         <IconHistory size={16} />
                         <span>История</span>
                     </button>
-                </div>
 
-                {balance !== null && (
-                    <div className="sidebar-balance-plate">
-                        <span>Баланс Polza</span>
-                        <span className="balance-amount">{balance} ₽</span>
-                    </div>
-                )}
+                    {balance !== null && (
+                        <div className="sidebar-balance-plate">
+                            <span>Баланс Polza</span>
+                            <span className="balance-amount">{Number(balance).toFixed(2)} ₽</span>
+                        </div>
+                    )}
+                </div>
 
                 <div className="sidebar-search">
                     <input
