@@ -49,7 +49,21 @@ export default function SettingsPage() {
                 setTestResult({ ok: true, msg: 'Ключ работает!' });
             } else {
                 const text = await response.text();
-                setTestResult({ ok: false, msg: `Ошибка ${response.status}: ${text.slice(0, 100)}` });
+                let errMsg = `Ошибка ${response.status}: ${text.slice(0, 100)}`;
+
+                try {
+                    const errorJson = JSON.parse(text);
+                    const detail = errorJson.error?.message || errorJson.message || errorJson.detail;
+                    if (detail === 'INSUFFICIENT_BALANCE') {
+                        errMsg = 'Недостаточно средств на балансе. Пожалуйста, пополните счет на polza.ai.';
+                    } else if (detail === 'UNAUTHORIZED' || response.status === 401) {
+                        errMsg = 'Неверный API ключ.';
+                    } else if (detail) {
+                        errMsg = `Ошибка Polza API: ${detail}`;
+                    }
+                } catch { }
+
+                setTestResult({ ok: false, msg: errMsg });
             }
         } catch (err: unknown) {
             const msg = err instanceof Error ? err.message : String(err);

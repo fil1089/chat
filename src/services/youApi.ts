@@ -295,7 +295,12 @@ async function streamNeuroResponse({
             let errorMsg = `Ошибка API: ${response.status}`;
             try {
                 const errorJson = JSON.parse(errorText);
-                errorMsg = errorJson.error?.message || errorJson.detail || errorMsg;
+                const detail = errorJson.error?.message || errorJson.detail;
+                if (detail === 'INSUFFICIENT_BALANCE') {
+                    errorMsg = 'Недостаточно средств на балансе NeuroAPI. Пожалуйста, пополните счет.';
+                } else if (detail) {
+                    errorMsg = detail;
+                }
             } catch { }
             onError?.(errorMsg);
             return;
@@ -411,7 +416,12 @@ async function generateImageNeuro({
             let errorMsg = `Ошибка API (${response.status})`;
             try {
                 const errorJson = JSON.parse(errorText);
-                errorMsg = errorJson.error?.message || errorJson.detail || errorMsg;
+                const detail = errorJson.error?.message || errorJson.detail;
+                if (detail === 'INSUFFICIENT_BALANCE') {
+                    errorMsg = 'Недостаточно средств на балансе NeuroAPI. Пожалуйста, пополните счет.';
+                } else if (detail) {
+                    errorMsg = detail;
+                }
             } catch { }
             onError?.(errorMsg);
             return;

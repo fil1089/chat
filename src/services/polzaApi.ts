@@ -207,7 +207,24 @@ export async function streamResponsePolza({
 
         if (!response.ok) {
             const errorText = await response.text();
-            throw new Error(`Ошибка Polza API: ${response.status} ${response.statusText} - ${errorText}`);
+            let errorMessage = `Ошибка API: ${response.status}`;
+
+            try {
+                const errorJson = JSON.parse(errorText);
+                const errorDetail = errorJson.error?.message || errorJson.message || errorJson.detail;
+
+                if (errorDetail === 'INSUFFICIENT_BALANCE') {
+                    errorMessage = 'Недостаточно средств на балансе. Пожалуйста, пополните счет на polza.ai.';
+                } else if (errorDetail === 'UNAUTHORIZED' || response.status === 401) {
+                    errorMessage = 'Неверный API ключ. Пожалуйста, проверьте его в настройках.';
+                } else if (errorDetail) {
+                    errorMessage = `Ошибка Polza API: ${errorDetail}`;
+                }
+            } catch (e) {
+                errorMessage = `Ошибка Polza API: ${response.status} ${response.statusText} - ${errorText.slice(0, 100)}`;
+            }
+
+            throw new Error(errorMessage);
         }
 
         if (!response.body) {
@@ -335,8 +352,25 @@ export async function generateImagePolza({
         });
 
         if (!response.ok) {
-            const error = await response.json();
-            throw new Error(error.error?.message || error.message || 'Ошибка генерации изображения Polza API');
+            const errorText = await response.text();
+            let errorMessage = 'Ошибка генерации изображения Polza API';
+
+            try {
+                const errorJson = JSON.parse(errorText);
+                const errorDetail = errorJson.error?.message || errorJson.message || errorJson.detail;
+
+                if (errorDetail === 'INSUFFICIENT_BALANCE') {
+                    errorMessage = 'Недостаточно средств на балансе. Пожалуйста, пополните счет на polza.ai.';
+                } else if (errorDetail === 'UNAUTHORIZED' || response.status === 401) {
+                    errorMessage = 'Неверный API ключ. Пожалуйста, проверьте его в настройках.';
+                } else if (errorDetail) {
+                    errorMessage = `Ошибка Polza API: ${errorDetail}`;
+                }
+            } catch (e) {
+                errorMessage = `Ошибка Polza API (${response.status}): ${errorText.slice(0, 100)}`;
+            }
+
+            throw new Error(errorMessage);
         }
 
         const data = await response.json();
