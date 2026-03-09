@@ -223,7 +223,7 @@ export default function SettingsPage() {
                     })()}
 
                     <div className="settings-model-wrapper" style={{ marginTop: '16px' }}>
-                        <div style={{ fontSize: '10px', fontWeight: 700, color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '8px' }}>
+                        <div style={{ fontSize: '10px', fontWeight: 700, color: 'var(--text-tertiary)', letterSpacing: '0.05em', marginBottom: '8px' }}>
                             Сменить модель
                         </div>
                         <ModelSelector

@@ -2963,6 +2963,22 @@ input:checked+.toggle-slider:before {
   box-sizing: border-box !important;
   max-height: 70vh !important;
   border-radius: var(--radius-md) !important;
+  overflow-x: hidden !important;
+}
+
+.settings-model-wrapper .model-selector-top-bar {
+  flex-wrap: nowrap;
+  overflow: hidden;
+}
+
+.settings-model-wrapper .model-search-container {
+  min-width: 0;
+  flex: 1;
+}
+
+.settings-model-wrapper .model-search-container input {
+  min-width: 0;
+  width: 100%;
 }
 
 .settings-section h2 {
@@ -4414,7 +4430,6 @@ input:checked+.toggle-slider:before {
   font-size: 10px;
   font-weight: 700;
   color: var(--text-tertiary);
-  text-transform: uppercase;
   letter-spacing: 0.05em;
   margin-bottom: 6px;
 }
