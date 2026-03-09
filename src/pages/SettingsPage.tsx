@@ -230,6 +230,7 @@ export default function SettingsPage() {
                             model={state.settings.defaultModel || 'openai/gpt-4o'}
                             onModelChange={(val) => handleSave('defaultModel', val)}
                             direction="down"
+                            constrained
                         />
                     </div>
                 </div>
