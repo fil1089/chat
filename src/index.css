@@ -5364,12 +5364,17 @@ input:checked+.toggle-slider:before {
 }
 
 .settings-main .page-header {
-  max-width: none;
-  margin: 0 0 28px 0;
+  max-width: 680px;
+  margin: 0 auto 28px auto;
 }
 
 .settings-section {
   max-width: 680px;
+  margin: 0 auto 24px auto;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: 24px 32px;
 }
 
 .settings-sidebar {
@@ -5494,7 +5499,7 @@ input:checked+.toggle-slider:before {
   bottom: calc(100% + 12px);
   right: 0;
   width: 280px;
-  background: var(--surface);
+  background: var(--bg-elevated);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   padding: 20px;
@@ -5510,7 +5515,7 @@ input:checked+.toggle-slider:before {
   right: 20px;
   width: 12px;
   height: 12px;
-  background: var(--surface);
+  background: var(--bg-elevated);
   border-right: 1px solid var(--border);
   border-bottom: 1px solid var(--border);
   transform: rotate(45deg);
