@@ -106,78 +106,83 @@ export default function SettingsPage() {
     };
 
     return (
-        <div className="page settings-page">
-            <div className="settings-layout">
-                <div className="settings-main">
-                    <div className="page-header">
-                        <IconSettings size={28} className="page-header-icon" />
-                        <h1>Настройки</h1>
-                    </div>
-
-                    <div className="settings-section">
-                        <h2>API Конфигурация</h2>
-                        <div className="setting-row">
-                            <label>API Ключ (Polza API)</label>
-                            <div className="api-key-input">
-                                <input
-                                    type={showKey ? 'text' : 'password'}
-                                    value={state.settings.polzaApiKey || ''}
-                                    onChange={(e) => handleSave('polzaApiKey', e.target.value)}
-                                    placeholder="Ваш API ключ Polza.ai"
-                                    autoComplete="off"
-                                    data-1p-ignore
-                                />
-                                <button className="btn-ghost" onClick={() => setShowKey(!showKey)}>
-                                    {showKey ? <IconEyeOff size={18} /> : <IconEye size={18} />}
-                                </button>
-                                <button
-                                    className="btn-secondary"
-                                    onClick={handleTestKey}
-                                    disabled={testing || !state.settings.polzaApiKey}
-                                >
-                                    {testing ? '...' : 'Проверить'}
-                                </button>
+        <div className="chat-layout-with-nav">
+            <div className="chat-main-area">
+                <div className="page settings-page">
+                    <div className="settings-layout">
+                        <div className="settings-main">
+                            <div className="page-header">
+                                <IconSettings size={28} className="page-header-icon" />
+                                <h1>Настройки</h1>
                             </div>
-                            {testResult && (
-                                <div className={`test-result ${testResult.ok ? 'success' : 'error'}`}>
-                                    <span>{testResult.msg}</span>
+
+                            <div className="settings-section">
+                                <h2>API Конфигурация</h2>
+                                <div className="setting-row">
+                                    <label>API Ключ (Polza API)</label>
+                                    <div className="api-key-input">
+                                        <input
+                                            type={showKey ? 'text' : 'password'}
+                                            value={state.settings.polzaApiKey || ''}
+                                            onChange={(e) => handleSave('polzaApiKey', e.target.value)}
+                                            placeholder="Ваш API ключ Polza.ai"
+                                            autoComplete="off"
+                                            data-1p-ignore
+                                        />
+                                        <button className="btn-ghost" onClick={() => setShowKey(!showKey)}>
+                                            {showKey ? <IconEyeOff size={18} /> : <IconEye size={18} />}
+                                        </button>
+                                        <button
+                                            className="btn-secondary"
+                                            onClick={handleTestKey}
+                                            disabled={testing || !state.settings.polzaApiKey}
+                                        >
+                                            {testing ? '...' : 'Проверить'}
+                                        </button>
+                                    </div>
+                                    {testResult && (
+                                        <div className={`test-result ${testResult.ok ? 'success' : 'error'}`}>
+                                            <span>{testResult.msg}</span>
+                                        </div>
+                                    )}
+                                    <p className="setting-hint">
+                                        Получите ключ на <a href="https://polza.ai/dashboard/api-keys" target="_blank" rel="noopener noreferrer">polza.ai</a>
+                                    </p>
                                 </div>
-                            )}
-                            <p className="setting-hint">
-                                Получите ключ на <a href="https://polza.ai/dashboard/api-keys" target="_blank" rel="noopener noreferrer">polza.ai</a>
-                            </p>
-                        </div>
-                    </div>
+                            </div>
 
-                    <div className="settings-section">
-                        <h2>Данные</h2>
-                        <div className="setting-row">
-                            <div className="data-stats">
-                                <span><IconMessage size={16} /> {state.chats.length} чатов</span>
-                                <span><IconFolder size={16} /> {state.spaces.length} пространств</span>
+                            <div className="settings-section">
+                                <h2>Данные</h2>
+                                <div className="setting-row">
+                                    <div className="data-stats">
+                                        <span><IconMessage size={16} /> {state.chats.length} чатов</span>
+                                        <span><IconFolder size={16} /> {state.spaces.length} пространств</span>
+                                    </div>
+                                </div>
+                                <div className="data-actions">
+                                    <button className="btn-secondary" onClick={handleExport}>Экспорт</button>
+                                    <label className="btn-secondary file-label">
+                                        Импорт
+                                        <input type="file" accept=".json" onChange={handleImport} hidden />
+                                    </label>
+                                    <button className="btn-danger" onClick={handleClear}>Очистить всё</button>
+                                </div>
                             </div>
                         </div>
-                        <div className="data-actions">
-                            <button className="btn-secondary" onClick={handleExport}>Экспорт</button>
-                            <label className="btn-secondary file-label">
-                                Импорт
-                                <input type="file" accept=".json" onChange={handleImport} hidden />
-                            </label>
-                            <button className="btn-danger" onClick={handleClear}>Очистить всё</button>
-                        </div>
+
                     </div>
                 </div>
+            </div>
 
-                <div className="settings-sidebar">
-                    <div className="sidebar-section">
-                        <h2>Модель по умолчанию</h2>
-                        <ModelSelector
-                            model={state.settings.defaultModel || 'gpt-4o'}
-                            onModelChange={(val) => handleSave('defaultModel', val)}
-                            direction="down"
-                            inline={true}
-                        />
-                    </div>
+            <div className="dialogue-nav-sidebar">
+                <div className="sidebar-section" style={{ padding: '24px' }}>
+                    <h2>Модель по умолчанию</h2>
+                    <ModelSelector
+                        model={state.settings.defaultModel || 'gpt-4o'}
+                        onModelChange={(val) => handleSave('defaultModel', val)}
+                        direction="down"
+                        inline={true}
+                    />
                 </div>
             </div>
         </div>

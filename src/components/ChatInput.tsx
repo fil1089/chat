@@ -419,7 +419,7 @@ export default function ChatInput({ onSend, model, onModelChange, isStreaming, o
                                             <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', cursor: 'pointer', margin: 0 }}>
                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                                                     <span style={{ fontSize: '13px', textTransform: 'none', fontWeight: 600 }}>Экономия токенов</span>
-                                                    <div title="Автоматически переводит запрос на английский для экономии токенов и ответ обратно. Рекомендуется для o1/Claude." style={{ cursor: 'help', color: 'var(--text-muted)', display: 'flex' }}>
+                                                    <div title="для больших запросов и ответов" style={{ cursor: 'help', color: 'var(--text-muted)', display: 'flex' }}>
                                                         <IconInfo size={12} />
                                                     </div>
                                                 </div>
@@ -438,7 +438,7 @@ export default function ChatInput({ onSend, model, onModelChange, isStreaming, o
                                                 <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', cursor: 'pointer', margin: 0 }}>
                                                     <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                                                         <span style={{ fontSize: '13px', textTransform: 'none', fontWeight: 600 }}>Токены рассуждений</span>
-                                                        <div title="Позволяет модели 'думать' перед ответом. Обязательно для o1/DeepSeek. Увеличивает время ответа." style={{ cursor: 'help', color: 'var(--text-muted)', display: 'flex' }}>
+                                                        <div title="для моделей с рассуждениями" style={{ cursor: 'help', color: 'var(--text-muted)', display: 'flex' }}>
                                                             <IconInfo size={12} />
                                                         </div>
                                                     </div>
