@@ -238,17 +238,26 @@ export default function ModelSelector({ model, onModelChange, direction = 'up', 
                         )}
 
                         {showSort && (
-                            <div className="model-sort-row">
-                                <select
-                                    className="model-sort-select"
-                                    value={sortOption}
-                                    onChange={(e) => setSortOption(e.target.value)}
-                                    onClick={(e) => e.stopPropagation()}
-                                >
-                                    <option value="default">Сортировка: По умолчанию</option>
-                                    <option value="price_asc">По стоимости (деш.)</option>
-                                    <option value="price_desc">По стоимости (дор.)</option>
-                                </select>
+                            <div className="model-filters-row hide-scrollbar" style={{ borderBottomColor: 'transparent', marginBottom: 0 }}>
+                                {[
+                                    { id: 'default', label: 'По умолчанию' },
+                                    { id: 'price_asc', label: 'Дешёвые сначала' },
+                                    { id: 'price_desc', label: 'Дорогие сначала' }
+                                ].map(s => (
+                                    <button
+                                        key={s.id}
+                                        onClick={(e) => { e.stopPropagation(); setSortOption(s.id); }}
+                                        style={{
+                                            whiteSpace: 'nowrap', padding: '6px 12px', fontSize: '12px',
+                                            borderRadius: '16px', border: '1px solid var(--border)',
+                                            background: sortOption === s.id ? 'var(--accent)' : 'var(--surface-glass)',
+                                            color: sortOption === s.id ? '#fff' : 'var(--text-secondary)',
+                                            cursor: 'pointer', transition: 'var(--transition)'
+                                        }}
+                                    >
+                                        {s.label}
+                                    </button>
+                                ))}
                             </div>
                         )}
                     </div>
