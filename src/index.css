@@ -2425,7 +2425,7 @@ input:checked+.toggle-slider:before {
 }
 
 .history-page {
-  max-width: 680px;
+  max-width: 1000px;
 }
 
 .helpers-topbar {
