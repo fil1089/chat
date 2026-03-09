@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, type ChangeEvent, type KeyboardEvent, type DragEvent } from 'react';
 import * as pdfjsLib from 'pdfjs-dist';
 import ModelSelector from './ModelSelector';
-import { IconSend, IconStop, IconAttachment, IconFileText, IconClose, IconSettings, IconChevronDown, IconImage, IconAudio, IconVideo } from './Icons';
+import { IconSend, IconStop, IconAttachment, IconFileText, IconClose, IconSettings, IconTrash, IconChevronDown, IconChevronUp, IconSparkles, IconInfo, IconImage, IconAudio, IconVideo } from './Icons';
 import type { Attachment, ContextMode } from '../types';
 import { useApp } from '../context/AppContext';
 import { ALL_POLZA_MODELS } from '../services/polzaApi';
@@ -350,11 +350,16 @@ export default function ChatInput({ onSend, model, onModelChange, isStreaming, o
                                 </button>
                                 {showSettings && (
                                     <div className="chat-settings-popup">
-                                        <h4><IconSettings size={14} /> Настройки</h4>
+                                        <h4 style={{ textTransform: 'none' }}><IconSettings size={14} /> Настройки</h4>
                                         <div className="settings-field">
                                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px' }}>
                                                 <div style={{ flex: 1 }}>
-                                                    <label style={{ marginBottom: '2px', display: 'block', fontSize: '11px', textTransform: 'none', color: 'var(--text-primary)', fontWeight: 600 }}>Экономия токенов</label>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '2px' }}>
+                                                        <label style={{ margin: 0, display: 'block', fontSize: '11px', textTransform: 'none', color: 'var(--text-primary)', fontWeight: 600 }}>Экономия токенов</label>
+                                                        <div title="Автоматически переводит запрос на английский для экономии токенов и ответ обратно. Рекомендуется для o1/Claude." style={{ cursor: 'help', color: 'var(--text-muted)', display: 'flex' }}>
+                                                            <IconInfo size={12} />
+                                                        </div>
+                                                    </div>
                                                     <p style={{ margin: 0, fontSize: '10px', color: 'var(--text-muted)', lineHeight: '1.2', textTransform: 'none' }}>
                                                         Для длинных ответов и о1/Claude.
                                                     </p>
@@ -372,7 +377,12 @@ export default function ChatInput({ onSend, model, onModelChange, isStreaming, o
                                         </div>
 
                                         <div className="settings-field">
-                                            <label>Контекст</label>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '4px' }}>
+                                                <label style={{ margin: 0, textTransform: 'none' }}>Контекст</label>
+                                                <div title="Определяет объем истории переписки, который будет отправлен модели. Большой контекст точнее, но дороже." style={{ cursor: 'help', color: 'var(--text-muted)', display: 'flex' }}>
+                                                    <IconInfo size={12} />
+                                                </div>
+                                            </div>
                                             <div className="custom-select-wrapper">
                                                 <button
                                                     className="custom-select-trigger"
@@ -432,7 +442,12 @@ export default function ChatInput({ onSend, model, onModelChange, isStreaming, o
                                         {true === true && onReasoningChange && (
                                             <div className="settings-field" style={{ marginTop: '8px', paddingTop: '12px', borderTop: '1px solid var(--border)' }}>
                                                 <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', cursor: 'pointer', margin: 0 }}>
-                                                    <span style={{ fontSize: '13px', textTransform: 'none', fontWeight: 600 }}>Токены рассуждений</span>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                                        <span style={{ fontSize: '13px', textTransform: 'none', fontWeight: 600 }}>Токены рассуждений</span>
+                                                        <div title="Позволяет модели 'думать' перед ответом. Обязательно для o1/DeepSeek. Увеличивает время ответа." style={{ cursor: 'help', color: 'var(--text-muted)', display: 'flex' }}>
+                                                            <IconInfo size={12} />
+                                                        </div>
+                                                    </div>
                                                     <div className="toggle-switch" style={{ transform: 'scale(0.8)', transformOrigin: 'right center', margin: 0 }}>
                                                         <input
                                                             type="checkbox"
@@ -447,7 +462,12 @@ export default function ChatInput({ onSend, model, onModelChange, isStreaming, o
                                         {true === true && onWebSearchChange && (
                                             <div className="settings-field" style={{ marginTop: '8px', paddingTop: '12px', borderTop: '1px solid var(--border)' }}>
                                                 <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', cursor: 'pointer', margin: 0 }}>
-                                                    <span style={{ fontSize: '13px', textTransform: 'none', fontWeight: 600 }}>Поиск в интернете</span>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                                        <span style={{ fontSize: '13px', textTransform: 'none', fontWeight: 600 }}>Поиск в интернете</span>
+                                                        <div title="Использование поисковых систем для получения актуальной информации." style={{ cursor: 'help', color: 'var(--text-muted)', display: 'flex' }}>
+                                                            <IconInfo size={12} />
+                                                        </div>
+                                                    </div>
                                                     <div className="toggle-switch" style={{ transform: 'scale(0.8)', transformOrigin: 'right center', margin: 0 }}>
                                                         <input
                                                             type="checkbox"

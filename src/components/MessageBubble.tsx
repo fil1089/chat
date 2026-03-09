@@ -361,7 +361,7 @@ export default function MessageBubble({ message, chatId, isLatest, isStreaming, 
                     {/* Citations block */}
                     {!isUser && message.annotations && message.annotations.length > 0 && (
                         <div className="message-citations" style={{ marginTop: '16px', paddingTop: '12px', borderTop: '1px solid var(--border)' }}>
-                            <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                            <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '8px', textTransform: 'none', letterSpacing: '0.05em' }}>
                                 Источники:
                             </div>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
