@@ -1,5 +1,11 @@
 import { neon } from '@neondatabase/serverless';
-import jwt from 'jsonwebtoken';
+import { createClient } from '@supabase/supabase-js';
+
+// Server-side Supabase admin client (uses service_role key to verify user tokens)
+const supabaseAdmin = createClient(
+    process.env.SUPABASE_URL,
+    process.env.SUPABASE_SERVICE_ROLE_KEY
+);
 
 export function getDb() {
     const sql = neon(process.env.SUPABASE_DATABASE_URL);
@@ -19,24 +25,28 @@ export function getToken(req) {
 }
 
 /**
- * Verify Supabase JWT and return the payload.
- * Returns null if invalid.
+ * Verify user's access token via Supabase Auth (server-side).
+ * Returns user payload { sub, email, role } or null if invalid.
  */
-export function verifySupabaseToken(req) {
+export async function verifySupabaseToken(req) {
     const token = getToken(req);
     if (!token) {
         console.error('[Auth] No Bearer token in request');
         return null;
     }
-    if (!process.env.SUPABASE_JWT_SECRET) {
-        console.error('[Auth] SUPABASE_JWT_SECRET is not set in environment!');
+    if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+        console.error('[Auth] SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY is not set!');
         return null;
     }
     try {
-        const payload = jwt.verify(token, process.env.SUPABASE_JWT_SECRET);
-        return payload;
+        const { data: { user }, error } = await supabaseAdmin.auth.getUser(token);
+        if (error || !user) {
+            console.error('[Auth] Token verification failed:', error?.message || 'no user');
+            return null;
+        }
+        return { sub: user.id, email: user.email, role: 'authenticated' };
     } catch (err) {
-        console.error('[Auth] JWT verification failed:', err.message);
+        console.error('[Auth] Unexpected error verifying token:', err.message);
         return null;
     }
 }

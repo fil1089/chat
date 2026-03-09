@@ -5,9 +5,9 @@ export default async function handler(req, res) {
     if (req.method === 'OPTIONS') return res.status(200).end();
 
     const token = req.headers['authorization']?.startsWith('Bearer ') ? req.headers['authorization'].slice(7) : null;
-    const payload = verifySupabaseToken(req);
+    const payload = await verifySupabaseToken(req);
     if (!payload) {
-        const reason = !token ? 'no_token' : !process.env.SUPABASE_JWT_SECRET ? 'no_secret' : 'invalid_token';
+        const reason = !token ? 'no_token' : (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) ? 'no_secret' : 'invalid_token';
         return res.status(401).json({ error: 'Unauthorized', reason });
     }
 
