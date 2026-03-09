@@ -355,7 +355,7 @@ export default function ChatInput({ onSend, model, onModelChange, isStreaming, o
                                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px' }}>
                                                 <div style={{ flex: 1 }}>
                                                     <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '2px' }}>
-                                                        <label style={{ margin: 0, display: 'block', fontSize: '11px', textTransform: 'none', color: 'var(--text-primary)', fontWeight: 600 }}>Экономия токенов</label>
+                                                        <label style={{ margin: 0, display: 'block', fontSize: '13px', textTransform: 'none', color: 'var(--text-primary)', fontWeight: 600 }}>Экономия токенов</label>
                                                         <div title="Автоматически переводит запрос на английский для экономии токенов и ответ обратно. Рекомендуется для o1/Claude." style={{ cursor: 'help', color: 'var(--text-muted)', display: 'flex' }}>
                                                             <IconInfo size={12} />
                                                         </div>
@@ -364,14 +364,13 @@ export default function ChatInput({ onSend, model, onModelChange, isStreaming, o
                                                         Для длинных ответов и о1/Claude.
                                                     </p>
                                                 </div>
-                                                <div className="toggle-switch" style={{ width: '36px', height: '20px' }}>
+                                                <div className="toggle-switch" style={{ transform: 'scale(0.8)', transformOrigin: 'right center', margin: 0 }}>
                                                     <input
                                                         type="checkbox"
-                                                        id="auto-translate-chat"
                                                         checked={state.settings.autoTranslate || false}
                                                         onChange={(e) => dispatch({ type: 'UPDATE_SETTINGS', payload: { autoTranslate: e.target.checked } as any })}
                                                     />
-                                                    <label htmlFor="auto-translate-chat" style={{ borderRadius: '20px' }}></label>
+                                                    <span className="toggle-slider"></span>
                                                 </div>
                                             </div>
                                         </div>

@@ -4255,7 +4255,7 @@ input:checked+.toggle-slider:before {
 .chat-settings-popup {
   position: absolute;
   bottom: 100%;
-  left: 0;
+  right: 0;
   margin-bottom: 8px;
   width: 280px;
   background: var(--bg-elevated);
