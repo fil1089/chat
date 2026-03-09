@@ -21,16 +21,29 @@ export default function Sidebar({ onLogout, onLogin, userEmail }: SidebarProps) 
     const [balance, setBalance] = useState<string | null>(null);
 
     useEffect(() => {
-        if (state.settings.polzaApiKey && userEmail) {
-            checkPolzaBalance(state.settings.polzaApiKey).then(b => {
+        let intervalId: NodeJS.Timeout;
+
+        const updateBalance = async () => {
+            if (state.settings.polzaApiKey && userEmail) {
+                const b = await checkPolzaBalance(state.settings.polzaApiKey);
                 if (b) {
                     const parsed = parseFloat(b);
                     if (!isNaN(parsed)) {
                         setBalance(parsed.toFixed(2));
                     }
                 }
-            });
+            }
+        };
+
+        updateBalance(); // Initial fetch
+
+        if (state.settings.polzaApiKey && userEmail) {
+            intervalId = setInterval(updateBalance, 30000); // 30 seconds
         }
+
+        return () => {
+            if (intervalId) clearInterval(intervalId);
+        };
     }, [state.settings.polzaApiKey, userEmail]);
 
     const handleNewChat = () => {
@@ -101,10 +114,10 @@ export default function Sidebar({ onLogout, onLogin, userEmail }: SidebarProps) 
                 </div>
 
                 {balance !== null && (
-                    <div className="sidebar-balance-plate" style={{ marginBottom: '12px' }}>
+                    <a href="https://polza.ai/dashboard/billing" target="_blank" rel="noopener noreferrer" className="sidebar-balance-plate" style={{ marginBottom: '12px', textDecoration: 'none' }}>
                         <span>Баланс Polza</span>
                         <span className="balance-amount">{Number(balance).toFixed(2)} ₽</span>
-                    </div>
+                    </a>
                 )}
 
                 <button className="new-chat-btn" onClick={handleNewChat}>
