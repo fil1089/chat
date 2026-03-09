@@ -184,11 +184,13 @@ export default function SpacesPage() {
                         </div>
                         <div className="form-row">
                             <label>Модель для ответов</label>
-                            <ModelSelector
-                                model={form.model}
-                                onModelChange={(m) => setForm({ ...form, model: m })}
-                                direction="down"
-                            />
+                            <div onClick={(e) => e.stopPropagation()}>
+                                <ModelSelector
+                                    model={form.model}
+                                    onModelChange={(m) => setForm({ ...form, model: m })}
+                                    direction="down"
+                                />
+                            </div>
                         </div>
                         <div className="form-row">
                             <label>Иконка</label>
