@@ -5275,10 +5275,13 @@ input:checked+.toggle-slider:before {
   /* ===== Settings Page Specific Layout Override ===== */
   .settings-layout {
     flex-direction: column;
+    overflow-y: auto !important;
   }
 
   .settings-layout .chat-main-area {
-    overflow-y: visible;
+    overflow-y: visible !important;
+    height: auto;
+    flex: none;
   }
 
   .settings-layout .dialogue-nav-sidebar {
