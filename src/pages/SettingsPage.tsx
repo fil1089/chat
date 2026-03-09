@@ -112,13 +112,13 @@ export default function SettingsPage() {
 
     return (
         <div className="page settings-page">
-            <div className="page-header">
-                <IconSettings size={28} className="page-header-icon" />
-                <h1>Настройки</h1>
-            </div>
-
             <div className="settings-layout">
                 <div className="settings-main">
+                    <div className="page-header">
+                        <IconSettings size={28} className="page-header-icon" />
+                        <h1>Настройки</h1>
+                    </div>
+
                     <div className="settings-section">
                         <h2>API Конфигурация</h2>
 

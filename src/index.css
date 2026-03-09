@@ -2907,10 +2907,12 @@ input:checked+.toggle-slider:before {
 
 /* ===== Settings Page ===== */
 .settings-page {
+  padding: 0;
   width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 32px 40px;
+  height: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 .settings-section {
@@ -5348,24 +5350,30 @@ input:checked+.toggle-slider:before {
 /* Settings Page Layout Redesign */
 .settings-layout {
   display: flex;
+  flex: 1;
+  width: 100%;
+  height: 100%;
   gap: 0;
-  height: calc(100% - 80px);
-  /* Fill remaining height excluding header */
-  min-height: 500px;
-  /* Ensure minimum height */
-  overflow: hidden;
-  margin: 0 -24px -24px;
-  /* offset page padding */
+  margin: 0;
 }
 
 .settings-main {
   flex: 1;
   overflow-y: auto;
-  padding: 24px 32px;
+  padding: 32px 40px;
+}
+
+.settings-main .page-header {
+  max-width: none;
+  margin: 0 0 28px 0;
+}
+
+.settings-section {
+  max-width: 680px;
 }
 
 .settings-sidebar {
-  width: 340px;
+  width: 320px;
   min-width: 320px;
   background: var(--bg-secondary);
   border-left: 1px solid var(--border);
