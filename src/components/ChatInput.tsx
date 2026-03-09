@@ -166,7 +166,7 @@ interface ChatInputProps {
 }
 
 export default function ChatInput({ onSend, model, onModelChange, isStreaming, onStop, direction = 'up', hideModelSelector = false, placeholder, contextMode, contextN, onContextModeChange, onContextNChange, hasSystemInstruction, imageSize, onImageSizeChange, imageQuality, onImageQualityChange, enableReasoning, onReasoningChange, enableWebSearch, onWebSearchChange }: ChatInputProps) {
-    const { state } = useApp();
+    const { state, dispatch } = useApp();
     const [text, setText] = useState('');
     const [attachments, setAttachments] = useState<Attachment[]>([]);
     const [isDragging, setIsDragging] = useState(false);
@@ -351,6 +351,26 @@ export default function ChatInput({ onSend, model, onModelChange, isStreaming, o
                                 {showSettings && (
                                     <div className="chat-settings-popup">
                                         <h4><IconSettings size={14} /> Настройки</h4>
+                                        <div className="settings-field">
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px' }}>
+                                                <div style={{ flex: 1 }}>
+                                                    <label style={{ marginBottom: '2px', display: 'block', fontSize: '11px', textTransform: 'none', color: 'var(--text-primary)', fontWeight: 600 }}>Экономия токенов</label>
+                                                    <p style={{ margin: 0, fontSize: '10px', color: 'var(--text-muted)', lineHeight: '1.2', textTransform: 'none' }}>
+                                                        Для длинных ответов и о1/Claude.
+                                                    </p>
+                                                </div>
+                                                <div className="toggle-switch" style={{ width: '36px', height: '20px' }}>
+                                                    <input
+                                                        type="checkbox"
+                                                        id="auto-translate-chat"
+                                                        checked={state.settings.autoTranslate || false}
+                                                        onChange={(e) => dispatch({ type: 'UPDATE_SETTINGS', payload: { autoTranslate: e.target.checked } as any })}
+                                                    />
+                                                    <label htmlFor="auto-translate-chat" style={{ borderRadius: '20px' }}></label>
+                                                </div>
+                                            </div>
+                                        </div>
+
                                         <div className="settings-field">
                                             <label>Контекст</label>
                                             <div className="custom-select-wrapper">

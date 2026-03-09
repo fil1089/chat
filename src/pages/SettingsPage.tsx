@@ -19,20 +19,19 @@ export default function SettingsPage() {
     const [showKey, setShowKey] = useState(false);
     const [testResult, setTestResult] = useState<TestResult | null>(null);
     const [testing, setTesting] = useState(false);
-    const [isEditingModel, setIsEditingModel] = useState(false); const handleSave = (key: string, value: string) => {
-        dispatch({ type: 'UPDATE_SETTINGS', payload: { [key]: value } as Record<string, string> });
+
+    const handleSave = (key: string, value: string) => {
+        dispatch({ type: 'UPDATE_SETTINGS', payload: { [key]: value } as any });
     };
 
     const handleTestKey = async () => {
         const apiKeyToTest = state.settings.polzaApiKey;
-
         if (!apiKeyToTest) return;
         setTesting(true);
         setTestResult(null);
 
         try {
             const apiUrl = API_URLS.polza;
-
             const response = await fetch(`${apiUrl}/v1/chat/completions`, {
                 method: 'POST',
                 headers: {
@@ -58,8 +57,6 @@ export default function SettingsPage() {
         }
         setTesting(false);
     };
-
-
 
     const handleExport = async () => {
         const data = await exportAllData();
@@ -108,8 +105,6 @@ export default function SettingsPage() {
         }
     };
 
-    const groups = getChatModelsByCategory();
-
     return (
         <div className="page settings-page">
             <div className="settings-layout">
@@ -121,7 +116,6 @@ export default function SettingsPage() {
 
                     <div className="settings-section">
                         <h2>API Конфигурация</h2>
-
                         <div className="setting-row">
                             <label>API Ключ (Polza API)</label>
                             <div className="api-key-input">
@@ -132,9 +126,8 @@ export default function SettingsPage() {
                                     placeholder="Ваш API ключ Polza.ai"
                                     autoComplete="off"
                                     data-1p-ignore
-                                    data-lpignore="true"
                                 />
-                                <button className="btn-ghost" onClick={() => setShowKey(!showKey)} title={showKey ? 'Скрыть' : 'Показать'}>
+                                <button className="btn-ghost" onClick={() => setShowKey(!showKey)}>
                                     {showKey ? <IconEyeOff size={18} /> : <IconEye size={18} />}
                                 </button>
                                 <button
@@ -156,81 +149,37 @@ export default function SettingsPage() {
                         </div>
                     </div>
 
-                </div>
-
-                <div className="settings-section">
-                    <h2>Данные</h2>
-                    <div className="setting-row">
-                        <div className="data-stats">
-                            <span><IconMessage size={16} /> {state.chats.length} чатов</span>
-                            <span><IconFolder size={16} /> {state.spaces.length} пространств</span>
+                    <div className="settings-section">
+                        <h2>Данные</h2>
+                        <div className="setting-row">
+                            <div className="data-stats">
+                                <span><IconMessage size={16} /> {state.chats.length} чатов</span>
+                                <span><IconFolder size={16} /> {state.spaces.length} пространств</span>
+                            </div>
+                        </div>
+                        <div className="data-actions">
+                            <button className="btn-secondary" onClick={handleExport}>Экспорт</button>
+                            <label className="btn-secondary file-label">
+                                Импорт
+                                <input type="file" accept=".json" onChange={handleImport} hidden />
+                            </label>
+                            <button className="btn-danger" onClick={handleClear}>Очистить всё</button>
                         </div>
                     </div>
-                    <div className="data-actions">
-                        <button className="btn-secondary" onClick={handleExport}>
-                            Экспорт данных
-                        </button>
-                        <label className="btn-secondary file-label">
-                            Импорт данных
-                            <input type="file" accept=".json" onChange={handleImport} hidden />
-                        </label>
-                        <button className="btn-danger" onClick={handleClear}>
-                            Очистить все данные
-                        </button>
-                    </div>
                 </div>
-            </div>
 
-            <div className="settings-sidebar">
-                <div className="sidebar-section">
-                    <h2 style={{ fontSize: '14px', marginBottom: '16px' }}>Модель по умолчанию</h2>
-                    {(() => {
-                        const allModels = [...MODELS, ...ALL_POLZA_MODELS];
-                        const currentModel = allModels.find(m => m.id === (state.settings.defaultModel || 'gpt-4o'));
-                        return currentModel ? (
-                            <div className="model-info-card" style={{ marginBottom: '20px' }}>
-                                <div className="model-info-label">Активная модель</div>
-                                <div className="model-info-name">{currentModel.name}</div>
-                                <div className="model-info-desc">{currentModel.desc}</div>
-                                {(currentModel.pricing || currentModel.capabilities) && (
-                                    <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid var(--border-light)', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                                        {currentModel.pricing && (
-                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '11px', color: 'var(--text-secondary)' }}>
-                                                <span>Стоимость (1M):</span>
-                                                <span style={{ fontWeight: 500, color: 'var(--text-primary)' }}>{currentModel.pricing.prompt} / {currentModel.pricing.completion}</span>
-                                            </div>
-                                        )}
-                                        {currentModel.capabilities && (
-                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '11px', color: 'var(--text-secondary)' }}>
-                                                <span>Возможности:</span>
-                                                <div style={{ display: 'flex', gap: '6px', opacity: 0.8, color: 'var(--accent-light)' }}>
-                                                    {currentModel.capabilities.text && <span title="Текст"><IconFileText size={14} /></span>}
-                                                    {currentModel.capabilities.image && <span title="Изображения"><IconImage size={14} /></span>}
-                                                    {currentModel.capabilities.file && <span title="Файлы"><IconAttachment size={14} /></span>}
-                                                    {currentModel.capabilities.audio && <span title="Аудио"><IconAudio size={14} /></span>}
-                                                    {currentModel.capabilities.video && <span title="Видео"><IconVideo size={14} /></span>}
-                                                </div>
-                                            </div>
-                                        )}
-                                    </div>
-                                )}
-                            </div>
-                        ) : null;
-                    })()}
-
-                    <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '12px' }}>
-                        Выберите модель, которая будет использоваться по умолчанию для новых чатов.
-                    </p>
-
-                    <ModelSelector
-                        model={state.settings.defaultModel || 'gpt-4o'}
-                        onModelChange={(val) => handleSave('defaultModel', val)}
-                        direction="down"
-                        inline={true}
-                    />
+                <div className="settings-sidebar">
+                    <div className="sidebar-section">
+                        <h2>Модель по умолчанию</h2>
+                        <ModelSelector
+                            model={state.settings.defaultModel || 'gpt-4o'}
+                            onModelChange={(val) => handleSave('defaultModel', val)}
+                            direction="down"
+                            inline={true}
+                        />
+                    </div>
                 </div>
             </div>
         </div>
-        </div >
     );
 }
