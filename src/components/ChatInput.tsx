@@ -351,29 +351,6 @@ export default function ChatInput({ onSend, model, onModelChange, isStreaming, o
                                 {showSettings && (
                                     <div className="chat-settings-popup">
                                         <h4 style={{ textTransform: 'none' }}><IconSettings size={14} /> Настройки</h4>
-                                        <div className="settings-field">
-                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px' }}>
-                                                <div style={{ flex: 1 }}>
-                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '2px' }}>
-                                                        <label style={{ margin: 0, display: 'block', fontSize: '13px', textTransform: 'none', color: 'var(--text-primary)', fontWeight: 600 }}>Экономия токенов</label>
-                                                        <div title="Автоматически переводит запрос на английский для экономии токенов и ответ обратно. Рекомендуется для o1/Claude." style={{ cursor: 'help', color: 'var(--text-muted)', display: 'flex' }}>
-                                                            <IconInfo size={12} />
-                                                        </div>
-                                                    </div>
-                                                    <p style={{ margin: 0, fontSize: '10px', color: 'var(--text-muted)', lineHeight: '1.2', textTransform: 'none' }}>
-                                                        Для длинных ответов и о1/Claude.
-                                                    </p>
-                                                </div>
-                                                <div className="toggle-switch" style={{ transform: 'scale(0.8)', transformOrigin: 'right center', margin: 0 }}>
-                                                    <input
-                                                        type="checkbox"
-                                                        checked={state.settings.autoTranslate || false}
-                                                        onChange={(e) => dispatch({ type: 'UPDATE_SETTINGS', payload: { autoTranslate: e.target.checked } as any })}
-                                                    />
-                                                    <span className="toggle-slider"></span>
-                                                </div>
-                                            </div>
-                                        </div>
 
                                         <div className="settings-field">
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '4px' }}>
@@ -438,6 +415,24 @@ export default function ChatInput({ onSend, model, onModelChange, isStreaming, o
                                                 </span>
                                             </div>
                                         )}
+                                        <div className="settings-field" style={{ marginTop: '8px', paddingTop: '12px', borderTop: '1px solid var(--border)' }}>
+                                            <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', cursor: 'pointer', margin: 0 }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                                    <span style={{ fontSize: '13px', textTransform: 'none', fontWeight: 600 }}>Экономия токенов</span>
+                                                    <div title="Автоматически переводит запрос на английский для экономии токенов и ответ обратно. Рекомендуется для o1/Claude." style={{ cursor: 'help', color: 'var(--text-muted)', display: 'flex' }}>
+                                                        <IconInfo size={12} />
+                                                    </div>
+                                                </div>
+                                                <div className="toggle-switch" style={{ transform: 'scale(0.8)', transformOrigin: 'right center', margin: 0 }}>
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={state.settings.autoTranslate || false}
+                                                        onChange={(e) => dispatch({ type: 'UPDATE_SETTINGS', payload: { autoTranslate: e.target.checked } as any })}
+                                                    />
+                                                    <span className="toggle-slider"></span>
+                                                </div>
+                                            </label>
+                                        </div>
                                         {true === true && onReasoningChange && (
                                             <div className="settings-field" style={{ marginTop: '8px', paddingTop: '12px', borderTop: '1px solid var(--border)' }}>
                                                 <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', cursor: 'pointer', margin: 0 }}>

@@ -1,0 +1,28 @@
+<context> Please analyze the writing style, tone, and structure in the following examples. Focus on elements such as word choice, sentence complexity, pacing, and overall voice. </context> <examples> [Same Russian examples as before – I've translated them accurately below to match the previous version for consistency.]
+Many present neural networks as a magic wand. They say, wave it—and everything happens by itself. Don't believe it! I avoid courses that claim this. All that intrusive advertising just devalues AI's real potential.
+For me, neural networks are a new tool that expands horizons. Now I can take on tasks I couldn't offer clients before:
+
+No photo for packaging? We'll do a neuro photo shoot.
+
+Clothing doesn't fit the design? Easy to replace.
+
+Need an unusual banner image? We'll create it perfectly.
+But I didn't spend less time on design. Sometimes even more! Now I know how to do it better and solve any task. Even ones I wouldn't have touched before.
+I'll say this: neural networks are a magic wand, but you have to learn to use it. Like in Harry Potter, heroes first learned to cast spells. Remember how much time they spent on books and practice mastering incantations?
+Same with neural networks. Miracles don't happen with a wave. To make AI useful, you'll have to:
+
+Understand the technologies and tools.
+
+Master neural network principles.
+
+Learn to set the right tasks.
+
+Spend time on experiments and finding the best solutions.
+Only then can you turn neural networks into your magic wand. Magic requires effort and knowledge. Without them, you'll get chaos, not magic.
+How do you feel about neural networks? See them as a magic wand or just a tool?
+
+[And the rest of the examples translated identically to my previous response: garden story, driving story, library story, zucchini story, birthday story.]
+</examples>
+
+<instruction> Create a post on the topic I will write. The content must match the style, tone, and structure of the provided examples. Ensure it's original, engaging, and suitable for people who run their own blogs. </instruction>
+Great, the instruction is ready! What's the topic you'd like me to create the blog post for? For example, something from your interests like Blender tips, family gaming nights, or prompt engineering fails? Let me know, and I'll craft it right away in that perfect casual, storytelling style.
