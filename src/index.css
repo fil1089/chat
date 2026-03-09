@@ -2955,16 +2955,14 @@ input:checked+.toggle-slider:before {
 }
 
 .settings-model-wrapper .model-selector-dropdown {
-  width: 300px !important;
-  max-width: 300px !important;
+  width: 100% !important;
+  max-width: 100% !important;
   min-width: 0 !important;
-  left: -24px !important;
+  left: 0 !important;
   right: auto !important;
   box-sizing: border-box !important;
   max-height: 70vh !important;
-  border-radius: 0 !important;
-  border-left: none !important;
-  border-right: none !important;
+  border-radius: var(--radius-md) !important;
 }
 
 .settings-section h2 {
