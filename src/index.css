@@ -5272,8 +5272,30 @@ input:checked+.toggle-slider:before {
     padding: 20px 16px;
   }
 
+  /* ===== Settings Page Specific Layout Override ===== */
+  .settings-layout {
+    flex-direction: column;
+  }
+
+  .settings-layout .chat-main-area {
+    overflow-y: visible;
+  }
+
+  .settings-layout .dialogue-nav-sidebar {
+    position: static;
+    transform: none;
+    width: 100%;
+    max-width: none;
+    box-shadow: none;
+    border-left: none;
+    border-top: 1px solid var(--border);
+    padding-bottom: 40px;
+    height: auto;
+  }
+
   /* ===== Settings Page — card-based sections ===== */
   .settings-section {
+
     background: rgba(255, 255, 255, 0.03);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);

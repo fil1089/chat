@@ -120,7 +120,7 @@ export default function SettingsPage() {
     };
 
     return (
-        <div className="chat-layout-with-nav">
+        <div className="chat-layout-with-nav settings-layout">
             <div className="chat-main-area">
                 <div className="settings-main">
                     <div className="page-header">
