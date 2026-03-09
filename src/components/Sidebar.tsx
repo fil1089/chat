@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { IconPlus, IconSidebar, IconMessage, IconFolder, IconHistory, IconSettings, IconSearch, IconTrash, IconLogo, SpaceIcon, IconRobot, IconChevronDown, IconClose, IconImage, IconUser } from './Icons';
+import { checkPolzaBalance } from '../services/polzaApi';
 import { v4 as uuidv4 } from 'uuid';
 import type { Chat } from '../types';
 
@@ -17,6 +18,20 @@ export default function Sidebar({ onLogout, onLogin, userEmail }: SidebarProps) 
     const location = useLocation();
     const [searchQuery, setSearchQuery] = useState('');
     const [spacesCollapsed, setSpacesCollapsed] = useState(false);
+    const [balance, setBalance] = useState<string | null>(null);
+
+    useEffect(() => {
+        if (state.settings.apiProvider === 'polza' && state.settings.polzaApiKey && userEmail) {
+            checkPolzaBalance(state.settings.polzaApiKey).then(b => {
+                if (b) {
+                    const parsed = parseFloat(b);
+                    if (!isNaN(parsed)) {
+                        setBalance(parsed.toFixed(2));
+                    }
+                }
+            });
+        }
+    }, [state.settings.apiProvider, state.settings.polzaApiKey, userEmail]);
 
     const handleNewChat = () => {
         dispatch({ type: 'SET_ACTIVE_CHAT', payload: null });
@@ -207,6 +222,11 @@ export default function Sidebar({ onLogout, onLogin, userEmail }: SidebarProps) 
                     {userEmail ? (
                         <>
                             <div className="sidebar-user-email" title={userEmail}>{userEmail}</div>
+                            {balance !== null && (
+                                <div className="sidebar-balance" style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '8px', padding: '0 8px' }}>
+                                    Баланс: <span style={{ color: 'var(--text-primary)', fontWeight: 500 }}>{balance} ₽</span>
+                                </div>
+                            )}
                             {onLogout && (
                                 <button className="sidebar-logout-btn" onClick={onLogout} title="Выйти">
                                     <IconClose size={14} />

@@ -290,9 +290,17 @@ export default function ChatInput({ onSend, model, onModelChange, isStreaming, o
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
         >
-            <div className="chat-input-wrapper">
+            <div className="chat-input-header-area" style={{ display: 'flex', alignItems: 'center', marginBottom: '8px', paddingLeft: '8px' }}>
+                {!hideModelSelector && (
+                    <div className="desktop-only" style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                        <ModelSelector model={model} onModelChange={onModelChange} direction={direction} />
+                    </div>
+                )}
+            </div>
+
+            <div className="chat-input-wrapper" style={{ borderRadius: '24px', background: 'var(--bg-elevated)', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
                 {attachments.length > 0 && (
-                    <div className="chat-input-attachments">
+                    <div className="chat-input-attachments" style={{ padding: '12px 16px 4px', display: 'flex', flexWrap: 'wrap', gap: '8px', borderBottom: '1px solid var(--border-light)' }}>
                         {attachments.map((file, i) => (
                             <div key={i} className="attachment-chip">
                                 <IconFileText size={14} />
@@ -304,33 +312,40 @@ export default function ChatInput({ onSend, model, onModelChange, isStreaming, o
                         ))}
                     </div>
                 )}
-                <div className="chat-input-top">
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1 }}>
-                        {!hideModelSelector && (
-                            <div className="desktop-only" style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                                <ModelSelector model={model} onModelChange={onModelChange} direction={direction} />
-                            </div>
-                        )}
-                    </div>
 
-                    <div className="chat-input-actions" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div className="chat-input-main-row" style={{ display: 'flex', alignItems: 'flex-end', padding: '8px 12px', gap: '8px' }}>
+                    <button
+                        className="btn-ghost btn-sm attachment-btn"
+                        onClick={() => fileInputRef.current?.click()}
+                        title="Прикрепить файлы"
+                        style={{ padding: '8px', flexShrink: 0, marginBottom: '2px' }}
+                    >
+                        <IconAttachment size={20} />
+                    </button>
 
-                        <button
-                            className="btn-ghost btn-sm attachment-btn"
-                            onClick={() => fileInputRef.current?.click()}
-                            title="Прикрепить файлы"
-                        >
-                            <IconAttachment size={18} />
-                        </button>
+                    <textarea
+                        ref={textareaRef}
+                        className="chat-textarea"
+                        placeholder={isDragging ? "Перетащите файлы сюда..." : (placeholder || "Введите сообщение...")}
+                        value={text}
+                        onChange={(e) => setText(e.target.value)}
+                        onKeyDown={handleKeyDown}
+                        onPaste={handlePaste}
+                        rows={1}
+                        disabled={isStreaming}
+                        style={{ flex: 1, border: 'none', background: 'transparent', color: 'var(--text-primary)', outline: 'none', resize: 'none', padding: '10px 0', minHeight: '24px', fontSize: '15px' }}
+                    />
 
+                    <div className="chat-input-actions-right" style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0, paddingBottom: '2px' }}>
                         {!(model.includes('image') || model.includes('image-preview')) && (
                             <div className="chat-settings-wrapper" ref={settingsRef}>
                                 <button
                                     className="chat-settings-btn"
                                     onClick={() => setShowSettings(!showSettings)}
                                     title="Настройки контекста"
+                                    style={{ background: 'transparent', border: 'none', color: 'var(--text-tertiary)', cursor: 'pointer', padding: '6px', borderRadius: '50%' }}
                                 >
-                                    <IconSettings size={18} />
+                                    <IconSettings size={20} />
                                 </button>
                                 {showSettings && (
                                     <div className="chat-settings-popup">
@@ -463,7 +478,7 @@ export default function ChatInput({ onSend, model, onModelChange, isStreaming, o
                             </div>
                         )}
                         {isStreaming ? (
-                            <button className="send-btn stop-btn" onClick={onStop} title="Остановить">
+                            <button className="send-btn stop-btn" onClick={onStop} title="Остановить" style={{ padding: '8px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                 <IconStop size={18} />
                             </button>
                         ) : (
@@ -472,6 +487,7 @@ export default function ChatInput({ onSend, model, onModelChange, isStreaming, o
                                 onClick={handleSubmit}
                                 disabled={!text.trim() && attachments.length === 0}
                                 title="Отправить (Enter)"
+                                style={{ padding: '8px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: text.trim() || attachments.length > 0 ? 'var(--surface-glass-hover)' : 'transparent', color: text.trim() || attachments.length > 0 ? 'var(--text-primary)' : 'var(--text-muted)' }}
                             >
                                 <IconSend size={18} />
                             </button>
@@ -484,19 +500,6 @@ export default function ChatInput({ onSend, model, onModelChange, isStreaming, o
                         style={{ display: 'none' }}
                         multiple
                         onChange={handleFileChange}
-                    />
-                </div>
-                <div className="chat-input-bottom">
-                    <textarea
-                        ref={textareaRef}
-                        className="chat-textarea"
-                        placeholder={isDragging ? "Перетащите файлы сюда..." : (placeholder || "Введите сообщение...")}
-                        value={text}
-                        onChange={(e) => setText(e.target.value)}
-                        onKeyDown={handleKeyDown}
-                        onPaste={handlePaste}
-                        rows={1}
-                        disabled={isStreaming}
                     />
                 </div>
             </div>

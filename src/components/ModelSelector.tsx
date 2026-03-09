@@ -156,7 +156,7 @@ export default function ModelSelector({ model, onModelChange, direction = 'up', 
                 <div className="model-trigger-content">
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                         <span className="model-name">{currentModel?.name || model}</span>
-                        {currentModel?.isActual && <span className="model-badge" style={{ background: 'rgba(255, 255, 255, 0.05)', color: 'var(--text-secondary)', border: '1px solid var(--border)', fontSize: '10px', padding: '2px 6px', fontWeight: 'normal', letterSpacing: '0.2px' }}>актуальная</span>}
+                        {currentModel?.isActual && <span className="model-badge" style={{ background: 'rgba(255, 255, 255, 0.05)', color: 'var(--text-secondary)', border: '1px solid var(--border)', fontSize: '10px', padding: '2px 6px', fontWeight: 'normal', letterSpacing: '0.2px', textTransform: 'lowercase' }}>актуальная</span>}
                     </div>
                 </div>
                 {direction === 'up' ? <IconChevronUp size={14} /> : <IconChevronDown size={14} />}
