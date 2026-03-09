@@ -26,7 +26,7 @@ const initialState: AppState = {
         enableReasoning: false,
         enableWebSearch: false,
     },
-    sidebarOpen: true,
+    sidebarOpen: typeof window !== 'undefined' ? window.innerWidth > 768 : true,
     storageReady: false,
 };
 

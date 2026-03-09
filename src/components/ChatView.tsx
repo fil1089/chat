@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { useGlobalAuthModal } from '../App';
 import { useNavigate } from 'react-router-dom';
 import { streamResponsePolza, ALL_POLZA_MODELS } from '../services/polzaApi';
+import { MODELS } from '../services/youApi';
 import ChatInput from './ChatInput';
 import MessageBubble from './MessageBubble';
 import ThreadNav from './ThreadNav';
@@ -459,7 +460,8 @@ export default function ChatView() {
                 </div>
                 <div className="sidebar-section" style={{ padding: '24px' }}>
                     {(() => {
-                        const currentModel = ALL_POLZA_MODELS.find(m => m.id === model);
+                        const allModels = [...MODELS, ...ALL_POLZA_MODELS];
+                        const currentModel = allModels.find(m => m.id === model);
                         return currentModel ? (
                             <div className="model-info-card">
                                 <div className="model-info-label">Модель</div>
