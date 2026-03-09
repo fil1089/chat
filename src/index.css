@@ -5442,7 +5442,8 @@ input:checked+.toggle-slider:before {
   .settings-sidebar {
     width: 100%;
     border-left: none;
-    border-top: 1px solid var(--border);
+    border-top: none;
+    background: transparent;
     overflow: visible;
     height: auto;
     padding: 24px 20px 300px 20px;
@@ -5554,6 +5555,27 @@ input:checked+.toggle-slider:before {
   z-index: 1000;
   animation: fadeIn 0.15s ease-out;
 }
+
+@media (max-width: 768px) {
+  .chat-settings-popup {
+    position: fixed;
+    bottom: 80px;
+    right: 16px;
+    left: 16px;
+    width: auto;
+    max-width: 400px;
+    margin: 0 auto;
+  }
+
+  .chat-settings-popup::before {
+    display: none;
+  }
+
+  .chat-empty {
+    margin-bottom: 20%;
+  }
+}
+
 
 .chat-settings-popup::before {
   content: '';
