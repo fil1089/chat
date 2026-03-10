@@ -2703,8 +2703,10 @@ input:checked+.toggle-slider:before {
   backdrop-filter: blur(4px);
   z-index: 1000;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
+  overflow-y: auto;
+  padding: 40px 20px;
   animation: fadeIn 0.15s ease-out;
 }
 
@@ -2713,10 +2715,9 @@ input:checked+.toggle-slider:before {
   border: 1px solid var(--border);
   border-radius: var(--radius-xl);
   padding: 28px;
-  width: 90%;
+  width: 100%;
   max-width: 500px;
-  max-height: 85vh;
-  /* overflow-y: auto removed to allow dropdowns to overflow */
+  margin: auto;
   animation: fadeInUp 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
