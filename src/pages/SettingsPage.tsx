@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { API_URLS } from '../services/apiConfig';
 import { useApp } from '../context/AppContext';
 import { getChatModelsByCategory } from '../services/youApi';
-import { IconSettings, IconDownload, IconPlus, IconTrash, IconMessage, IconFolder, IconEye, IconEyeOff, IconCheck, IconError, IconFileText, IconImage, IconAttachment, IconAudio, IconVideo } from '../components/Icons';
+import { IconSettings, IconDownload, IconPlus, IconTrash, IconMessage, IconRobot, IconFolder, IconEye, IconEyeOff, IconCheck, IconError, IconFileText, IconImage, IconAttachment, IconAudio, IconVideo } from '../components/Icons';
 import ModelSelector from '../components/ModelSelector';
 import { exportAllData, importAllData, clearAllData } from '../services/storage';
 import { MODELS } from '../services/youApi';
@@ -107,7 +107,7 @@ export default function SettingsPage() {
     };
 
     const handleClear = async () => {
-        if (confirm('Вы уверены? Все чаты, пространства и настройки будут удалены.')) {
+        if (confirm('Вы уверены? Все чаты, помощники и настройки будут удалены.')) {
             await clearAllData();
             const storage = await import('../services/storage');
             const [chats, spaces, settings] = await Promise.all([
@@ -165,9 +165,9 @@ export default function SettingsPage() {
                     <div className="settings-section">
                         <h2>Локальные данные</h2>
                         <div className="setting-row">
-                            <div className="data-stats" style={{ display: 'flex', gap: '16px', marginBottom: '16px', color: 'var(--text-secondary)', fontSize: '13px' }}>
+                            <div className="data-stats">
                                 <span><IconMessage size={16} /> {state.chats.length} чатов</span>
-                                <span><IconFolder size={16} /> {state.spaces.length} пространств</span>
+                                <span><IconRobot size={16} /> {state.spaces.length} ИИ Помощников</span>
                             </div>
                             <div className="data-actions">
                                 <button className="btn-secondary" onClick={handleExport}>Экспорт всех данных (.json)</button>
