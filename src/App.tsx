@@ -34,9 +34,9 @@ function Layout() {
     let mobileHeaderTitle = '';
     if (location.pathname === '/settings') mobileHeaderTitle = 'Настройки';
     else if (location.pathname === '/history') mobileHeaderTitle = 'История';
-    else if (location.pathname === '/spaces') mobileHeaderTitle = 'Пространства';
+    else if (location.pathname === '/spaces') mobileHeaderTitle = 'ИИ Помощники';
     else if (location.pathname === '/images') mobileHeaderTitle = 'Изображения';
-    else if (location.pathname.startsWith('/space/')) mobileHeaderTitle = 'Пространство';
+    else if (location.pathname.startsWith('/space/')) mobileHeaderTitle = 'Помощник';
 
     const showMobileHeader = location.pathname !== '/';
 
