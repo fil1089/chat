@@ -293,7 +293,7 @@ export default function ChatInput({ onSend, model, onModelChange, isStreaming, o
             <div className="chat-input-header-area" style={{ display: 'flex', alignItems: 'center', marginBottom: '8px', paddingLeft: '8px' }}>
                 {!hideModelSelector && (
                     <div className="desktop-only" style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                        <ModelSelector model={model} onModelChange={onModelChange} direction={direction} variant="transparent" />
+                        <ModelSelector model={model} onModelChange={onModelChange} direction={direction} variant="transparent" align="left" />
                     </div>
                 )}
                 {attachments.length > 0 && (

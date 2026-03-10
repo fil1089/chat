@@ -9,13 +9,14 @@ interface ModelSelectorProps {
     model: string;
     onModelChange: (model: string) => void;
     direction?: 'up' | 'down';
+    align?: 'left' | 'right';
     isMobileHeader?: boolean;
     variant?: 'default' | 'transparent';
     inline?: boolean;
     constrained?: boolean;
 }
 
-export default function ModelSelector({ model, onModelChange, direction = 'up', isMobileHeader = false, variant = 'default', inline = false, constrained = false }: ModelSelectorProps) {
+export default function ModelSelector({ model, onModelChange, direction = 'up', align = 'right', isMobileHeader = false, variant = 'default', inline = false, constrained = false }: ModelSelectorProps) {
     const { state } = useApp();
     const isPolza = true;
 
@@ -181,7 +182,7 @@ export default function ModelSelector({ model, onModelChange, direction = 'up', 
             )}
 
             {(open || inline) && (
-                <div className={`model-selector-dropdown ${direction === 'down' ? 'down' : ''} ${inline ? 'inline' : ''}`} style={constrained ? { width: '100%', maxWidth: '100%', minWidth: 0, left: 0, right: 'auto', boxSizing: 'border-box' as const, maxHeight: '70vh' } : undefined}>
+                <div className={`model-selector-dropdown ${direction === 'down' ? 'down' : ''} ${align === 'left' ? 'left-aligned' : ''} ${inline ? 'inline' : ''}`} style={constrained ? { width: '100%', maxWidth: '100%', minWidth: 0, left: 0, right: 'auto', boxSizing: 'border-box' as const, maxHeight: '70vh' } : undefined}>
                     <div style={{ padding: '12px', borderBottom: '1px solid var(--border)' }}>
                         <div className="model-selector-top-bar">
                             <div className="model-search-container">
