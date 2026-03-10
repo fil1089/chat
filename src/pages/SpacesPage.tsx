@@ -187,7 +187,8 @@ export default function SpacesPage() {
                             <ModelSelector
                                 model={form.model}
                                 onModelChange={(m) => setForm({ ...form, model: m })}
-                                inline={true}
+                                direction="down"
+                                constrained={true}
                             />
                         </div>
                         <div className="form-row">
