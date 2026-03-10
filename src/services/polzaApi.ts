@@ -64,8 +64,8 @@ export async function translateText(text: string, targetLang: 'en' | 'ru', apiKe
     if (!text || !text.trim()) return text;
 
     // Используем максимально дешевую модель для перевода
-    // Gemma 3n 4B - отличный выбор (1.68 руб / 1М токенов)
-    const model = 'google/gemma-3-4b-it';
+    // GPT-4o Mini - отличный выбор для служебных задач (быстро и стабильно)
+    const model = 'openai/gpt-4o-mini';
 
     const prompt = targetLang === 'en'
         ? `Translate the following text to English. Output ONLY the translation without any preamble or quotes:\n\n${text}`
@@ -262,6 +262,12 @@ export async function streamResponsePolza({
                         const jsonStr = trimmedLine.slice(6);
                         const data = JSON.parse(jsonStr);
                         console.log('[Polza Chunk]', data);
+
+                        // Проверяем наличие ошибки в чанке
+                        if (data.error) {
+                            const errorMsg = data.error.message || data.error.code || 'Неизвестная ошибка в потоке';
+                            throw new Error(errorMsg);
+                        }
 
                         // Handle usage statistics if present
                         if (data.usage?.prompt_tokens && onUsage) {
