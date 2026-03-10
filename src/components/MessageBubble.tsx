@@ -18,6 +18,20 @@ interface StreamStatus {
     message: string;
 }
 
+const CodeCopyButton = ({ text }: { text: string }) => {
+    const [copied, setCopied] = useState(false);
+    const handleCopy = () => {
+        navigator.clipboard.writeText(text);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+    };
+    return (
+        <button className="code-copy-btn" onClick={handleCopy} title={copied ? 'Скопировано' : 'Копировать'}>
+            {copied ? <IconCheck size={14} /> : <IconCopy size={14} />}
+        </button>
+    );
+};
+
 interface MessageBubbleProps {
     message: Message;
     chatId: string; // Added to handle version switch
@@ -286,7 +300,7 @@ export default function MessageBubble({ message, chatId, isLatest, isStreaming, 
                                         code(props: React.HTMLAttributes<HTMLElement> & { children?: React.ReactNode }) {
                                             const { className, children, ...rest } = props;
                                             const match = /language-(\w+)/.exec(className || '');
-                                            const isInline = !match;
+                                            const isInline = !match && !String(children).includes('\n');
 
                                             if (isInline) {
                                                 return <code className="inline-code" {...rest}>{children}</code>;
@@ -295,10 +309,8 @@ export default function MessageBubble({ message, chatId, isLatest, isStreaming, 
                                             return (
                                                 <div className="code-block-wrapper">
                                                     <div className="code-block-header">
-                                                        <span className="code-lang">{match?.[1]}</span>
-                                                        <button className="code-copy-btn" onClick={() => navigator.clipboard.writeText(String(children).replace(/\n$/, ''))}>
-                                                            <IconCopy size={14} /> Скопировать
-                                                        </button>
+                                                        <span className="code-lang">{match?.[1] || 'text'}</span>
+                                                    <CodeCopyButton text={String(children).replace(/\n$/, '')} />
                                                     </div>
                                                     <pre><code className={className} {...rest}>{children}</code></pre>
                                                 </div>
@@ -317,7 +329,7 @@ export default function MessageBubble({ message, chatId, isLatest, isStreaming, 
                                     code(props: React.HTMLAttributes<HTMLElement> & { children?: React.ReactNode }) {
                                         const { className, children, ...rest } = props;
                                         const match = /language-(\w+)/.exec(className || '');
-                                        const isInline = !match;
+                                        const isInline = !match && !String(children).includes('\n');
 
                                         if (isInline) {
                                             return <code className="inline-code" {...rest}>{children}</code>;
@@ -326,10 +338,8 @@ export default function MessageBubble({ message, chatId, isLatest, isStreaming, 
                                         return (
                                             <div className="code-block-wrapper">
                                                 <div className="code-block-header">
-                                                    <span className="code-lang">{match?.[1]}</span>
-                                                    <button className="code-copy-btn" onClick={() => navigator.clipboard.writeText(String(children).replace(/\n$/, ''))}>
-                                                        <IconCopy size={14} /> Скопировать
-                                                    </button>
+                                                    <span className="code-lang">{match?.[1] || 'text'}</span>
+                                                    <CodeCopyButton text={String(children).replace(/\n$/, '')} />
                                                 </div>
                                                 <pre><code className={className} {...rest}>{children}</code></pre>
                                             </div>
