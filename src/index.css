@@ -5350,25 +5350,22 @@ input:checked+.toggle-slider:before {
   }
 
   .settings-model-wrapper .model-selector-dropdown {
-    position: fixed;
-    left: 8px;
-    right: 8px;
-    width: auto;
-    max-width: none;
-    bottom: auto;
-    top: 50%;
-    transform: translateY(-50%);
-    max-height: 70vh;
-    z-index: 10001;
+    position: fixed !important;
+    left: 10px !important;
+    right: 10px !important;
+    width: auto !important;
+    max-width: none !important;
+    top: 60px !important;
+    bottom: auto !important;
+    transform: none !important;
+    max-height: 80vh !important;
+    z-index: 10001 !important;
+    box-shadow: 0 20px 80px rgba(0, 0, 0, 0.7) !important;
+    animation: fade-in 0.2s ease-out !important;
   }
 
   .settings-model-wrapper .model-selector-dropdown.down {
-    position: fixed;
-    left: 8px;
-    right: 8px;
-    width: auto;
-    top: 50%;
-    transform: translateY(-50%);
+    top: 60px !important;
   }
 
   /* ===== Spaces Grid ===== */
