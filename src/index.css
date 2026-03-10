@@ -5494,9 +5494,9 @@ input:checked+.toggle-slider:before {
 
   .settings-layout {
     flex-direction: column;
-    overflow: visible;
+    overflow-y: auto !important;
+    height: 100% !important;
     margin: 0;
-    height: auto;
   }
 
   .settings-main {
@@ -5505,15 +5505,17 @@ input:checked+.toggle-slider:before {
     padding: 24px 20px;
   }
 
-  .settings-sidebar {
+  .settings-layout .dialogue-nav-sidebar {
     width: 100%;
     border-left: none;
-    border-top: none;
+    border-top: 1px solid var(--border);
     background: transparent;
     overflow: visible;
     height: auto;
-    padding: 24px 20px 300px 20px;
-    /* Space for dropdown + restore side padding */
+    padding: 24px 20px 100px 20px;
+    position: static;
+    transform: none;
+    box-shadow: none;
   }
 }
 
