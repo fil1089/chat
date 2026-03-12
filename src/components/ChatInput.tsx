@@ -141,6 +141,23 @@ async function readFile(file: File, isPolza: boolean): Promise<Attachment[]> {
     });
 }
 
+const MODE_DESCRIPTIONS: Record<string, string> = {
+    '@Article Mode': 'написание SEO-статей',
+    '@Blog Article': 'статья + изображения',
+    '@Blog Article + Image Mode': 'статья + изображения',
+    '@Custom Mode': 'кастомный стиль',
+    '@Multilingual Mode': 'другой язык',
+    '@SEO Post Check Mode': 'проверка текста на SEO',
+    '@Social Media Mode': 'пост для соцсетей',
+    '@VK Mode': 'пост для ВКонтакте',
+    '@Telegram Mode': 'пост для Telegram',
+    '@LinkedIn Mode': 'деловой пост',
+    '@Rewrite Mode': 'переписать текст',
+    '@Humanizer Mode': 'сделать текст живым',
+    '@Hook Generator Mode': 'идеи начала поста',
+    '@Title Generator Mode': 'варианты заголовков'
+};
+
 interface ChatInputProps {
     onSend: (text: string, attachments: Attachment[]) => void;
     model: string;
@@ -181,17 +198,32 @@ export default function ChatInput({ onSend, model, onModelChange, isStreaming, o
     // Extract @Mode hints from active space instructions
     const activeSpace = state.activeSpace ? state.spaces.find(s => s.id === state.activeSpace) : null;
     const modeHints: string[] = [];
-    if (activeSpace?.instructions) {
-        const matches = activeSpace.instructions.match(/@[A-Za-zА-Яа-я0-9_]+(?:\s+[A-Za-zА-Яа-я0-9_]+)*/g);
-        if (matches) {
-            const seen = new Set<string>();
-            for (const m of matches) {
-                const trimmed = m.trim();
-                if (!seen.has(trimmed)) {
-                    seen.add(trimmed);
-                    modeHints.push(trimmed);
-                }
+    const dynamicDescriptions: Record<string, string> = { ...MODE_DESCRIPTIONS };
+
+    const instructions = activeSpace?.instructions;
+    if (instructions) {
+        // Find all lines that define a mode: "@Mode Name (description)"
+        const definitionRegex = /^[-*]?\s*@([^(\n]+?)\s*\(([^)\n]+)\)\s*$/gm;
+        let match;
+        const definedModes = new Set<string>();
+        
+        while ((match = definitionRegex.exec(instructions)) !== null) {
+            const modeName = '@' + match[1].trim();
+            const description = match[2].trim();
+            if (!definedModes.has(modeName)) {
+                definedModes.add(modeName);
+                modeHints.push(modeName);
+                dynamicDescriptions[modeName] = description;
             }
+        }
+
+        // If no structured definitions were found, fallback to checking if any predefined MODE_DESCRIPTIONS are mentioned
+        if (modeHints.length === 0) {
+            Object.keys(MODE_DESCRIPTIONS).forEach(mode => {
+                if (instructions.includes(mode)) {
+                    modeHints.push(mode);
+                }
+            });
         }
     }
 
@@ -360,11 +392,20 @@ export default function ChatInput({ onSend, model, onModelChange, isStreaming, o
             <div className="chat-input-wrapper" style={{ borderRadius: '24px', background: 'var(--bg-elevated)', display: 'flex', flexDirection: 'column' }}>
                 {/* Mode hints */}
                 {isFocused && modeHints.length > 0 && (
-                    <div className="mode-hints-row">
+                    <div 
+                        className="mode-hints-row"
+                        onWheel={(e) => {
+                            if (e.deltaY !== 0) {
+                                e.preventDefault();
+                                e.currentTarget.scrollLeft += e.deltaY;
+                            }
+                        }}
+                    >
                         {modeHints.map((mode) => (
                             <button
                                 key={mode}
                                 className="mode-hint-chip"
+                                title={dynamicDescriptions[mode] || mode}
                                 onMouseDown={(e) => { e.preventDefault(); handleModeClick(mode); }}
                             >
                                 {mode}

@@ -372,14 +372,14 @@ export default function ChatView() {
                             />
                         </div>
                     )}
-                    {activeSpace && <div className="mobile-space-title">{activeSpace.name}</div>}
+                    {activeSpace && <div className="mobile-space-title" onClick={() => dispatch({ type: 'SET_ACTIVE_CHAT', payload: null })} style={{ cursor: 'pointer' }}>{activeSpace.name}</div>}
                     <button className="mobile-right-panel-btn" onClick={() => setRightPanelOpen(true)}>
                         <IconSidebarRight size={20} />
                     </button>
                 </div>
 
                 {activeSpace && (
-                    <div className="space-banner desktop-only">
+                    <div className="space-banner desktop-only" onClick={() => dispatch({ type: 'SET_ACTIVE_CHAT', payload: null })} style={{ cursor: 'pointer' }}>
                         <IconFolder size={16} className="space-banner-icon" />
                         {activeSpace.name}
                     </div>

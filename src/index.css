@@ -4329,6 +4329,8 @@ input:checked+.toggle-slider:before {
   overflow-x: auto;
   scrollbar-width: none;
   -ms-overflow-style: none;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .mode-hints-row::-webkit-scrollbar {

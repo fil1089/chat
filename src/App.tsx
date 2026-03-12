@@ -17,6 +17,8 @@ function Layout() {
     const { state, dispatch } = useApp();
     const { logout, user } = useAuth();
     const navigate = useNavigate();
+    const { showAuthModal } = useGlobalAuthModal();
+    const location = useLocation();
 
     if (!state.storageReady) {
         return (
@@ -26,9 +28,6 @@ function Layout() {
             </div>
         );
     }
-
-    const { showAuthModal } = useGlobalAuthModal();
-    const location = useLocation();
 
     // Determine the title for the mobile header based on the current route
     let mobileHeaderTitle = '';
