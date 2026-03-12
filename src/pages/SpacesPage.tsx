@@ -128,11 +128,12 @@ export default function SpacesPage() {
                         </div>
                         <div className="form-row">
                             <label>Описание</label>
-                            <input
-                                type="text"
+                            <textarea
                                 value={form.description}
                                 onChange={(e) => setForm({ ...form, description: e.target.value })}
-                                placeholder="Краткое описание"
+                                placeholder="Краткое описание (поддерживаются переносы строк)"
+                                rows={6}
+                                style={{ resize: 'vertical', minHeight: '120px' }}
                             />
                         </div>
                         <div className="form-row">
@@ -208,7 +209,7 @@ export default function SpacesPage() {
                         <div className="form-row">
                             <label>Цвет плитки</label>
                             <div className="color-picker-row">
-                                {['', '#6366f1', '#8b5cf6', '#ec4899', '#f43f5e', '#f97316', '#eab308', '#22c55e', '#06b6d4', '#3b82f6'].map(c => (
+                                {['', '#6366f1', '#8b5cf6', '#ec4899', '#f43f5e', '#f97316', '#eab308', '#22c55e', '#06b6d4', '#3b82f6', '#14b8a6', '#a855f7', '#e11d48', '#0ea5e9', '#84cc16', '#d946ef', '#f59e0b', '#10b981', '#818cf8', '#fb7185'].map(c => (
                                     <button
                                         key={c}
                                         className={`color-swatch ${form.color === c ? 'active' : ''}`}

@@ -14,6 +14,8 @@ export default function SpaceDashboard() {
     const [selectedModel, setSelectedModel] = useState<string>('');
     const [expandedPrompt, setExpandedPrompt] = useState(false);
     const [expandedDescription, setExpandedDescription] = useState(false);
+    const [expandedChats, setExpandedChats] = useState(true);
+    const [expandedFiles, setExpandedFiles] = useState(true);
     const [editingChatId, setEditingChatId] = useState<string | null>(null);
     const [editTitle, setEditTitle] = useState('');
     const [contextMode, setContextMode] = useState<ContextMode>('full');
@@ -109,15 +111,17 @@ export default function SpaceDashboard() {
                         <SpaceIcon icon={space.icon || 'folder'} size={40} />
                         <div>
                             <h1 style={{ margin: 0, fontSize: '24px' }}>{space.name}</h1>
-                            {space.description && <p className="page-subtitle" style={{ margin: '4px 0 0' }}>{space.description}</p>}
                         </div>
                     </div>
                 </div>
 
                 <div className="space-dashboard-content">
                     <div className="space-chats">
-                        <h2 className="section-title">История чатов</h2>
-                        {spaceChats.length > 0 && (
+                        <div className="sidebar-section-header" onClick={() => setExpandedChats(!expandedChats)} style={{ cursor: 'pointer', marginBottom: '12px' }}>
+                            <h2 className="section-title" style={{ margin: 0 }}>История чатов</h2>
+                            {expandedChats ? <IconChevronUp size={14} /> : <IconChevronDown size={14} />}
+                        </div>
+                        {expandedChats && spaceChats.length > 0 && (
                             <div className="chats-list">
                                 {spaceChats.map((chat) => (
                                     <div
@@ -194,7 +198,7 @@ export default function SpaceDashboard() {
                         <h3>Системный промт</h3>
                         {expandedPrompt ? <IconChevronUp size={14} /> : <IconChevronDown size={14} />}
                     </div>
-                    <p className={!expandedPrompt ? 'line-clamp-3' : ''} style={{ fontSize: '13px', lineHeight: '1.5', color: 'var(--text-secondary)', marginTop: '12px' }}>
+                    <p className={!expandedPrompt ? 'line-clamp-3' : ''} style={{ fontSize: '13px', lineHeight: '1.5', color: 'var(--text-secondary)', marginTop: '12px', whiteSpace: 'pre-wrap' }}>
                         {space.instructions || 'Инструкции не заданы'}
                     </p>
                     {!expandedPrompt && space.instructions && space.instructions.length > 100 && (
@@ -209,7 +213,7 @@ export default function SpaceDashboard() {
                         <h3>Описание</h3>
                         {expandedDescription ? <IconChevronUp size={14} /> : <IconChevronDown size={14} />}
                     </div>
-                    <p className={!expandedDescription ? 'line-clamp-3' : ''} style={{ fontSize: '13px', lineHeight: '1.5', color: 'var(--text-secondary)', marginTop: '12px' }}>
+                    <p className={!expandedDescription ? 'line-clamp-3' : ''} style={{ fontSize: '13px', lineHeight: '1.5', color: 'var(--text-secondary)', marginTop: '12px', whiteSpace: 'pre-wrap' }}>
                         {space.description || 'Описание не задано'}
                     </p>
                     {!expandedDescription && space.description && space.description.length > 50 && (
@@ -221,21 +225,26 @@ export default function SpaceDashboard() {
 
                 {space.files && space.files.length > 0 && (
                     <div className="sidebar-section">
-                        <h3>Прикрепленные файлы ({space.files.length})</h3>
-                        <div className="sidebar-file-list" style={{ marginTop: '12px' }}>
-                            {space.files.map((file, i) => (
-                                <div key={i} className="sidebar-file-item" style={{ marginBottom: '8px' }}>
-                                    <IconAttachment size={14} />
-                                    <span>{file.name}</span>
-                                </div>
-                            ))}
+                        <div className="sidebar-section-header" onClick={() => setExpandedFiles(!expandedFiles)}>
+                            <h3>Прикрепленные файлы ({space.files.length})</h3>
+                            {expandedFiles ? <IconChevronUp size={14} /> : <IconChevronDown size={14} />}
                         </div>
+                        {expandedFiles && (
+                            <div className="sidebar-file-list" style={{ marginTop: '12px' }}>
+                                {space.files.map((file, i) => (
+                                    <div key={i} className="sidebar-file-item" style={{ marginBottom: '8px' }}>
+                                        <IconAttachment size={14} />
+                                        <span>{file.name}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                     </div>
                 )}
 
                 <div className="sidebar-section" style={{ marginTop: 'auto' }}>
                     <button className="btn-secondary" style={{ width: '100%' }} onClick={() => navigate(`/spaces?edit=${space.id}`)}>
-                        <IconEdit size={16} /> Редактировать помощника
+                        <IconEdit size={16} /> <span style={{ marginLeft: '8px' }}>Редактировать помощника</span>
                     </button>
                 </div>
             </div>

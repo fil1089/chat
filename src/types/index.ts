@@ -6,7 +6,7 @@ export interface Message {
     content: string;
     displayContent?: string;
     model?: string;
-    usage?: { prompt_tokens: number; completion_tokens: number; total_tokens: number; cost_rub?: number };
+    usage?: { prompt_tokens: number; completion_tokens: number; total_tokens: number; cost_rub?: number; cached_tokens?: number };
     attachments?: { name: string; size: number }[];
     fullAttachments?: Attachment[];
     timestamp?: number;
@@ -15,7 +15,7 @@ export interface Message {
     versions?: {
         content: string;
         model?: string;
-        usage?: { prompt_tokens: number; completion_tokens: number; total_tokens: number; cost_rub?: number };
+        usage?: { prompt_tokens: number; completion_tokens: number; total_tokens: number; cost_rub?: number; cached_tokens?: number };
         timestamp?: number;
         reasoningContent?: string;
         annotations?: any[];

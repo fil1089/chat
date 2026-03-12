@@ -4288,6 +4288,75 @@ input:checked+.toggle-slider:before {
   opacity: 0.6;
 }
 
+/* Icon Picker */
+.icon-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.icon-btn {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.icon-btn:hover {
+  background: var(--surface-glass-hover);
+  color: var(--text-primary);
+  border-color: var(--border-hover);
+}
+
+.icon-btn.active {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--accent-light);
+}
+
+/* Mode Hints (Telegram-style command chips) */
+.mode-hints-row {
+  display: flex;
+  gap: 6px;
+  padding: 8px 12px 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.mode-hints-row::-webkit-scrollbar {
+  display: none;
+}
+
+.mode-hint-chip {
+  flex-shrink: 0;
+  padding: 4px 12px;
+  border-radius: 16px;
+  border: 1px solid var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent-light);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  font-family: inherit;
+  white-space: nowrap;
+}
+
+.mode-hint-chip:hover {
+  background: var(--accent);
+  color: #fff;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px var(--accent-soft);
+}
+
 /* Chat Settings Popup */
 .chat-settings-btn {
   display: flex;

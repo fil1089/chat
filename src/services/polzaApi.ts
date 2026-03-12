@@ -49,49 +49,11 @@ export interface PolzaStreamParams {
     fileContents?: any[];
     enableReasoning?: boolean;
     enableWebSearch?: boolean;
-    onUsage?: (usage: { prompt_tokens: number; completion_tokens: number; total_tokens: number; cost_rub?: number }) => void;
+    onUsage?: (usage: { prompt_tokens: number; completion_tokens: number; total_tokens: number; cost_rub?: number; cached_tokens?: number }) => void;
     onStatus?: (status: { type: string; message: string }) => void;
     onAnnotations?: (annotations: any[]) => void;
     onHistoryFix?: () => void;
     signal?: AbortSignal;
-    enableAutoTranslate?: boolean;
-}
-
-/**
- * Вспомогательная функция для быстрого перевода текста через дешевую модель
- */
-export async function translateText(text: string, targetLang: 'en' | 'ru', apiKey: string): Promise<string> {
-    if (!text || !text.trim()) return text;
-
-    // Используем максимально дешевую модель для перевода
-    // GPT-4o Mini - отличный выбор для служебных задач (быстро и стабильно)
-    const model = 'openai/gpt-4o-mini';
-
-    const prompt = targetLang === 'en'
-        ? `Translate the following text to English. Output ONLY the translation without any preamble or quotes:\n\n${text}`
-        : `Переведи следующий текст на русский язык. Выведи ТОЛЬКО перевод без лишних слов, вступлений и кавычек:\n\n${text}`;
-
-    try {
-        const response = await fetch(`${API_URLS.polza}/v1/chat/completions`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${apiKey}`,
-            },
-            body: JSON.stringify({
-                model,
-                messages: [{ role: 'user', content: prompt }],
-                temperature: 0.1,
-            }),
-        });
-
-        if (!response.ok) return text; // Fallback to original if translation fails
-        const data = await response.json();
-        return data.choices[0]?.message?.content?.trim() || text;
-    } catch (e) {
-        console.error('Translation failed:', e);
-        return text;
-    }
 }
 
 export async function streamResponsePolza({
@@ -107,7 +69,6 @@ export async function streamResponsePolza({
     onStatus,
     onAnnotations,
     signal,
-    enableAutoTranslate,
 }: PolzaStreamParams): Promise<void> {
     if (!apiKey) {
         throw new Error('Укажите API ключ Polza.ai в настройках');
@@ -116,27 +77,11 @@ export async function streamResponsePolza({
     try {
         let modifiedMessages = [...messages];
 
-        // Авто-перевод входящего сообщения
-        if (enableAutoTranslate && messages.length > 0) {
-            const lastMsg = messages[messages.length - 1];
-            if (lastMsg.role === 'user' && typeof lastMsg.content === 'string') {
-                // Простая проверка на наличие кириллицы
-                const hasCyrillic = /[а-яА-ЯёЁ]/.test(lastMsg.content);
-                if (hasCyrillic) {
-                    if (onStatus) onStatus({ type: 'info', message: 'Перевод запроса...' });
-                    const translated = await translateText(lastMsg.content, 'en', apiKey);
-                    modifiedMessages[modifiedMessages.length - 1] = {
-                        ...lastMsg,
-                        content: translated
-                    };
-                    // Минимальная инструкция для экономии токенов
-                    systemInstructions = (systemInstructions ? systemInstructions + '\n' : '') +
-                        "Respond in English.";
-                }
-            }
-        }
+        // Detect if model is Anthropic/Claude for cache_control
+        const isAnthropic = model.toLowerCase().includes('claude') || model.toLowerCase().includes('anthropic');
 
-        // Prepend system prompt if provided
+        // Build system prompt: instructions first (static), then files (static)
+        // This order is optimal for prompt caching - static content at the beginning
         let systemPrompt = '';
         if (systemInstructions) systemPrompt += systemInstructions + '\n\n';
         if (fileContents?.length > 0) {
@@ -147,10 +92,22 @@ export async function streamResponsePolza({
         }
 
         if (systemPrompt.trim()) {
-            modifiedMessages.unshift({
-                role: 'system',
-                content: systemPrompt.trim()
-            });
+            if (isAnthropic) {
+                // For Anthropic: use cache_control to enable prompt caching
+                modifiedMessages.unshift({
+                    role: 'system',
+                    content: [{
+                        type: 'text',
+                        text: systemPrompt.trim(),
+                        cache_control: { type: 'ephemeral' }
+                    }]
+                });
+            } else {
+                modifiedMessages.unshift({
+                    role: 'system',
+                    content: systemPrompt.trim()
+                });
+            }
         }
 
         if (enableWebSearch) {
@@ -263,15 +220,13 @@ export async function streamResponsePolza({
                         const data = JSON.parse(jsonStr);
                         console.log('[Polza Chunk]', data);
 
-                        // Проверяем наличие ошибки в чанке
-                        if (data.error) {
-                            const errorMsg = data.error.message || data.error.code || 'Неизвестная ошибка в потоке';
-                            throw new Error(errorMsg);
-                        }
-
-                        // Handle usage statistics if present
+                        // Handle usage statistics if present (including cached tokens)
                         if (data.usage?.prompt_tokens && onUsage) {
-                            onUsage(data.usage);
+                            const cached = data.usage.prompt_tokens_details?.cached_tokens
+                                || data.usage.cache_read_input_tokens
+                                || data.usage.cached_tokens
+                                || 0;
+                            onUsage({ ...data.usage, cached_tokens: cached });
                         }
 
                         // Handle reasoning chunks
@@ -306,12 +261,7 @@ export async function streamResponsePolza({
             }
         }
 
-        // Авто-перевод исходящего сообщения в самом конце
-        if (enableAutoTranslate && fullContent.trim()) {
-            if (onStatus) onStatus({ type: 'info', message: 'Перевод ответа...' });
-            const translatedContent = await translateText(fullContent, 'ru', apiKey);
-            onUpdate(translatedContent);
-        }
+
 
     } catch (error: any) {
         console.error('[PolzaAPI] Error:', error);

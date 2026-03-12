@@ -425,6 +425,7 @@ export default function MessageBubble({ message, chatId, isLatest, isStreaming, 
                             return (
                                 <span className="message-usage">
                                     {' · '}{u.prompt_tokens} → {u.completion_tokens} токенов
+                                    {u.cached_tokens ? <span className="message-cached" title="Закешированные токены"> · 📦 {u.cached_tokens} кеш</span> : null}
                                     {cost !== null && <span className="message-cost"> · {cost} ₽</span>}
                                 </span>
                             );

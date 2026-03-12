@@ -172,9 +172,55 @@ export default function ChatInput({ onSend, model, onModelChange, isStreaming, o
     const [isDragging, setIsDragging] = useState(false);
     const [showSettings, setShowSettings] = useState(false);
     const [showDropdown, setShowDropdown] = useState(false);
+    const [isFocused, setIsFocused] = useState(false);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const settingsRef = useRef<HTMLDivElement>(null);
+    const focusTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    // Extract @Mode hints from active space instructions
+    const activeSpace = state.activeSpace ? state.spaces.find(s => s.id === state.activeSpace) : null;
+    const modeHints: string[] = [];
+    if (activeSpace?.instructions) {
+        const matches = activeSpace.instructions.match(/@[A-Za-zА-Яа-я0-9_]+(?:\s+[A-Za-zА-Яа-я0-9_]+)*/g);
+        if (matches) {
+            const seen = new Set<string>();
+            for (const m of matches) {
+                const trimmed = m.trim();
+                if (!seen.has(trimmed)) {
+                    seen.add(trimmed);
+                    modeHints.push(trimmed);
+                }
+            }
+        }
+    }
+
+    const handleModeClick = (mode: string) => {
+        const ta = textareaRef.current;
+        if (ta) {
+            const pos = ta.selectionStart || 0;
+            const before = text.slice(0, pos);
+            const after = text.slice(pos);
+            const insertion = (before.length > 0 && !before.endsWith(' ') && !before.endsWith('\n')) ? ' ' + mode + ' ' : mode + ' ';
+            setText(before + insertion + after);
+            setTimeout(() => {
+                if (ta) {
+                    const newPos = pos + insertion.length;
+                    ta.focus();
+                    ta.setSelectionRange(newPos, newPos);
+                }
+            }, 0);
+        }
+    };
+
+    const handleFocus = () => {
+        if (focusTimeoutRef.current) clearTimeout(focusTimeoutRef.current);
+        setIsFocused(true);
+    };
+
+    const handleBlur = () => {
+        focusTimeoutRef.current = setTimeout(() => setIsFocused(false), 200);
+    };
 
     useEffect(() => {
         if (textareaRef.current) {
@@ -312,6 +358,20 @@ export default function ChatInput({ onSend, model, onModelChange, isStreaming, o
             </div>
 
             <div className="chat-input-wrapper" style={{ borderRadius: '24px', background: 'var(--bg-elevated)', display: 'flex', flexDirection: 'column' }}>
+                {/* Mode hints */}
+                {isFocused && modeHints.length > 0 && (
+                    <div className="mode-hints-row">
+                        {modeHints.map((mode) => (
+                            <button
+                                key={mode}
+                                className="mode-hint-chip"
+                                onMouseDown={(e) => { e.preventDefault(); handleModeClick(mode); }}
+                            >
+                                {mode}
+                            </button>
+                        ))}
+                    </div>
+                )}
                 {/* Attachments relocated to header */}
 
                 <div className="chat-input-main-row" style={{ display: 'flex', alignItems: 'flex-end', padding: '8px 12px', gap: '8px' }}>
@@ -332,6 +392,8 @@ export default function ChatInput({ onSend, model, onModelChange, isStreaming, o
                         onChange={(e) => setText(e.target.value)}
                         onKeyDown={handleKeyDown}
                         onPaste={handlePaste}
+                        onFocus={handleFocus}
+                        onBlur={handleBlur}
                         rows={1}
                         disabled={isStreaming}
                         style={{ flex: 1, border: 'none', background: 'transparent', color: 'var(--text-primary)', outline: 'none', resize: 'none', padding: '10px 0', minHeight: '24px', fontSize: '15px' }}
@@ -415,24 +477,7 @@ export default function ChatInput({ onSend, model, onModelChange, isStreaming, o
                                                 </span>
                                             </div>
                                         )}
-                                        <div className="settings-field" style={{ marginTop: '8px', paddingTop: '12px', borderTop: '1px solid var(--border)' }}>
-                                            <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', cursor: 'pointer', margin: 0 }}>
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                                    <span style={{ fontSize: '13px', textTransform: 'none', fontWeight: 600 }}>Экономия токенов</span>
-                                                    <div title="для больших запросов и ответов" style={{ cursor: 'help', color: 'var(--text-muted)', display: 'flex' }}>
-                                                        <IconInfo size={12} />
-                                                    </div>
-                                                </div>
-                                                <div className="toggle-switch" style={{ transform: 'scale(0.8)', transformOrigin: 'right center', margin: 0 }}>
-                                                    <input
-                                                        type="checkbox"
-                                                        checked={state.settings.autoTranslate || false}
-                                                        onChange={(e) => dispatch({ type: 'UPDATE_SETTINGS', payload: { autoTranslate: e.target.checked } as any })}
-                                                    />
-                                                    <span className="toggle-slider"></span>
-                                                </div>
-                                            </label>
-                                        </div>
+                                        {/* Экономия токенов toggle removed — feature disabled */}
                                         {true === true && onReasoningChange && (
                                             <div className="settings-field" style={{ marginTop: '8px', paddingTop: '12px', borderTop: '1px solid var(--border)' }}>
                                                 <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', cursor: 'pointer', margin: 0 }}>

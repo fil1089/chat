@@ -17,7 +17,7 @@ export default function Sidebar({ onLogout, onLogin, userEmail }: SidebarProps) 
     const navigate = useNavigate();
     const location = useLocation();
     const [searchQuery, setSearchQuery] = useState('');
-    const [spacesCollapsed, setSpacesCollapsed] = useState(false);
+    const [spacesCollapsed, setSpacesCollapsed] = useState(true);
     const [balance, setBalance] = useState<string | null>(null);
 
     useEffect(() => {
