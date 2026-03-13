@@ -373,15 +373,25 @@ export default function ChatView() {
                         </div>
                     )}
                     {activeSpace && <div className="mobile-space-title" onClick={() => dispatch({ type: 'SET_ACTIVE_CHAT', payload: null })} style={{ cursor: 'pointer' }}>{activeSpace.name}</div>}
-                    <button className="mobile-right-panel-btn" onClick={() => setRightPanelOpen(true)}>
+                    <button className="mobile-right-panel-btn" onClick={() => setRightPanelOpen(!rightPanelOpen)}>
                         <IconSidebarRight size={20} />
                     </button>
                 </div>
 
                 {activeSpace && (
-                    <div className="space-banner desktop-only" onClick={() => dispatch({ type: 'SET_ACTIVE_CHAT', payload: null })} style={{ cursor: 'pointer' }}>
-                        <IconFolder size={16} className="space-banner-icon" />
-                        {activeSpace.name}
+                    <div className="space-banner desktop-only" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div onClick={() => dispatch({ type: 'SET_ACTIVE_CHAT', payload: null })} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', flex: 1 }}>
+                            <IconFolder size={16} className="space-banner-icon" />
+                            {activeSpace.name}
+                        </div>
+                        <button 
+                            className="btn-ghost btn-sm" 
+                            onClick={() => setRightPanelOpen(!rightPanelOpen)}
+                            style={{ padding: '4px', opacity: 0.6 }}
+                            title={rightPanelOpen ? "Скрыть панель" : "Показать панель"}
+                        >
+                            <IconSidebarRight size={18} />
+                        </button>
                     </div>
                 )}
 
@@ -455,7 +465,7 @@ export default function ChatView() {
             </div>
 
             {rightPanelOpen && <div className="right-panel-overlay" onClick={() => setRightPanelOpen(false)} />}
-            <div className={`dialogue-nav-sidebar ${rightPanelOpen ? 'mobile-open' : ''}`}>
+            <div className={`dialogue-nav-sidebar ${rightPanelOpen ? 'mobile-open' : 'desktop-hidden'}`}>
                 <div className="right-panel-close-btn" onClick={() => setRightPanelOpen(false)}>
                     <IconClose size={18} />
                 </div>

@@ -253,6 +253,9 @@ export default function SpacesPage() {
                                     dragOverItem.current = null;
                                 }}
                                 onClick={() => {
+                                    if (window.innerWidth <= 768) {
+                                        dispatch({ type: 'SET_SIDEBAR', payload: false });
+                                    }
                                     dispatch({ type: 'SET_ACTIVE_CHAT', payload: null });
                                     dispatch({ type: 'SET_ACTIVE_SPACE', payload: space.id });
                                     navigate(`/space/${space.id}`);

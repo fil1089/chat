@@ -152,6 +152,9 @@ export default function Sidebar({ onLogout, onLogin, userEmail }: SidebarProps) 
                                         to={`/space/${space.id}`}
                                         className={`sub-nav-item ${state.activeSpace === space.id ? 'active' : ''}`}
                                         onClick={() => {
+                                            if (window.innerWidth <= 768) {
+                                                dispatch({ type: 'SET_SIDEBAR', payload: false });
+                                            }
                                             dispatch({ type: 'SET_ACTIVE_CHAT', payload: null });
                                             dispatch({ type: 'SET_ACTIVE_SPACE', payload: space.id });
                                         }}
