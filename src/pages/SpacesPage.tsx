@@ -277,9 +277,10 @@ export default function SpacesPage() {
                                 }}
                                 onTouchStart={() => handleTouchStart(space.id)}
                                 onTouchEnd={handleTouchEnd}
-                                onMouseDown={(e) => e.button === 0 && handleTouchStart(space.id)}
-                                onMouseUp={handleTouchEnd}
-                                onMouseLeave={handleTouchEnd}
+                                onContextMenu={(e) => {
+                                    e.preventDefault();
+                                    setActiveActionsId(space.id);
+                                }}
                                 onClick={(e) => {
                                     if (activeActionsId === space.id) {
                                         e.stopPropagation();
