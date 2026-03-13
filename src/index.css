@@ -2637,16 +2637,16 @@ input:checked+.toggle-slider:before {
   background: var(--bg-elevated);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  padding: 32px 16px 14px; /* Increased top padding to accommodate top actions */
+  padding: 24px; /* Balanced padding for rectangular look */
   cursor: pointer;
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
-  aspect-ratio: 1 / 1;
+  min-height: 160px; /* Instead of fixed aspect-ratio */
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-start; /* Left aligned as requested */
   overflow: hidden;
-  user-select: none; /* Prevent selection while dragging/scrolling */
+  user-select: none;
 }
 
 .helper-card:hover {
@@ -2656,23 +2656,22 @@ input:checked+.toggle-slider:before {
 }
 
 .helper-card-icon {
-  width: 52px;
-  height: 52px;
-  background: rgba(255, 255, 255, 0.06);
+  width: 44px;
+  height: 44px;
+  background: rgba(255, 255, 255, 0.05); /* Slightly more subtle */
   border-radius: var(--radius-md);
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-top: 8px; /* Push icon lower */
-  margin-bottom: 12px;
+  margin-bottom: 20px;
   flex-shrink: 0;
 }
 
 .helper-card-name {
-  font-size: 13px;
+  font-size: 15px; /* Slightly larger as in screenshot */
   font-weight: 600;
   color: var(--text-primary);
-  text-align: center;
+  text-align: left;
   width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -2680,8 +2679,7 @@ input:checked+.toggle-slider:before {
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   line-clamp: 2;
-  flex: 1;
-  margin-bottom: 8px;
+  margin-bottom: 12px;
 }
 
 .helper-card-meta {
@@ -2704,18 +2702,34 @@ input:checked+.toggle-slider:before {
 }
 
 @media (max-width: 768px) {
+  .helper-card {
+    padding: 16px;
+    min-height: 140px;
+    align-items: center; /* Keep mobile centered if preferred, or align-start? */
+  }
+  
+  .helper-card-icon {
+    margin-bottom: 12px;
+    margin-top: 0;
+  }
+  
+  .helper-card-name {
+    text-align: center;
+    font-size: 13px;
+  }
+
   .helper-card-actions {
     top: 8px;
-    left: 12px;
+    left: 8px;
     right: auto;
-    flex-direction: row; /* Horizontal on mobile too for compactness */
+    flex-direction: row;
     opacity: 1 !important;
   }
 }
 
 @media (max-width: 768px) {
   .helper-card-icon {
-    margin-left: 24px; /* Shift icons right on mobile to avoid overlap */
+    margin-left: 0;
   }
 }
 
@@ -2745,9 +2759,9 @@ input:checked+.toggle-slider:before {
   background: var(--bg-secondary);
   border: 1px solid var(--border);
   border-radius: var(--radius-xl);
-  padding: 28px;
+  padding: 32px;
   width: 100%;
-  max-width: 500px;
+  max-width: 680px; /* Increased from 500px for a more "elongated" look on PC */
   margin: auto;
   animation: fadeInUp 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
