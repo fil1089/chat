@@ -57,6 +57,11 @@ async function authHeaders(): Promise<Record<string, string>> {
 }
 
 async function apiGet<T>(key: string): Promise<T | null> {
+    const headers = await authHeaders();
+    if (!headers.Authorization) {
+        return lsGet<T>(key);
+    }
+
     try {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 10000);
@@ -88,6 +93,11 @@ async function apiSet(key: string, value: unknown): Promise<void> {
     // Always save to localStorage first (instant, reliable)
     lsSet(key, value);
 
+    const headers = await authHeaders();
+    if (!headers.Authorization) {
+        return;
+    }
+
     try {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 10000);
@@ -109,6 +119,10 @@ async function apiSet(key: string, value: unknown): Promise<void> {
 }
 async function apiDelete(key: string): Promise<void> {
     lsDelete(key);
+    const headers = await authHeaders();
+    if (!headers.Authorization) {
+        return;
+    }
     try {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 10000);
