@@ -98,6 +98,29 @@ export default function SpacesPage() {
     const formatDate = (ts: number) => {
         return new Date(ts).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short', year: 'numeric' });
     };
+    const [activeActionsId, setActiveActionsId] = useState<string | null>(null);
+    const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    const handleTouchStart = (id: string) => {
+        longPressTimer.current = setTimeout(() => {
+            setActiveActionsId(id);
+            if (navigator.vibrate) navigator.vibrate(50);
+        }, 600);
+    };
+
+    const handleTouchEnd = () => {
+        if (longPressTimer.current) {
+            clearTimeout(longPressTimer.current);
+            longPressTimer.current = null;
+        }
+    };
+
+    // Close actions menu when clicking outside
+    useEffect(() => {
+        const handleClickOutside = () => setActiveActionsId(null);
+        window.addEventListener('click', handleClickOutside);
+        return () => window.removeEventListener('click', handleClickOutside);
+    }, []);
 
     return (
         <div className="page helpers-page">
@@ -238,7 +261,7 @@ export default function SpacesPage() {
                         {state.spaces.map((space, index) => (
                             <div
                                 key={space.id}
-                                className="helper-card"
+                                className={`helper-card ${activeActionsId === space.id ? 'actions-open' : ''}`}
                                 draggable
                                 onDragStart={() => { dragItem.current = index; }}
                                 onDragEnter={() => { dragOverItem.current = index; }}
@@ -252,7 +275,16 @@ export default function SpacesPage() {
                                     dragItem.current = null;
                                     dragOverItem.current = null;
                                 }}
-                                onClick={() => {
+                                onTouchStart={() => handleTouchStart(space.id)}
+                                onTouchEnd={handleTouchEnd}
+                                onMouseDown={(e) => e.button === 0 && handleTouchStart(space.id)}
+                                onMouseUp={handleTouchEnd}
+                                onMouseLeave={handleTouchEnd}
+                                onClick={(e) => {
+                                    if (activeActionsId === space.id) {
+                                        e.stopPropagation();
+                                        return;
+                                    }
                                     if (window.innerWidth <= 768) {
                                         dispatch({ type: 'SET_SIDEBAR', payload: false });
                                     }
@@ -260,7 +292,11 @@ export default function SpacesPage() {
                                     dispatch({ type: 'SET_ACTIVE_SPACE', payload: space.id });
                                     navigate(`/space/${space.id}`);
                                 }}
-                                style={space.color ? { borderTopColor: space.color, borderTopWidth: '3px' } : undefined}
+                                style={{
+                                    borderTopColor: space.color || 'transparent',
+                                    borderTopWidth: space.color ? '3px' : '1px',
+                                    '--theme-color': space.color || 'var(--accent-primary)'
+                                } as React.CSSProperties}
                             >
                                 <div className="helper-card-icon">
                                     <SpaceIcon icon={space.icon || 'folder'} size={28} />
@@ -276,12 +312,15 @@ export default function SpacesPage() {
                                         <span>{state.chats.filter(c => c.spaceId === space.id).length}</span>
                                     </div>
                                 </div>
-                                <div className="helper-card-actions">
-                                    <button className="btn-ghost btn-sm" onClick={(e) => { e.stopPropagation(); handleEdit(space); }} title="Редактировать">
-                                        <IconEdit size={14} />
+                                
+                                <div className={`helper-actions-menu ${activeActionsId === space.id ? 'visible' : ''}`} onClick={(e) => e.stopPropagation()}>
+                                    <button className="action-menu-item" onClick={(e) => { e.stopPropagation(); handleEdit(space); setActiveActionsId(null); }}>
+                                        <IconEdit size={16} />
+                                        <span>Изменить</span>
                                     </button>
-                                    <button className="btn-ghost btn-sm" onClick={(e) => { e.stopPropagation(); handleDelete(space.id); }} title="Удалить">
-                                        <IconTrash size={14} />
+                                    <button className="action-menu-item delete" onClick={(e) => { e.stopPropagation(); handleDelete(space.id); setActiveActionsId(null); }}>
+                                        <IconTrash size={16} />
+                                        <span>Удалить</span>
                                     </button>
                                 </div>
                             </div>
