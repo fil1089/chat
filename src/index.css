@@ -2663,6 +2663,7 @@ input:checked+.toggle-slider:before {
   justify-content: center;
   margin-bottom: 12px;
   flex-shrink: 0;
+  margin-left: 32px; /* Shift right to make room for buttons on the left */
 }
 
 .helper-card-name {
@@ -2692,11 +2693,19 @@ input:checked+.toggle-slider:before {
 .helper-card-actions {
   position: absolute;
   top: 12px;
-  right: 12px;
+  left: 12px;
   display: flex;
-  gap: 4px;
+  flex-direction: column;
+  gap: 8px;
   opacity: 0;
   transition: opacity 0.2s;
+  z-index: 2;
+}
+
+@media (max-width: 768px) {
+  .helper-card-actions {
+    opacity: 1; /* Always visible on mobile */
+  }
 }
 
 .helper-card:hover .helper-card-actions {
@@ -3624,7 +3633,9 @@ input:checked+.toggle-slider:before {
 .space-dashboard-layout {
   display: flex;
   height: 100%;
+  flex: 1; /* Match parent's flex-direction: column */
   overflow: hidden;
+  min-height: 0; /* Important for flex children scrolling */
 }
 
 .space-dashboard-main {
