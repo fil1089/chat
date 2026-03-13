@@ -184,9 +184,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
                 break;
             }
             case 'REORDER_SPACES': {
-                for (const space of action.payload) {
-                    await storage.saveSpace(space);
-                }
+                await storage.saveAllSpaces(action.payload);
                 break;
             }
         }

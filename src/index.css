@@ -2637,7 +2637,7 @@ input:checked+.toggle-slider:before {
   background: var(--bg-elevated);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  padding: 20px 16px 14px;
+  padding: 32px 16px 14px; /* Increased top padding to accommodate top actions */
   cursor: pointer;
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
@@ -2663,6 +2663,7 @@ input:checked+.toggle-slider:before {
   display: flex;
   align-items: center;
   justify-content: center;
+  margin-top: 8px; /* Push icon lower */
   margin-bottom: 12px;
   flex-shrink: 0;
 }
@@ -2693,8 +2694,8 @@ input:checked+.toggle-slider:before {
 
 .helper-card-actions {
   position: absolute;
-  top: 12px;
-  right: 12px; /* Original right position on desktop */
+  top: 8px; /* Move to very top */
+  right: 12px;
   display: flex;
   gap: 6px;
   opacity: 0;
@@ -2704,9 +2705,10 @@ input:checked+.toggle-slider:before {
 
 @media (max-width: 768px) {
   .helper-card-actions {
-    left: 12px; /* Left on mobile as requested */
+    top: 8px;
+    left: 12px;
     right: auto;
-    flex-direction: column;
+    flex-direction: row; /* Horizontal on mobile too for compactness */
     opacity: 1 !important;
   }
 }

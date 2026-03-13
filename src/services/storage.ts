@@ -246,6 +246,25 @@ export async function saveSpace(space: Space): Promise<Space[]> {
     return spaces;
 }
 
+export async function saveAllSpaces(spaces: Space[]): Promise<Space[]> {
+    // Strip large attachments to prevent Vercel 4.5MB error
+    const dbSpaces = spaces.map(s => {
+        if (!s.files || s.files.length === 0) return s;
+        return {
+            ...s,
+            files: s.files.map(f => {
+                if (f.content && f.content.length > 256 * 1024) {
+                    return { ...f, content: '' };
+                }
+                return f;
+            })
+        };
+    });
+
+    await apiSet(KEYS.SPACES, dbSpaces);
+    return spaces;
+}
+
 export async function deleteSpace(spaceId: string): Promise<Space[]> {
     const spaces = (await getSpaces()).filter((s) => s.id !== spaceId);
     await apiSet(KEYS.SPACES, spaces);
