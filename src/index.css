@@ -3829,6 +3829,12 @@ input:checked+.toggle-slider:before {
   overflow-y: auto;
 }
 
+@media (max-width: 1024px) {
+  .space-dashboard-sidebar {
+    display: none;
+  }
+}
+
 .tabs-header {
   display: flex;
   gap: 24px;
