@@ -5270,17 +5270,6 @@ input:checked+.toggle-slider:before {
     gap: 4px;
   }
 
-  /* Gradient fade above input */
-  .chat-input-container::before {
-    content: '';
-    position: absolute;
-    top: -32px;
-    left: 0;
-    right: 0;
-    height: 32px;
-    background: linear-gradient(to top, var(--bg-primary), transparent);
-    pointer-events: none;
-  }
 
   /* ===== Messages ===== */
   .message {
