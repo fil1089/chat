@@ -126,14 +126,6 @@ export default function SpaceDashboard() {
                         <SpaceIcon icon={space.icon || 'folder'} size={32} />
                         <h1 style={{ margin: 0, fontSize: '20px' }}>{space.name}</h1>
                     </div>
-                    <button
-                        className="btn-ghost btn-sm"
-                        onClick={() => setShowInfoPanel(!showInfoPanel)}
-                        title={showInfoPanel ? 'Скрыть информацию' : 'Показать информацию'}
-                        style={{ padding: '6px', opacity: showInfoPanel ? 1 : 0.5 }}
-                    >
-                        <IconSidebarRight size={18} />
-                    </button>
                 </div>
 
                 <div className="space-dashboard-content">
@@ -220,6 +212,13 @@ export default function SpaceDashboard() {
             {/* Info panel overlay on mobile */}
             {showInfoPanel && <div className="space-info-overlay" onClick={() => setShowInfoPanel(false)} />}
             <div className={`space-dashboard-sidebar ${showInfoPanel ? 'info-open' : ''}`}>
+                <button 
+                    className="sidebar-close-btn" 
+                    onClick={() => setShowInfoPanel(false)}
+                    title="Скрыть панель"
+                >
+                    <IconSidebarRight size={18} />
+                </button>
                 <div className="sidebar-section">
                     <div className="sidebar-section-header" onClick={() => setExpandedPrompt(!expandedPrompt)}>
                         <h3>Системный промт</h3>

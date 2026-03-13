@@ -2622,7 +2622,7 @@ input:checked+.toggle-slider:before {
 
 .helpers-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  grid-template-columns: repeat(3, 1fr); /* Exactly 3 columns on desktop */
   gap: 16px;
 }
 
@@ -2665,7 +2665,6 @@ input:checked+.toggle-slider:before {
   justify-content: center;
   margin-bottom: 12px;
   flex-shrink: 0;
-  margin-left: 24px; /* Shift right as requested */
 }
 
 .helper-card-name {
@@ -2695,9 +2694,8 @@ input:checked+.toggle-slider:before {
 .helper-card-actions {
   position: absolute;
   top: 12px;
-  left: 12px; /* Left as requested */
+  right: 12px; /* Original right position on desktop */
   display: flex;
-  flex-direction: column;
   gap: 6px;
   opacity: 0;
   transition: opacity 0.2s;
@@ -2706,7 +2704,16 @@ input:checked+.toggle-slider:before {
 
 @media (max-width: 768px) {
   .helper-card-actions {
+    left: 12px; /* Left on mobile as requested */
+    right: auto;
+    flex-direction: column;
     opacity: 1 !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .helper-card-icon {
+    margin-left: 24px; /* Shift icons right on mobile to avoid overlap */
   }
 }
 
@@ -3692,10 +3699,32 @@ input:checked+.toggle-slider:before {
   background: var(--surface-glass);
   display: flex;
   flex-direction: column;
-  padding: 24px;
+  padding: 60px 24px 24px; /* Increased top padding for the close button */
   gap: 24px;
   overflow-y: auto;
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+}
+
+.sidebar-close-btn {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  padding: 8px;
+  color: var(--text-secondary);
+  opacity: 0.6;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.05);
+}
+
+.sidebar-close-btn:hover {
+  opacity: 1;
+  background: rgba(255,255,255,0.1);
 }
 
 /* Fix chat history scroll */
