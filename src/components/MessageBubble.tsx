@@ -6,7 +6,7 @@ import { Document, Packer, Paragraph, TextRun } from 'docx';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeHighlight from 'rehype-highlight';
-import { IconCopy, IconCheck, IconRegenerate, IconDownload, IconEdit, IconMarkdown, IconPdf, IconDoc, IconFileText, IconChevronDown, IconChevronUp, IconUser, IconBrain, IconAttachment, IconHistory, IconSearch, IconChevronLeft, IconChevronRight, IconError, IconExternalLink } from './Icons';
+import { IconCopy, IconCheck, IconRegenerate, IconDownload, IconEdit, IconMarkdown, IconPdf, IconDoc, IconFileText, IconChevronDown, IconChevronUp, IconUser, IconBrain, IconAttachment, IconHistory, IconSearch, IconChevronLeft, IconChevronRight, IconError, IconExternalLink, IconZap } from './Icons';
 import { useApp } from '../context/AppContext';
 import { MODELS, calcCost } from '../services/youApi';
 import { ALL_POLZA_MODELS } from '../services/polzaApi';
@@ -425,7 +425,7 @@ export default function MessageBubble({ message, chatId, isLatest, isStreaming, 
                             return (
                                 <span className="message-usage">
                                     {' · '}{u.prompt_tokens} → {u.completion_tokens} токенов
-                                    {u.cached_tokens ? <span className="message-cached" title="Закешированные токены"> · 📦 {u.cached_tokens} кеш</span> : null}
+                                    {u.cached_tokens ? <span className="message-cached" title="Закешированные токены"> · <IconZap size={12} style={{ verticalAlign: 'middle', marginRight: '2px', color: 'var(--accent)' }} /> {u.cached_tokens} кеш</span> : null}
                                     {cost !== null && <span className="message-cost"> · {cost} ₽</span>}
                                 </span>
                             );
