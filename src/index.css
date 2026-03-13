@@ -2703,25 +2703,26 @@ input:checked+.toggle-slider:before {
 
 @media (max-width: 768px) {
   .helper-card {
-    padding: 16px;
+    padding: 20px;
     min-height: 140px;
-    align-items: center; /* Keep mobile centered if preferred, or align-start? */
+    align-items: flex-start; /* Consistent left alignment */
   }
   
   .helper-card-icon {
-    margin-bottom: 12px;
+    margin-bottom: 16px;
     margin-top: 0;
   }
   
   .helper-card-name {
-    text-align: center;
-    font-size: 13px;
+    text-align: left;
+    font-size: 14px;
+    margin-bottom: 8px;
   }
 
   .helper-card-actions {
-    top: 8px;
-    left: 8px;
-    right: auto;
+    top: 12px;
+    right: 12px; /* Move back to right to avoid overlap with left-aligned icon */
+    left: auto;
     flex-direction: row;
     opacity: 1 !important;
   }
