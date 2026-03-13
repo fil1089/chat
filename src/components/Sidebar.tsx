@@ -131,7 +131,12 @@ export default function Sidebar({ onLogout, onLogin, userEmail }: SidebarProps) 
                             <Link
                                 to="/spaces"
                                 className={`nav-item ${location.pathname === '/spaces' ? 'active' : ''}`}
-                                onClick={() => dispatch({ type: 'SET_ACTIVE_CHAT', payload: null })}
+                                onClick={() => {
+                                    dispatch({ type: 'SET_ACTIVE_CHAT', payload: null });
+                                    if (window.innerWidth <= 768) {
+                                        dispatch({ type: 'SET_SIDEBAR', payload: false });
+                                    }
+                                }}
                             >
                                 <IconRobot size={16} />
                                 <span>ИИ Помощники</span>

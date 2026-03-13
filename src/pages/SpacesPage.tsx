@@ -260,17 +260,20 @@ export default function SpacesPage() {
                                     dispatch({ type: 'SET_ACTIVE_SPACE', payload: space.id });
                                     navigate(`/space/${space.id}`);
                                 }}
-                                style={space.color ? { borderLeftColor: space.color, borderLeftWidth: '3px' } : undefined}
+                                style={space.color ? { borderTopColor: space.color, borderTopWidth: '3px' } : undefined}
                             >
                                 <div className="helper-card-icon">
                                     <SpaceIcon icon={space.icon || 'folder'} size={28} />
                                 </div>
-                                <div className="helper-card-info">
-                                    <div className="helper-card-name">{space.name}</div>
-                                    {space.description && <div className="helper-card-desc">{space.description}</div>}
-                                    <div className="helper-card-meta">
-                                        <div className="meta-item"><IconHistory size={12} /> {formatDate(space.createdAt || Date.now())}</div>
-                                        <div className="meta-item"><IconMessage size={12} /> {state.chats.filter(c => c.spaceId === space.id).length}</div>
+                                <div className="helper-card-name">{space.name}</div>
+                                <div className="helper-card-meta">
+                                    <div className="meta-item">
+                                        <IconHistory size={12} />
+                                        <span>{formatDate(space.createdAt || Date.now())}</span>
+                                    </div>
+                                    <div className="meta-item">
+                                        <IconMessage size={12} />
+                                        <span>{state.chats.filter(c => c.spaceId === space.id).length}</span>
                                     </div>
                                 </div>
                                 <div className="helper-card-actions">

@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import ChatView from '../components/ChatView';
 import ChatInput from '../components/ChatInput';
-import { IconPlus, IconMessage, IconTrash, IconEdit, IconSettings, IconAttachment, IconHistory, SpaceIcon, IconChevronDown, IconChevronUp } from '../components/Icons';
+import { IconPlus, IconMessage, IconTrash, IconEdit, IconSettings, IconAttachment, IconHistory, SpaceIcon, IconChevronDown, IconChevronUp, IconMenu } from '../components/Icons';
 import { v4 as uuidv4 } from 'uuid';
 import type { Chat, Attachment, ContextMode } from '../types';
 
@@ -106,6 +106,17 @@ export default function SpaceDashboard() {
     return (
         <div className="space-dashboard-layout">
             <div className="space-dashboard-main">
+                {/* Mobile header with menu button */}
+                <div className="mobile-chat-header">
+                    <button className="mobile-menu-btn" onClick={() => dispatch({ type: 'TOGGLE_SIDEBAR' })}>
+                        <IconMenu size={20} />
+                    </button>
+                    <div className="mobile-space-title" onClick={() => dispatch({ type: 'SET_ACTIVE_SPACE', payload: null })} style={{ cursor: 'pointer', fontWeight: 500, flex: 1, textAlign: 'center' }}>
+                        {space.name}
+                    </div>
+                    <div style={{ width: '36px' }}></div>
+                </div>
+
                 <div className="page-header" style={{ padding: '24px 24px 0' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                         <SpaceIcon icon={space.icon || 'folder'} size={40} />
