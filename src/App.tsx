@@ -37,7 +37,7 @@ function Layout() {
     else if (location.pathname === '/images') mobileHeaderTitle = 'Изображения';
     else if (location.pathname.startsWith('/space/')) mobileHeaderTitle = 'Помощник';
 
-    const showMobileHeader = location.pathname !== '/';
+    const showMobileHeader = location.pathname !== '/' && !location.pathname.startsWith('/space/');
 
     return (
         <div className={`app-layout ${state.sidebarOpen ? '' : 'sidebar-collapsed'}`}>

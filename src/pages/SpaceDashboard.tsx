@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import ChatView from '../components/ChatView';
 import ChatInput from '../components/ChatInput';
-import { IconPlus, IconMessage, IconTrash, IconEdit, IconSettings, IconAttachment, IconHistory, SpaceIcon, IconChevronDown, IconChevronUp, IconMenu } from '../components/Icons';
+import { IconPlus, IconMessage, IconTrash, IconEdit, IconSettings, IconAttachment, IconHistory, SpaceIcon, IconChevronDown, IconChevronUp, IconSidebarRight, IconMenu } from '../components/Icons';
 import { v4 as uuidv4 } from 'uuid';
 import type { Chat, Attachment, ContextMode } from '../types';
 
@@ -20,6 +20,7 @@ export default function SpaceDashboard() {
     const [editTitle, setEditTitle] = useState('');
     const [contextMode, setContextMode] = useState<ContextMode>('full');
     const [contextN, setContextN] = useState(20);
+    const [showInfoPanel, setShowInfoPanel] = useState(false);
 
     const space = state.spaces.find((s) => s.id === id);
 
@@ -106,24 +107,33 @@ export default function SpaceDashboard() {
     return (
         <div className="space-dashboard-layout">
             <div className="space-dashboard-main">
-                {/* Mobile header with menu button */}
+                {/* Unified Mobile header */}
                 <div className="mobile-chat-header">
                     <button className="mobile-menu-btn" onClick={() => dispatch({ type: 'TOGGLE_SIDEBAR' })}>
                         <IconMenu size={20} />
                     </button>
-                    <div className="mobile-space-title" onClick={() => dispatch({ type: 'SET_ACTIVE_SPACE', payload: null })} style={{ cursor: 'pointer', fontWeight: 500, flex: 1, textAlign: 'center' }}>
+                    <div className="mobile-space-title" style={{ fontWeight: 500, flex: 1, textAlign: 'center' }}>
                         {space.name}
                     </div>
-                    <div style={{ width: '36px' }}></div>
+                    <button className="mobile-info-toggle-btn" onClick={() => setShowInfoPanel(!showInfoPanel)}>
+                        <IconSidebarRight size={18} />
+                    </button>
                 </div>
 
-                <div className="page-header" style={{ padding: '24px 24px 0' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                        <SpaceIcon icon={space.icon || 'folder'} size={40} />
-                        <div>
-                            <h1 style={{ margin: 0, fontSize: '24px' }}>{space.name}</h1>
-                        </div>
+                {/* Desktop-only header with space name and info toggle */}
+                <div className="page-header space-dashboard-header-bar desktop-only">
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1 }}>
+                        <SpaceIcon icon={space.icon || 'folder'} size={32} />
+                        <h1 style={{ margin: 0, fontSize: '20px' }}>{space.name}</h1>
                     </div>
+                    <button
+                        className="btn-ghost btn-sm"
+                        onClick={() => setShowInfoPanel(!showInfoPanel)}
+                        title={showInfoPanel ? 'Скрыть информацию' : 'Показать информацию'}
+                        style={{ padding: '6px', opacity: showInfoPanel ? 1 : 0.5 }}
+                    >
+                        <IconSidebarRight size={18} />
+                    </button>
                 </div>
 
                 <div className="space-dashboard-content">
@@ -207,7 +217,9 @@ export default function SpaceDashboard() {
                 </div>
             </div>
 
-            <div className="space-dashboard-sidebar">
+            {/* Info panel overlay on mobile */}
+            {showInfoPanel && <div className="space-info-overlay" onClick={() => setShowInfoPanel(false)} />}
+            <div className={`space-dashboard-sidebar ${showInfoPanel ? 'info-open' : ''}`}>
                 <div className="sidebar-section">
                     <div className="sidebar-section-header" onClick={() => setExpandedPrompt(!expandedPrompt)}>
                         <h3>Системный промт</h3>
