@@ -3940,7 +3940,8 @@ input:checked+.toggle-slider:before {
   background: var(--surface-glass);
   display: flex;
   flex-direction: column;
-  overflow: visible;
+  overflow-y: auto;
+  height: 100%;
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), margin 0.3s ease;
 }
 
