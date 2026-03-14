@@ -378,13 +378,13 @@ export default function ChatView() {
                     </button>
                 </div>
 
-                {!activeSpace && (
+                {!activeSpace && !rightPanelOpen && (
                     <div className="desktop-only" style={{ position: 'absolute', top: '12px', right: '12px', zIndex: 10 }}>
                         <button 
                             className="btn-ghost btn-sm" 
-                            onClick={() => setRightPanelOpen(!rightPanelOpen)}
+                            onClick={() => setRightPanelOpen(true)}
                             style={{ padding: '8px', opacity: 0.6 }}
-                            title={rightPanelOpen ? "Скрыть панель" : "Показать панель"}
+                            title="Показать панель"
                         >
                             <IconSidebarRight size={18} />
                         </button>
@@ -479,6 +479,16 @@ export default function ChatView() {
 
             {rightPanelOpen && <div className="right-panel-overlay" onClick={() => setRightPanelOpen(false)} />}
             <div className={`dialogue-nav-sidebar ${rightPanelOpen ? 'mobile-open' : 'desktop-hidden'}`}>
+                <div className="desktop-only" style={{ padding: '12px 12px 0 24px', display: 'flex', justifyContent: 'flex-start' }}>
+                    <button 
+                        className="btn-ghost btn-sm" 
+                        onClick={() => setRightPanelOpen(false)}
+                        style={{ padding: '8px', opacity: 0.6 }}
+                        title="Скрыть панель"
+                    >
+                        <IconSidebarRight size={18} />
+                    </button>
+                </div>
                 <div className="right-panel-close-btn" onClick={() => setRightPanelOpen(false)}>
                     <IconClose size={18} />
                 </div>
