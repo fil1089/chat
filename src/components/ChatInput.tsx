@@ -437,7 +437,7 @@ export default function ChatInput({ onSend, model, onModelChange, isStreaming, o
                         onBlur={handleBlur}
                         rows={1}
                         disabled={isStreaming}
-                        style={{ flex: 1, border: 'none', background: 'transparent', color: 'var(--text-primary)', outline: 'none', resize: 'none', padding: '10px 0', minHeight: '24px', fontSize: '15px' }}
+                        style={{ flex: 1, border: 'none', background: 'transparent', color: 'var(--text-primary)', outline: 'none', resize: 'none', padding: '10px 0', minHeight: '24px', fontSize: '16px' }}
                     />
 
                     <div className="chat-input-actions-right" style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0, paddingBottom: '2px' }}>
