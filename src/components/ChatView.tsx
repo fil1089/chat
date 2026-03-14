@@ -41,7 +41,7 @@ export default function ChatView() {
     const [model, setModel] = useState(initialModel);
     const [contextMode, setContextMode] = useState<ContextMode>('full');
     const [contextN, setContextN] = useState(5);
-    const [rightPanelOpen, setRightPanelOpen] = useState(false);
+    const [rightPanelOpen, setRightPanelOpen] = useState(window.innerWidth > 768);
 
     const activeChat = state.chats.find((c) => c.id === state.activeChat);
     const activeSpace = state.spaces.find((s) => s.id === state.activeSpace) as Space | undefined;
@@ -377,6 +377,19 @@ export default function ChatView() {
                         <IconSidebarRight size={20} />
                     </button>
                 </div>
+
+                {!activeSpace && (
+                    <div className="desktop-only" style={{ position: 'absolute', top: '12px', right: '12px', zIndex: 10 }}>
+                        <button 
+                            className="btn-ghost btn-sm" 
+                            onClick={() => setRightPanelOpen(!rightPanelOpen)}
+                            style={{ padding: '8px', opacity: 0.6 }}
+                            title={rightPanelOpen ? "Скрыть панель" : "Показать панель"}
+                        >
+                            <IconSidebarRight size={18} />
+                        </button>
+                    </div>
+                )}
 
                 {activeSpace && (
                     <div className="space-banner desktop-only" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
