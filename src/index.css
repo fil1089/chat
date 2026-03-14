@@ -190,6 +190,27 @@ a:hover {
   border-color: var(--border-hover);
 }
 
+.right-sidebar-toggle-fixed {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  color: var(--text-tertiary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: var(--transition);
+  box-shadow: var(--shadow-sm);
+}
+
+.right-sidebar-toggle-fixed:hover {
+  background: var(--surface-glass-hover);
+  color: var(--text-primary);
+  border-color: var(--border-hover);
+}
+
 .sidebar-hidden {
   opacity: 0;
   pointer-events: none;

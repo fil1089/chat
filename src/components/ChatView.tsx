@@ -379,11 +379,10 @@ export default function ChatView() {
                 </div>
 
                 {!activeSpace && !rightPanelOpen && (
-                    <div className="desktop-only" style={{ position: 'absolute', top: '12px', right: '12px', zIndex: 10 }}>
+                    <div className="desktop-only" style={{ position: 'absolute', top: '16px', right: '16px', zIndex: 10 }}>
                         <button 
-                            className="btn-ghost btn-sm" 
+                            className="right-sidebar-toggle-fixed" 
                             onClick={() => setRightPanelOpen(true)}
-                            style={{ padding: '8px', opacity: 0.6 }}
                             title="Показать панель"
                         >
                             <IconSidebarRight size={18} />
