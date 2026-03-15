@@ -396,14 +396,6 @@ export default function ChatView() {
                             <IconFolder size={16} className="space-banner-icon" />
                             {activeSpace.name}
                         </div>
-                        <button 
-                            className="btn-ghost btn-sm" 
-                            onClick={() => setRightPanelOpen(!rightPanelOpen)}
-                            style={{ padding: '4px', opacity: 0.6 }}
-                            title={rightPanelOpen ? "Скрыть панель" : "Показать панель"}
-                        >
-                            <IconSidebarRight size={18} />
-                        </button>
                     </div>
                 )}
 
@@ -478,18 +470,16 @@ export default function ChatView() {
 
             {rightPanelOpen && <div className="right-panel-overlay" onClick={() => setRightPanelOpen(false)} />}
             <div className={`dialogue-nav-sidebar ${rightPanelOpen ? 'mobile-open' : 'desktop-hidden'}`}>
-                {!activeSpace && (
-                    <div className="desktop-only" style={{ padding: '12px 12px 0 24px', display: 'flex', justifyContent: 'flex-start' }}>
-                        <button 
-                            className="btn-ghost btn-sm" 
-                            onClick={() => setRightPanelOpen(false)}
-                            style={{ padding: '8px', opacity: 0.6 }}
-                            title="Скрыть панель"
-                        >
-                            <IconSidebarRight size={18} />
-                        </button>
-                    </div>
-                )}
+                <div className="desktop-only" style={{ padding: '12px 12px 0 24px', display: 'flex', justifyContent: 'flex-start' }}>
+                    <button 
+                        className="btn-ghost btn-sm" 
+                        onClick={() => setRightPanelOpen(false)}
+                        style={{ padding: '8px', opacity: 0.6 }}
+                        title="Скрыть панель"
+                    >
+                        <IconSidebarRight size={18} />
+                    </button>
+                </div>
                 <div className="right-panel-close-btn" onClick={() => setRightPanelOpen(false)}>
                     <IconClose size={18} />
                 </div>
