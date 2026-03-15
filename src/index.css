@@ -2181,9 +2181,8 @@ input:checked+.toggle-slider:before {
 }
 
 .history-page {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 20px;
+  padding-left: max(20px, calc(50% - 410px));
+  padding-right: max(20px, calc(50% - 410px));
 }
 
 .history-toolbar {
@@ -2479,10 +2478,7 @@ input:checked+.toggle-slider:before {
   padding-top: 50px;
 }
 
-.history-page {
-  padding-left: max(20px, calc(50% - 500px));
-  padding-right: max(20px, calc(50% - 500px));
-}
+
 
 .helpers-topbar {
   display: flex;
