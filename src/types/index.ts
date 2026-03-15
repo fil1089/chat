@@ -43,6 +43,8 @@ export interface Space {
     color?: string;
     model?: string;
     files?: Attachment[];
+    isPublic?: boolean;
+    authorName?: string;
     createdAt?: number;
     updatedAt?: number;
 }

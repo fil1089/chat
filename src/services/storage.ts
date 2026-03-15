@@ -273,6 +273,30 @@ export async function deleteSpace(spaceId: string): Promise<Space[]> {
     return spaces;
 }
 
+export async function getPublicSpaces(): Promise<Space[]> {
+    try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000);
+        // Note: this endpoint doesn't strictly need auth for reading, but we pass headers just in case
+        const res = await fetch(`/api/store/public_spaces`, {
+            headers: await authHeaders(),
+            signal: controller.signal
+        });
+        clearTimeout(timeoutId);
+
+        if (!res.ok) {
+            console.error('[Storage API] Failed to fetch public spaces', res.status);
+            return [];
+        }
+
+        const data = await res.json();
+        return Array.isArray(data.spaces) ? data.spaces as Space[] : [];
+    } catch (e) {
+        console.error('[Storage API] getPublicSpaces failed:', e);
+        return [];
+    }
+}
+
 // --- Settings ---
 const DEFAULT_SETTINGS: Settings = {
     youApiKey: '',

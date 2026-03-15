@@ -19,6 +19,8 @@ export default function SpacesPage() {
         color: string;
         model: string;
         files: Attachment[];
+        isPublic: boolean;
+        authorName: string;
     }>({
         name: '',
         description: '',
@@ -27,7 +29,32 @@ export default function SpacesPage() {
         color: '',
         model: 'gpt-4o',
         files: [],
+        isPublic: false,
+        authorName: '',
     });
+
+    const [activeTab, setActiveTab] = useState<'mine' | 'public'>('mine');
+    const [publicSpaces, setPublicSpaces] = useState<Space[]>([]);
+    const [isLoadingPublic, setIsLoadingPublic] = useState(false);
+
+    useEffect(() => {
+        if (activeTab === 'public') {
+            const loadPublic = async () => {
+                setIsLoadingPublic(true);
+                try {
+                    // Dynamic import to avoid circular dependencies if any, or just import it at top
+                    const { getPublicSpaces } = await import('../services/storage');
+                    const spaces = await getPublicSpaces();
+                    setPublicSpaces(spaces);
+                } catch (e) {
+                    console.error("Failed to load public spaces", e);
+                } finally {
+                    setIsLoadingPublic(false);
+                }
+            };
+            loadPublic();
+        }
+    }, [activeTab]);
 
     const dragItem = useRef<number | null>(null);
     const dragOverItem = useRef<number | null>(null);
@@ -50,7 +77,7 @@ export default function SpacesPage() {
     const iconKeys = Object.keys(SPACE_ICON_MAP);
 
     const resetForm = () => {
-        setForm({ name: '', description: '', instructions: '', icon: 'folder', color: '', model: 'gpt-4o', files: [] });
+        setForm({ name: '', description: '', instructions: '', icon: 'folder', color: '', model: 'gpt-4o', files: [], isPublic: false, authorName: '' });
         setEditing(null);
         setShowForm(false);
     };
@@ -67,6 +94,8 @@ export default function SpacesPage() {
             color: form.color || undefined,
             model: form.model,
             files: form.files,
+            isPublic: form.isPublic,
+            authorName: form.isPublic ? (form.authorName.trim() || 'Аноним') : undefined,
             createdAt: editing?.createdAt || Date.now(),
             updatedAt: Date.now(),
         };
@@ -84,6 +113,8 @@ export default function SpacesPage() {
             color: space.color || '',
             model: space.model || 'gpt-4o',
             files: space.files || [],
+            isPublic: !!space.isPublic,
+            authorName: space.authorName || '',
         });
         setEditing(space);
         setShowForm(true);
@@ -126,11 +157,18 @@ export default function SpacesPage() {
         <div className="page helpers-page">
             {/* Top bar */}
             <div className="helpers-topbar">
-                <h1 className="helpers-title">ИИ Помощники</h1>
-                {state.spaces.length > 0 && (
+                <div className="helpers-topbar-tabs">
+                    <button className={`helpers-tab ${activeTab === 'mine' ? 'active' : ''}`} onClick={() => setActiveTab('mine')}>
+                        Мои помощники
+                    </button>
+                    <button className={`helpers-tab ${activeTab === 'public' ? 'active' : ''}`} onClick={() => setActiveTab('public')}>
+                        Публичные
+                    </button>
+                </div>
+                {activeTab === 'mine' && (
                     <button className="helpers-create-btn" onClick={() => { resetForm(); setShowForm(true); }}>
                         <IconPlus size={16} />
-                        <span>Новый помощник</span>
+                        <span>Создать</span>
                     </button>
                 )}
             </div>
@@ -243,6 +281,31 @@ export default function SpacesPage() {
                                 ))}
                             </div>
                         </div>
+                        <div className="form-row">
+                            <label className="checkbox-label" style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', marginTop: '10px' }}>
+                                <input
+                                    type="checkbox"
+                                    checked={form.isPublic}
+                                    onChange={(e) => setForm({ ...form, isPublic: e.target.checked })}
+                                    style={{ width: '16px', height: '16px' }}
+                                />
+                                <span>Сделать публичным (опубликовать для всех)</span>
+                            </label>
+                        </div>
+                        {form.isPublic && (
+                            <div className="form-row" style={{ marginTop: '-10px' }}>
+                                <label>Имя автора (опционально)</label>
+                                <input
+                                    type="text"
+                                    value={form.authorName}
+                                    onChange={(e) => setForm({ ...form, authorName: e.target.value })}
+                                    placeholder="Например: Иван Иванов"
+                                />
+                                <div style={{ fontSize: '11px', color: 'var(--text-tertiary)', marginTop: '4px' }}>
+                                    Ваш помощник (без истории чатов) будет доступен другим пользователям.
+                                </div>
+                            </div>
+                        )}
                         <div className="editor-actions">
                             <button className="btn-secondary" onClick={resetForm}>Отмена</button>
                             <button className="btn-primary" onClick={handleSave}>
@@ -254,67 +317,68 @@ export default function SpacesPage() {
             )}
 
             {/* Grid of helpers */}
-            {state.spaces.length > 0 ? (
-                <div className="helpers-section">
-                    <h3 className="helpers-section-title">Мои помощники</h3>
-                    <div className="helpers-grid">
-                        {state.spaces.map((space, index) => (
-                            <div
-                                key={space.id}
-                                className={`helper-card ${activeActionsId === space.id ? 'actions-open' : ''}`}
-                                draggable
-                                onDragStart={() => { dragItem.current = index; }}
-                                onDragEnter={() => { dragOverItem.current = index; }}
-                                onDragOver={(e) => e.preventDefault()}
-                                onDragEnd={() => {
-                                    if (dragItem.current === null || dragOverItem.current === null) return;
-                                    const items = [...state.spaces];
-                                    const [removed] = items.splice(dragItem.current, 1);
-                                    items.splice(dragOverItem.current, 0, removed);
-                                    dispatch({ type: 'REORDER_SPACES', payload: items });
-                                    dragItem.current = null;
-                                    dragOverItem.current = null;
-                                }}
-                                onTouchStart={() => handleTouchStart(space.id)}
-                                onTouchEnd={handleTouchEnd}
-                                onContextMenu={(e) => {
-                                    e.preventDefault();
-                                    setActiveActionsId(space.id);
-                                }}
-                                onClick={(e) => {
-                                    if (activeActionsId === space.id) {
-                                        e.stopPropagation();
-                                        return;
-                                    }
-                                    if (window.innerWidth <= 768) {
-                                        dispatch({ type: 'SET_SIDEBAR', payload: false });
-                                    }
-                                    dispatch({ type: 'SET_ACTIVE_CHAT', payload: null });
-                                    dispatch({ type: 'SET_ACTIVE_SPACE', payload: space.id });
-                                    navigate(`/space/${space.id}`);
-                                }}
-                                style={{
-                                    borderTopColor: space.color || 'transparent',
-                                    borderTopWidth: space.color ? '3px' : '1px',
-                                    '--theme-color': space.color || 'var(--accent-primary)'
-                                } as React.CSSProperties}
-                            >
-                                <div className="helper-card-icon">
-                                    <SpaceIcon icon={space.icon || 'folder'} size={28} />
-                                </div>
-                                <div className="helper-card-name">{space.name}</div>
-                                <div className="helper-card-meta">
-                                    <div className="meta-item">
-                                        <IconHistory size={12} />
-                                        <span>{formatDate(space.createdAt || Date.now())}</span>
+            {activeTab === 'mine' ? (
+                state.spaces.length > 0 ? (
+                    <div className="helpers-section">
+                        <h3 className="helpers-section-title">Мои помощники</h3>
+                        <div className="helpers-grid">
+                            {state.spaces.map((space, index) => (
+                                <div
+                                    key={space.id}
+                                    className={`helper-card ${activeActionsId === space.id ? 'actions-open' : ''}`}
+                                    draggable
+                                    onDragStart={() => { dragItem.current = index; }}
+                                    onDragEnter={() => { dragOverItem.current = index; }}
+                                    onDragOver={(e) => e.preventDefault()}
+                                    onDragEnd={() => {
+                                        if (dragItem.current === null || dragOverItem.current === null) return;
+                                        const items = [...state.spaces];
+                                        const [removed] = items.splice(dragItem.current, 1);
+                                        items.splice(dragOverItem.current, 0, removed);
+                                        dispatch({ type: 'REORDER_SPACES', payload: items });
+                                        dragItem.current = null;
+                                        dragOverItem.current = null;
+                                    }}
+                                    onTouchStart={() => handleTouchStart(space.id)}
+                                    onTouchEnd={handleTouchEnd}
+                                    onContextMenu={(e) => {
+                                        e.preventDefault();
+                                        setActiveActionsId(space.id);
+                                    }}
+                                    onClick={(e) => {
+                                        if (activeActionsId === space.id) {
+                                            e.stopPropagation();
+                                            return;
+                                        }
+                                        if (window.innerWidth <= 768) {
+                                            dispatch({ type: 'SET_SIDEBAR', payload: false });
+                                        }
+                                        dispatch({ type: 'SET_ACTIVE_CHAT', payload: null });
+                                        dispatch({ type: 'SET_ACTIVE_SPACE', payload: space.id });
+                                        navigate(`/space/${space.id}`);
+                                    }}
+                                    style={{
+                                        borderTopColor: space.color || 'transparent',
+                                        borderTopWidth: space.color ? '3px' : '1px',
+                                        '--theme-color': space.color || 'var(--accent-primary)'
+                                    } as React.CSSProperties}
+                                >
+                                    <div className="helper-card-icon">
+                                        <SpaceIcon icon={space.icon || 'folder'} size={28} />
                                     </div>
-                                    <div className="meta-item">
-                                        <IconMessage size={12} />
-                                        <span>{state.chats.filter(c => c.spaceId === space.id).length}</span>
+                                    <div className="helper-card-name">{space.name}</div>
+                                    <div className="helper-card-meta">
+                                        <div className="meta-item">
+                                            <IconHistory size={12} />
+                                            <span>{formatDate(space.createdAt || Date.now())}</span>
+                                        </div>
+                                        <div className="meta-item">
+                                            <IconMessage size={12} />
+                                            <span>{state.chats.filter(c => c.spaceId === space.id).length}</span>
+                                        </div>
                                     </div>
-                                </div>
-                                
-                                <div className={`helper-actions-menu ${activeActionsId === space.id ? 'visible' : ''}`} onClick={(e) => e.stopPropagation()}>
+                                    
+                                    <div className={`helper-actions-menu ${activeActionsId === space.id ? 'visible' : ''}`} onClick={(e) => e.stopPropagation()}>
                                     <button className="action-menu-item" onClick={(e) => { e.stopPropagation(); handleEdit(space); setActiveActionsId(null); }}>
                                         <IconEdit size={16} />
                                         <span>Изменить</span>
@@ -339,6 +403,71 @@ export default function SpacesPage() {
                         <IconPlus size={16} />
                         <span>Новый помощник</span>
                     </button>
+                </div>
+            )) : (
+                <div className="helpers-section">
+                    <h3 className="helpers-section-title">Публичные помощники</h3>
+                    {isLoadingPublic ? (
+                        <div className="helpers-empty">
+                            <p>Загрузка...</p>
+                        </div>
+                    ) : publicSpaces.length > 0 ? (
+                        <div className="helpers-grid">
+                            {publicSpaces.map((space) => {
+                                const hasAlready = state.spaces.some(s => s.id === space.id);
+                                return (
+                                    <div
+                                        key={space.id}
+                                        className="helper-card"
+                                        style={{
+                                            borderTopColor: space.color || 'transparent',
+                                            borderTopWidth: space.color ? '3px' : '1px',
+                                            '--theme-color': space.color || 'var(--accent-primary)',
+                                            cursor: hasAlready ? 'default' : 'pointer',
+                                            opacity: hasAlready ? 0.6 : 1
+                                        } as React.CSSProperties}
+                                    >
+                                        <div className="helper-card-icon">
+                                            <SpaceIcon icon={space.icon || 'folder'} size={28} />
+                                        </div>
+                                        <div className="helper-card-name">{space.name}</div>
+                                        {space.description && <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '4px', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{space.description}</div>}
+                                        <div className="helper-card-meta" style={{ marginTop: 'auto', paddingTop: '12px' }}>
+                                            <div className="meta-item">
+                                                <span>Автор: {space.authorName || 'Аноним'}</span>
+                                            </div>
+                                        </div>
+                                        
+                                        {!hasAlready ? (
+                                            <button 
+                                                className="btn-primary" 
+                                                style={{ marginTop: '12px', width: '100%', padding: '6px' }}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    dispatch({ type: 'SAVE_SPACE', payload: { ...space, id: uuidv4(), isPublic: false } });
+                                                    setActiveTab('mine');
+                                                }}
+                                            >
+                                                Добавить себе
+                                            </button>
+                                        ) : (
+                                            <div style={{ marginTop: '12px', fontSize: '12px', color: 'var(--text-tertiary)', textAlign: 'center' }}>
+                                                Уже добавлен
+                                            </div>
+                                        )}
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    ) : (
+                        <div className="helpers-empty">
+                            <div className="helpers-empty-icon">
+                                <IconRobot size={48} />
+                            </div>
+                            <h2>Пусто</h2>
+                            <p>Пока никто не опубликовал помощников. Вы можете стать первым!</p>
+                        </div>
+                    )}
                 </div>
             )}
 
