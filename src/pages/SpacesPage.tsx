@@ -165,12 +165,10 @@ export default function SpacesPage() {
                         Публичные
                     </button>
                 </div>
-                {activeTab === 'mine' && (
-                    <button className="helpers-create-btn" onClick={() => { resetForm(); setShowForm(true); }}>
-                        <IconPlus size={16} />
-                        <span>Создать</span>
-                    </button>
-                )}
+                <button className="helpers-create-btn" onClick={() => { resetForm(); setShowForm(true); }}>
+                    <IconPlus size={16} />
+                    <span>Создать</span>
+                </button>
             </div>
 
             {/* Editor modal */}
@@ -287,13 +285,13 @@ export default function SpacesPage() {
                                     type="checkbox"
                                     checked={form.isPublic}
                                     onChange={(e) => setForm({ ...form, isPublic: e.target.checked })}
-                                    style={{ width: '16px', height: '16px' }}
+                                    style={{ width: '16px', height: '16px', accentColor: 'var(--accent)' }}
                                 />
                                 <span>Сделать публичным (опубликовать для всех)</span>
                             </label>
                         </div>
                         {form.isPublic && (
-                            <div className="form-row" style={{ marginTop: '-10px' }}>
+                            <div className="form-row" style={{ marginTop: '0' }}>
                                 <label>Имя автора (опционально)</label>
                                 <input
                                     type="text"
@@ -420,7 +418,6 @@ export default function SpacesPage() {
                                         key={space.id}
                                         className="helper-card"
                                         style={{
-                                            borderTopColor: space.color || 'transparent',
                                             borderTopWidth: space.color ? '3px' : '1px',
                                             '--theme-color': space.color || 'var(--accent-primary)',
                                             cursor: hasAlready ? 'default' : 'pointer',
