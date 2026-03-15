@@ -378,7 +378,7 @@ export default function ChatView() {
                     </button>
                 </div>
 
-                {!activeSpace && !rightPanelOpen && (
+                {!rightPanelOpen && (
                     <div className="desktop-only" style={{ position: 'absolute', top: '16px', right: '16px', zIndex: 10 }}>
                         <button 
                             className="right-sidebar-toggle-fixed" 
