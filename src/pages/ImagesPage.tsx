@@ -20,10 +20,9 @@ export default function ImagesPage() {
     const [contextN, setContextN] = useState(20);
 
     const imageChats = state.chats.filter((c) => {
-        // Find chats that use image models (for Neuro it's gemini-3-pro-image-preview, for Polza we track any model in Image category)
-        const isNeuroImage = c.model === 'gemini-3-pro-image-preview';
+        // Find chats that use image models tracking any model in Image category
         const isPolzaImage = c.model === 'openai/dall-e-3' || c.model.includes('flux') || c.model.includes('midjourney') || c.model.includes('stable-diffusion');
-        return isNeuroImage || isPolzaImage;
+        return isPolzaImage;
     });
 
     const handleNewChat = (initialText?: string, attachments: Attachment[] = []) => {

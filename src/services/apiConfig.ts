@@ -1,12 +1,9 @@
 // API URL configuration
-// In development: uses Vite proxy (/api/neuro/...)
+// In development: uses Vite proxy (/api/polza/...)
 // In production (Vercel): calls external APIs directly
 
 const isDev = import.meta.env.DEV;
 
 export const API_URLS = {
-    neuro: isDev ? '/api/neuro' : 'https://neuroapi.host',
     polza: 'https://polza.ai/api', // Direct connection, Polza API supports CORS
-    youSearch: isDev ? '/api/you-search' : 'https://ydc-index.io',
-    youAgent: isDev ? '/api/you-agent' : 'https://api.you.com',
 } as const;

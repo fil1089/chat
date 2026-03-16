@@ -3,8 +3,8 @@ import { useApp } from '../context/AppContext';
 import { useAuth } from '../context/AuthContext';
 import { useGlobalAuthModal } from '../App';
 import { useNavigate } from 'react-router-dom';
-import { streamResponsePolza, ALL_POLZA_MODELS } from '../services/polzaApi';
-import { MODELS } from '../services/youApi';
+import { streamResponsePolza } from '../services/polzaApi';
+import { POLZA_MODELS } from '../services/polzaModels';
 import ChatInput from './ChatInput';
 import MessageBubble from './MessageBubble';
 import ThreadNav from './ThreadNav';
@@ -354,7 +354,6 @@ export default function ChatView() {
     };
 
     const messages = activeChat?.messages || [];
-    const isSearch = model === 'you-search' || model === 'you-research';
 
     return (
         <div className="chat-layout-with-nav">
@@ -363,15 +362,13 @@ export default function ChatView() {
                     <button className="mobile-menu-btn" onClick={() => dispatch({ type: 'TOGGLE_SIDEBAR' })}>
                         <IconMenu size={20} />
                     </button>
-                    {!isSearch && (
-                        <div className="mobile-model-selector">
+                    <div className="mobile-model-selector">
                             <ModelSelector
                                 model={model}
                                 onModelChange={setModel}
                                 isMobileHeader={true}
                             />
                         </div>
-                    )}
                     {activeSpace && (
                         <div 
                             className="mobile-space-title desktop-only" 
@@ -459,7 +456,7 @@ export default function ChatView() {
                     onModelChange={setModel}
                     isStreaming={isStreaming}
                     onStop={handleStop}
-                    hideModelSelector={isSearch}
+                    hideModelSelector={false}
                     contextMode={contextMode}
                     contextN={contextN}
                     onContextModeChange={setContextMode}
@@ -493,7 +490,7 @@ export default function ChatView() {
                 </div>
                 <div className="sidebar-section" style={{ padding: '24px' }}>
                     {(() => {
-                        const allModels = [...MODELS, ...ALL_POLZA_MODELS];
+                        const allModels = POLZA_MODELS;
                         const currentModel = allModels.find(m => m.id === model);
                         return currentModel ? (
                             <div className="model-info-card">

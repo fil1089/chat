@@ -17,7 +17,6 @@ const initialState: AppState = {
     activeSpace: null,
     settings: {
         polzaApiKey: '',
-        youApiKey: '',
         hfToken: '',
         defaultModel: 'openai/gpt-4o',
         theme: 'dark',

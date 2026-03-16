@@ -207,7 +207,6 @@ export default function Sidebar({ onLogout, onLogin, userEmail }: SidebarProps) 
                     ) : (
                         recentChats.map((chat) => {
                             const space = chat.spaceId ? state.spaces.find(s => s.id === chat.spaceId) : null;
-                            const isSearch = chat.model === 'you-search' || chat.model === 'you-research';
                             return (
                                 <div
                                     key={chat.id}
@@ -217,8 +216,6 @@ export default function Sidebar({ onLogout, onLogin, userEmail }: SidebarProps) 
                                     <div className="chat-icon-wrapper">
                                         {space ? (
                                             <SpaceIcon icon={space.icon || 'folder'} size={16} className="chat-space-icon" />
-                                        ) : isSearch ? (
-                                            <IconSearch size={16} className="chat-icon" />
                                         ) : (
                                             <IconMessage size={16} className="chat-icon" />
                                         )}
@@ -228,11 +225,6 @@ export default function Sidebar({ onLogout, onLogin, userEmail }: SidebarProps) 
                                         {space && (
                                             <span className="chat-item-space-label">
                                                 {space.name}
-                                            </span>
-                                        )}
-                                        {isSearch && !space && (
-                                            <span className="chat-item-search-label">
-                                                ИИ Поиск
                                             </span>
                                         )}
                                     </div>

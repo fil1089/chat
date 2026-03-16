@@ -1,12 +1,10 @@
 import { useState, useEffect } from 'react';
 import { API_URLS } from '../services/apiConfig';
 import { useApp } from '../context/AppContext';
-import { getChatModelsByCategory } from '../services/youApi';
 import { IconSettings, IconDownload, IconPlus, IconTrash, IconMessage, IconRobot, IconFolder, IconEye, IconEyeOff, IconCheck, IconError, IconFileText, IconImage, IconAttachment, IconAudio, IconVideo } from '../components/Icons';
 import ModelSelector from '../components/ModelSelector';
 import { exportAllData, importAllData, clearAllData } from '../services/storage';
-import { MODELS } from '../services/youApi';
-import { ALL_POLZA_MODELS } from '../services/polzaApi';
+import { POLZA_MODELS } from '../services/polzaModels';
 import type { ChangeEvent } from 'react';
 
 interface TestResult {
@@ -187,8 +185,8 @@ export default function SettingsPage() {
                     <h2 style={{ marginBottom: '16px' }}>Модель по умолчанию</h2>
 
                     {(() => {
-                        const defaultModelId = state.settings.defaultModel || 'gpt-4o';
-                        const allModels = [...MODELS, ...ALL_POLZA_MODELS];
+                        const defaultModelId = state.settings.defaultModel || 'openai/gpt-4o';
+                        const allModels = POLZA_MODELS;
                         const currentModel = allModels.find(m => m.id === defaultModelId);
 
                         return currentModel ? (

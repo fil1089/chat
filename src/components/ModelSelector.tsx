@@ -1,9 +1,9 @@
 import { useState, useRef, useEffect, useMemo } from 'react';
 import { useApp } from '../context/AppContext';
-import { getGroupedChatModels, MODELS } from '../services/youApi';
 import { IconChevronDown, IconChevronUp, IconCheck, IconSearch, IconFileText, IconImage, IconAttachment, IconAudio, IconVideo, IconFilter, IconSort } from './Icons';
+import { IconGPT, IconGoogle, IconAnthropic, IconGrok, IconZAi } from './CategoryIcons';
 import type { AIModel } from '../types';
-import { getGroupedPolzaModels, ALL_POLZA_MODELS } from '../services/polzaApi';
+import { ALL_POLZA_MODELS } from '../services/polzaApi';
 
 interface ModelSelectorProps {
     model: string;
@@ -18,24 +18,17 @@ interface ModelSelectorProps {
 
 export default function ModelSelector({ model, onModelChange, direction = 'up', align = 'right', isMobileHeader = false, variant = 'default', inline = false, constrained = false }: ModelSelectorProps) {
     const { state } = useApp();
-    const isPolza = true;
-
-    const currentModel = isPolza
-        ? ALL_POLZA_MODELS.find((m) => m.id === model)
-        : MODELS.find((m) => m.id === model);
+    const currentModel = ALL_POLZA_MODELS.find((m) => m.id === model);
 
     const groupedModels = useMemo(() => {
-        const ALL_MODELS = isPolza ? ALL_POLZA_MODELS.filter(m => !m.id.toLowerCase().includes('nano') && !m.id.toLowerCase().includes('banana') && !m.name.toLowerCase().includes('nano') && !m.name.toLowerCase().includes('banana')) : MODELS;
-        const chatModels = isPolza ? ALL_MODELS : ALL_MODELS.filter((m) => !['gpt-image-1', 'tts', 'whisper', 'text-embedding-3-small', 'text-embedding-3-large', 'gemini-2.5-flash-image', 'you-search', 'you-research'].includes(m.id));
+        const chatModels = ALL_POLZA_MODELS;
 
         const CATEGORY_MAP: Record<string, string> = {
-            'OpenAI': 'GPT',
-            'Google': 'Gemini',
-            'Anthropic': 'Claude',
-            'X.AI': 'Grok',
-            'DeepSeek': 'DeepSeek',
-            'GLM': 'GLM',
-            'You.com': 'You.com'
+            'GPT': 'GPT',
+            'Gemini': 'Gemini',
+            'Claude': 'Claude',
+            'Grok': 'Grok',
+            'GLM': 'GLM'
         };
 
         const hierarchy: Record<string, Record<string, AIModel[]>> = {};
@@ -50,7 +43,7 @@ export default function ModelSelector({ model, onModelChange, direction = 'up', 
         });
 
         // Ensure proper category ordering
-        const order = ['GPT', 'Gemini', 'Claude', 'Grok', 'DeepSeek', 'GLM', 'You.com', 'Other'];
+        const order = ['Grok', 'GPT', 'Gemini', 'Claude', 'GLM'];
         const orderedHierarchy: Record<string, Record<string, AIModel[]>> = {};
 
         order.forEach(k => {
@@ -61,7 +54,8 @@ export default function ModelSelector({ model, onModelChange, direction = 'up', 
         });
 
         return orderedHierarchy;
-    }, [isPolza]);
+    }, []);
+
 
     const [open, setOpen] = useState(false);
     const [search, setSearch] = useState('');
@@ -112,8 +106,7 @@ export default function ModelSelector({ model, onModelChange, direction = 'up', 
     }, [open, model, groupedModels]);
 
     const getFilteredAndSortedFlat = () => {
-        const ALL_MODELS = isPolza ? ALL_POLZA_MODELS.filter(m => !m.id.toLowerCase().includes('nano') && !m.id.toLowerCase().includes('banana') && !m.name.toLowerCase().includes('nano') && !m.name.toLowerCase().includes('banana')) : MODELS;
-        const chatModels = isPolza ? ALL_MODELS : ALL_MODELS.filter((m) => !['gpt-image-1', 'tts', 'whisper', 'text-embedding-3-small', 'text-embedding-3-large', 'gemini-2.5-flash-image', 'you-search', 'you-research'].includes(m.id));
+        const chatModels = ALL_POLZA_MODELS;
 
         let res = chatModels;
 
@@ -316,7 +309,14 @@ export default function ModelSelector({ model, onModelChange, direction = 'up', 
                                 return (
                                     <div key={category} className={`model-family-group ${isCategoryExpanded ? 'expanded' : ''}`}>
                                         <div className="model-family-header" onClick={() => toggleFamily(category)}>
-                                            <span>{category}</span>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                {category === 'GPT' && <IconGPT size={16} />}
+                                                {category === 'Gemini' && <IconGoogle size={16} />}
+                                                {category === 'Claude' && <IconAnthropic size={16} />}
+                                                {category === 'Grok' && <IconGrok size={16} />}
+                                                {category === 'GLM' && <IconZAi size={16} />}
+                                                <span>{category}</span>
+                                            </div>
                                             {isCategoryExpanded ? <IconChevronUp size={12} /> : <IconChevronDown size={12} />}
                                         </div>
 

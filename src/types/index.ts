@@ -53,7 +53,6 @@ export type ContextMode = 'full' | 'last_n' | 'first_n' | 'system_only';
 
 export interface Settings {
     polzaApiKey: string;
-    youApiKey: string;
     hfToken: string;
     autoTranslate?: boolean;
     defaultModel: string;
