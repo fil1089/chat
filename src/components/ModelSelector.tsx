@@ -167,7 +167,7 @@ export default function ModelSelector({ model, onModelChange, direction = 'up', 
                     <div className="model-trigger-content">
                         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                             <span className="model-name">{currentModel?.name || model}</span>
-                            {currentModel?.isActual && <span className="model-badge" style={{ background: 'rgba(255, 255, 255, 0.05)', color: 'var(--text-secondary)', border: '1px solid var(--border)', fontSize: '10px', padding: '2px 6px', fontWeight: 'normal', letterSpacing: '0.2px', textTransform: 'lowercase' }}>актуальная</span>}
+                            {/* Удален тег актуальная */}
                         </div>
                     </div>
                     {direction === 'up' ? <IconChevronUp size={14} /> : <IconChevronDown size={14} />}
@@ -272,7 +272,7 @@ export default function ModelSelector({ model, onModelChange, direction = 'up', 
                                                 <div className="model-item-info">
                                                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
                                                         <span className="model-item-name">{m.name}</span>
-                                                        {m.isActual && <span className="model-badge" style={{ background: 'rgba(255, 255, 255, 0.05)', color: 'var(--text-secondary)', border: '1px solid var(--border)', fontSize: '10px', padding: '1px 5px', fontWeight: 'normal', textTransform: 'lowercase' }}>актуальная</span>}
+                                                        {/* Удален тег актуальная */}
                                                         {m.pricing && (
                                                             <span className="model-pricing-info" style={{ fontSize: '10px', color: 'var(--text-secondary)', opacity: 0.8 }}>
                                                                 {m.pricing.prompt} / {m.pricing.completion}
@@ -359,7 +359,7 @@ export default function ModelSelector({ model, onModelChange, direction = 'up', 
                                                                                 <div className="model-item-info">
                                                                                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
                                                                                         <span className="model-item-name">{m.name}</span>
-                                                                                        {m.isActual && <span className="model-badge" style={{ background: 'rgba(255, 255, 255, 0.05)', color: 'var(--text-secondary)', border: '1px solid var(--border)', fontSize: '10px', padding: '1px 5px', fontWeight: 'normal', textTransform: 'lowercase' }}>актуальная</span>}
+                                                                                        {/* Удален тег актуальная */}
                                                                                         {m.pricing && (
                                                                                             <span className="model-pricing-info" style={{ fontSize: '10px', color: 'var(--text-secondary)', opacity: 0.8 }}>
                                                                                                 {m.pricing.prompt} / {m.pricing.completion}
