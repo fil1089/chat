@@ -301,7 +301,7 @@ export async function getPublicSpaces(): Promise<Space[]> {
 const DEFAULT_SETTINGS: Settings = {
     polzaApiKey: '',
     hfToken: '',
-    defaultModel: 'gpt-4o',
+    defaultModel: 'google/gemini-3.1-flash-lite-preview',
     theme: 'dark',
     imageSize: '1024x1024',
     imageQuality: 'high',
