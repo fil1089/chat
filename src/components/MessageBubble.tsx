@@ -8,7 +8,7 @@ import remarkGfm from 'remark-gfm';
 import rehypeHighlight from 'rehype-highlight';
 import { IconCopy, IconCheck, IconRegenerate, IconDownload, IconEdit, IconMarkdown, IconPdf, IconDoc, IconFileText, IconChevronDown, IconChevronUp, IconUser, IconBrain, IconAttachment, IconHistory, IconSearch, IconChevronLeft, IconChevronRight, IconError, IconExternalLink, IconZap } from './Icons';
 import { useApp } from '../context/AppContext';
-import { MODELS, calcCost } from '../services/youApi';
+
 import { ALL_POLZA_MODELS } from '../services/polzaApi';
 import MessageModelSelector from './MessageModelSelector';
 import type { Message } from '../types';
@@ -416,17 +416,17 @@ export default function MessageBubble({ message, chatId, isLatest, isStreaming, 
                 {!isUser && (displayModel || displayUsage) && (
                     <div className="message-model-label">
                         {displayModel && (() => {
-                            const allModels = [...MODELS, ...ALL_POLZA_MODELS];
+                            const allModels = ALL_POLZA_MODELS;
                             return allModels.find(m => m.id === displayModel)?.name || displayModel;
                         })()}
                         {displayUsage && (() => {
                             const u = displayUsage;
-                            const cost = u.cost_rub !== undefined ? u.cost_rub.toFixed(4) : calcCost(displayModel || '', u.prompt_tokens, u.completion_tokens);
+                            const cost = u.cost_rub;
                             return (
                                 <span className="message-usage">
                                     {' · '}{u.prompt_tokens} → {u.completion_tokens} токенов
                                     {u.cached_tokens ? <span className="message-cached" title="Закешированные токены"> · <IconZap size={12} style={{ verticalAlign: 'middle', marginRight: '2px', color: 'var(--accent)' }} /> {u.cached_tokens} кеш</span> : null}
-                                    {cost !== null && <span className="message-cost"> · {cost} ₽</span>}
+                                    {cost !== undefined && <span className="message-cost"> · {cost.toFixed(4)} ₽</span>}
                                 </span>
                             );
                         })()}

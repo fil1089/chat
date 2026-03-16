@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { getChatModelsByCategory } from '../services/youApi';
+
 import { getPolzaModelsByCategory } from '../services/polzaApi';
 import { useApp } from '../context/AppContext';
 import { IconChevronDown, IconChevronUp } from './Icons';
@@ -15,8 +15,7 @@ export default function MessageModelSelector({ onSelect }: MessageModelSelectorP
     const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
     const ref = useRef<HTMLDivElement>(null);
 
-    const isPolza = true;
-    const grouped = isPolza ? getPolzaModelsByCategory() : getChatModelsByCategory();
+    const grouped = getPolzaModelsByCategory();
 
     useEffect(() => {
         const handleClickOutside = (e: MouseEvent) => {

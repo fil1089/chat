@@ -299,7 +299,6 @@ export async function getPublicSpaces(): Promise<Space[]> {
 
 // --- Settings ---
 const DEFAULT_SETTINGS: Settings = {
-    youApiKey: '',
     polzaApiKey: '',
     hfToken: '',
     defaultModel: 'gpt-4o',

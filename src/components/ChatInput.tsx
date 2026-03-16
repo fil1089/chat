@@ -5,7 +5,7 @@ import { IconSend, IconStop, IconAttachment, IconFileText, IconClose, IconSettin
 import type { Attachment, ContextMode } from '../types';
 import { useApp } from '../context/AppContext';
 import { ALL_POLZA_MODELS } from '../services/polzaApi';
-import { MODELS } from '../services/youApi';
+
 
 // Configure PDF.js worker via CDN (avoids Vite bundling issues)
 pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.8.69/pdf.worker.min.mjs';
