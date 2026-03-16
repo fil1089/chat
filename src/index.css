@@ -5729,8 +5729,8 @@ input:checked+.toggle-slider:before {
 /* Helper Card Info Button */
 .helper-info-btn {
   position: absolute;
-  top: 12px;
-  right: 12px;
+  top: 30px;
+  right: 24px;
   width: 32px;
   height: 32px;
   display: flex;
@@ -5761,8 +5761,8 @@ input:checked+.toggle-slider:before {
     opacity: 1;
     background: transparent;
     border: none;
-    top: 8px;
-    right: 8px;
+    top: 26px;
+    right: 20px;
   }
 }
 
