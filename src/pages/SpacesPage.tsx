@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
-import { IconPlus, IconTrash, IconEdit, IconRobot, IconHistory, IconMessage, IconAttachment, SpaceIcon, IconSidebarRight, SPACE_ICON_MAP } from '../components/Icons';
+import { IconPlus, IconTrash, IconEdit, IconRobot, IconHistory, IconMessage, IconAttachment, SpaceIcon, IconInfo, IconClose, IconFolder, IconSearch, IconBriefcase, IconGlobe, IconCrystalBall, SPACE_ICON_MAP } from '../components/Icons';
 import ModelSelector from '../components/ModelSelector';
 import { v4 as uuidv4 } from 'uuid';
 import type { Space, Attachment } from '../types';
@@ -75,6 +75,8 @@ export default function SpacesPage() {
     }, [location.search, state.spaces, navigate]);
 
     const iconKeys = Object.keys(SPACE_ICON_MAP);
+
+    const [selectedSpaceForInfo, setSelectedSpaceForInfo] = useState<Space | null>(null);
 
     const resetForm = () => {
         setForm({ name: '', description: '', instructions: '', icon: 'folder', color: '', model: 'gpt-4o', files: [], isPublic: false, authorName: '' });
@@ -377,17 +379,15 @@ export default function SpacesPage() {
                                     </div>
 
                                     <button 
-                                        className="helper-info-btn" 
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            dispatch({ type: 'SET_ACTIVE_CHAT', payload: null });
-                                            dispatch({ type: 'SET_ACTIVE_SPACE', payload: space.id });
-                                            navigate(`/space/${space.id}?info=true`);
-                                        }}
-                                        title="Информация о помощнике"
-                                    >
-                                        <IconSidebarRight size={18} />
-                                    </button>
+                                            className="helper-info-btn"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                setSelectedSpaceForInfo(space);
+                                            }}
+                                            title="Информация"
+                                        >
+                                            <IconInfo size={18} />
+                                        </button>
                                     
                                     <div className={`helper-actions-menu ${activeActionsId === space.id ? 'visible' : ''}`} onClick={(e) => e.stopPropagation()}>
                                     <button className="action-menu-item" onClick={(e) => { e.stopPropagation(); handleEdit(space); setActiveActionsId(null); }}>
@@ -482,6 +482,38 @@ export default function SpacesPage() {
             )}
 
             {/* Footer removed, button moved to topbar/empty state */}
+            {/* Local Info Panel */}
+            {selectedSpaceForInfo && (
+                <>
+                    <div className="info-panel-overlay" onClick={() => setSelectedSpaceForInfo(null)} />
+                    <div className="info-panel-container">
+                        <div className="info-panel-header">
+                            <h3>{selectedSpaceForInfo.name}</h3>
+                            <button className="info-panel-close" onClick={() => setSelectedSpaceForInfo(null)}>
+                                <IconClose size={20} />
+                            </button>
+                        </div>
+                        <div className="info-panel-content">
+                            <div className="info-panel-section">
+                                <label>Описание</label>
+                                <div className="info-panel-text">
+                                    {selectedSpaceForInfo.description || "Описание отсутствует"}
+                                </div>
+                            </div>
+                            <button 
+                                className="info-panel-action-btn"
+                                onClick={() => {
+                                    dispatch({ type: 'SET_ACTIVE_SPACE', payload: selectedSpaceForInfo.id });
+                                    setSelectedSpaceForInfo(null);
+                                    navigate(`/space/${selectedSpaceForInfo.id}`);
+                                }}
+                            >
+                                Начать чат
+                            </button>
+                        </div>
+                    </div>
+                </>
+            )}
         </div>
     );
 }

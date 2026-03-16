@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import ChatView from '../components/ChatView';
 import ChatInput from '../components/ChatInput';
@@ -29,16 +29,6 @@ export default function SpaceDashboard() {
             setSelectedModel(space.model);
         }
     }, [space?.id, space?.model]);
-
-    const location = useLocation();
-    useEffect(() => {
-        const query = new URLSearchParams(location.search);
-        if (query.get('info') === 'true') {
-            setShowInfoPanel(true);
-            // Clear the query parameter to prevent it from reappearing on refresh if desired
-            navigate(location.pathname, { replace: true });
-        }
-    }, [location.search, location.pathname, navigate]);
 
     if (!space) {
         return (
