@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
-import { IconPlus, IconTrash, IconEdit, IconRobot, IconHistory, IconMessage, IconAttachment, SpaceIcon, SPACE_ICON_MAP } from '../components/Icons';
+import { IconPlus, IconTrash, IconEdit, IconRobot, IconHistory, IconMessage, IconAttachment, SpaceIcon, IconSidebarRight, SPACE_ICON_MAP } from '../components/Icons';
 import ModelSelector from '../components/ModelSelector';
 import { v4 as uuidv4 } from 'uuid';
 import type { Space, Attachment } from '../types';
@@ -375,6 +375,19 @@ export default function SpacesPage() {
                                             <span>{state.chats.filter(c => c.spaceId === space.id).length}</span>
                                         </div>
                                     </div>
+
+                                    <button 
+                                        className="helper-info-btn" 
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            dispatch({ type: 'SET_ACTIVE_CHAT', payload: null });
+                                            dispatch({ type: 'SET_ACTIVE_SPACE', payload: space.id });
+                                            navigate(`/space/${space.id}?info=true`);
+                                        }}
+                                        title="Информация о помощнике"
+                                    >
+                                        <IconSidebarRight size={18} />
+                                    </button>
                                     
                                     <div className={`helper-actions-menu ${activeActionsId === space.id ? 'visible' : ''}`} onClick={(e) => e.stopPropagation()}>
                                     <button className="action-menu-item" onClick={(e) => { e.stopPropagation(); handleEdit(space); setActiveActionsId(null); }}>

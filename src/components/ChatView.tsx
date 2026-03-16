@@ -363,7 +363,7 @@ export default function ChatView() {
                     <button className="mobile-menu-btn" onClick={() => dispatch({ type: 'TOGGLE_SIDEBAR' })}>
                         <IconMenu size={20} />
                     </button>
-                    {!isSearch && !activeSpace && (
+                    {!isSearch && (
                         <div className="mobile-model-selector">
                             <ModelSelector
                                 model={model}
@@ -372,7 +372,15 @@ export default function ChatView() {
                             />
                         </div>
                     )}
-                    {activeSpace && <div className="mobile-space-title" onClick={() => dispatch({ type: 'SET_ACTIVE_CHAT', payload: null })} style={{ cursor: 'pointer' }}>{activeSpace.name}</div>}
+                    {activeSpace && (
+                        <div 
+                            className="mobile-space-title desktop-only" 
+                            onClick={() => dispatch({ type: 'SET_ACTIVE_CHAT', payload: null })} 
+                            style={{ cursor: 'pointer' }}
+                        >
+                            {activeSpace.name}
+                        </div>
+                    )}
                     <button className="mobile-right-panel-btn" onClick={() => setRightPanelOpen(!rightPanelOpen)}>
                         <IconSidebarRight size={20} />
                     </button>

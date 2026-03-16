@@ -82,6 +82,11 @@ body {
   select {
     font-size: 16px !important;
   }
+  
+  .message-content {
+    font-size: 15px;
+    line-height: 1.6;
+  }
 }
 
 a {
@@ -5599,6 +5604,46 @@ input:checked+.toggle-slider:before {
 
   .message-content pre code {
     font-size: 12px;
+  }
+}
+
+/* Helper Card Info Button */
+.helper-info-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface-glass);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-tertiary);
+  cursor: pointer;
+  transition: var(--transition);
+  opacity: 0;
+  z-index: 2;
+}
+
+.helper-card:hover .helper-info-btn {
+  opacity: 1;
+}
+
+.helper-info-btn:hover {
+  background: var(--surface-glass-hover);
+  color: var(--text-primary);
+  border-color: var(--border-accent);
+}
+
+@media (max-width: 768px) {
+  .helper-info-btn {
+    opacity: 1;
+    background: transparent;
+    border: none;
+    top: 8px;
+    right: 8px;
   }
 }
 
