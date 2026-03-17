@@ -99,7 +99,7 @@ export function AnimatedDiamond({
             {isIntro && !introDone && (
               <motion.path 
                 d={svgPaths.pCenter} 
-                stroke="var(--fill-0, #8F45FC)" 
+                stroke="var(--fill-0, #795ce7)" 
                 strokeWidth="3"
                 fill="transparent"
                 initial={{ pathLength: 0 }}
@@ -114,7 +114,7 @@ export function AnimatedDiamond({
             {/* Main filled layer with optional pulsation */}
             <motion.path 
               d={svgPaths.pCenter} 
-              fill="var(--fill-0, #8F45FC)" 
+              fill="var(--fill-0, #795ce7)" 
               initial={isIntro && !introDone ? { opacity: 0 } : false}
               animate={{ 
                 opacity: 1,

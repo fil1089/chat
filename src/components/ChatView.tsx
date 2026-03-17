@@ -13,6 +13,7 @@ import { v4 as uuidv4 } from 'uuid';
 import type { Message, Chat, Attachment, StatusEvent, Space, ContextMode } from '../types';
 import ModelSelector from './ModelSelector';
 import { AnimatedDiamond } from './AnimatedDiamond';
+import { Typewriter } from './Typewriter';
 
 interface StreamStatus {
     type: string;

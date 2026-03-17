@@ -18,12 +18,14 @@ export const Typewriter: React.FC<TypewriterProps> = ({
 }) => {
   const [displayedText, setDisplayedText] = useState("");
   const [isDone, setIsDone] = useState(false);
+  const [hasStarted, setHasStarted] = useState(false);
 
   useEffect(() => {
     let timeout: NodeJS.Timeout;
     let charIndex = 0;
 
     const startTyping = () => {
+      setHasStarted(true);
       const type = () => {
         if (charIndex < text.length) {
           setDisplayedText(text.slice(0, charIndex + 1));
@@ -62,7 +64,7 @@ export const Typewriter: React.FC<TypewriterProps> = ({
           backgroundColor: "currentColor",
           marginLeft: "2px",
           verticalAlign: "middle",
-          visibility: isDone ? "hidden" : "visible" // Hide cursor when finished, or keep it if desired
+          visibility: (isDone || !hasStarted) ? "hidden" : "visible"
         }}
       />
     </span>
