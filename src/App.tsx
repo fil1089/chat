@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, createContext, useContext } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import Sidebar from './components/Sidebar';
 import ChatView from './components/ChatView';
@@ -8,10 +8,25 @@ import AuthPage from './pages/AuthPage';
 import SettingsPage from './pages/SettingsPage';
 import { useApp } from './context/AppContext';
 import { useAuth } from './context/AuthContext';
-import { storage } from './services/storage';
+import * as storage from './services/storage';
 import AuthModal from './components/AuthModal';
-import { useGlobalAuthModal } from './context/AuthContext';
-import AnimatedDiamond from './components/AnimatedDiamond';
+import { AnimatedDiamond } from './components/AnimatedDiamond';
+
+// --- Global Auth Modal Context ---
+interface GlobalAuthModalContextType {
+    isAuthModalOpen: boolean;
+    showAuthModal: (title?: string) => void;
+    closeAuthModal: () => void;
+    modalTitle: string;
+}
+
+const GlobalAuthModalContext = createContext<GlobalAuthModalContextType | null>(null);
+
+export function useGlobalAuthModal() {
+    const context = useContext(GlobalAuthModalContext);
+    if (!context) throw new Error('useGlobalAuthModal must be used within GlobalAuthModalProvider');
+    return context;
+}
 
 function AppLayout({ children }: { children: React.ReactNode }) {
   const { state } = useApp();
@@ -21,7 +36,7 @@ function AppLayout({ children }: { children: React.ReactNode }) {
   if (isAuthPage) return <>{children}</>;
 
   return (
-    <div className={`app-container ${state.settings.sidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
+    <div className={`app-container ${!state.sidebarOpen ? 'sidebar-collapsed' : ''}`}>
       <Sidebar />
       <main className="main-content">
         {children}
@@ -31,21 +46,25 @@ function AppLayout({ children }: { children: React.ReactNode }) {
 }
 
 function App() {
-  const { state, dispatch } = useApp();
-  const { user, loading } = useAuth();
-  const { isAuthModalOpen, closeAuthModal } = useGlobalAuthModal();
+  const { user, isLoading } = useAuth();
   const [appLoading, setAppLoading] = useState(true);
+  
+  // Auth Modal State
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [modalTitle, setModalTitle] = useState('');
+
+  const showAuthModal = (title?: string) => {
+    setModalTitle(title || "Необходима авторизация");
+    setIsAuthModalOpen(true);
+  };
+
+  const closeAuthModal = () => setIsAuthModalOpen(false);
 
   useEffect(() => {
     const initApp = async () => {
       try {
-        const spaces = await storage.getSpaces();
-        const settings = await storage.getSettings();
-        const chats = await storage.getChats();
-        
-        dispatch({ type: 'SET_SPACES', payload: spaces });
-        dispatch({ type: 'SET_SETTINGS', payload: settings });
-        dispatch({ type: 'SET_CHATS', payload: chats });
+        // AppContext handles loading data from storage automatically via its own useEffect
+        // We just wait for a small delay to show the splash screen
       } catch (error) {
         console.error('Failed to init app:', error);
       } finally {
@@ -54,32 +73,41 @@ function App() {
     };
 
     initApp();
-  }, [dispatch]);
+  }, []);
 
-  if (appLoading || loading) {
+  if (appLoading || isLoading) {
     return (
       <div className="app-loading">
         <div className="app-loading-content">
-          <AnimatedDiamond size={160} type="glow" />
+          <AnimatedDiamond size={160} animationType="glow" />
           <div className="app-loading-text">Polza</div>
         </div>
       </div>
     );
   }
 
+  const authModalValue = {
+    isAuthModalOpen,
+    showAuthModal,
+    closeAuthModal,
+    modalTitle
+  };
+
   return (
     <Router>
-      <AppLayout>
-        <Routes>
-          <Route path="/auth" element={!user ? <AuthPage /> : <Navigate to="/" />} />
-          <Route path="/" element={user ? <ChatView /> : <Navigate to="/auth" />} />
-          <Route path="/space/:id" element={user ? <ChatView /> : <Navigate to="/auth" />} />
-          <Route path="/spaces" element={user ? <SpacesPage /> : <Navigate to="/auth" />} />
-          <Route path="/history" element={user ? <HistoryPage /> : <Navigate to="/auth" />} />
-          <Route path="/settings" element={user ? <SettingsPage /> : <Navigate to="/auth" />} />
-        </Routes>
-      </AppLayout>
-      {isAuthModalOpen && <AuthModal isOpen={isAuthModalOpen} onClose={closeAuthModal} />}
+      <GlobalAuthModalContext.Provider value={authModalValue}>
+        <AppLayout>
+          <Routes>
+            <Route path="/auth" element={!user ? <AuthPage /> : <Navigate to="/" />} />
+            <Route path="/" element={user ? <ChatView /> : <Navigate to="/auth" />} />
+            <Route path="/space/:id" element={user ? <ChatView /> : <Navigate to="/auth" />} />
+            <Route path="/spaces" element={user ? <SpacesPage /> : <Navigate to="/auth" />} />
+            <Route path="/history" element={user ? <HistoryPage /> : <Navigate to="/auth" />} />
+            <Route path="/settings" element={user ? <SettingsPage /> : <Navigate to="/auth" />} />
+          </Routes>
+        </AppLayout>
+        {isAuthModalOpen && <AuthModal onClose={closeAuthModal} title={modalTitle} />}
+      </GlobalAuthModalContext.Provider>
     </Router>
   );
 }
