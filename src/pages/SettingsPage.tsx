@@ -160,24 +160,6 @@ export default function SettingsPage() {
                     </div>
 
                     <div className="settings-section">
-                        <h2>Локальные данные</h2>
-                        <div className="setting-row">
-                            <div className="data-stats">
-                                <span><IconMessage size={16} /> {state.chats.length} чатов</span>
-                                <span><IconRobot size={16} /> {state.spaces.length} ИИ Помощников</span>
-                            </div>
-                            <div className="data-actions">
-                                <button className="btn-secondary" onClick={handleExport}>Экспорт всех данных (.json)</button>
-                                <label className="file-label btn-secondary">
-                                    Импорт данных (.json)
-                                    <input type="file" accept=".json" onChange={handleImport} hidden />
-                                </label>
-                                <button className="btn-danger" onClick={handleClear}>Очистить всё</button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="settings-section">
                         <h2>Модель по умолчанию</h2>
                         <div className="setting-row">
                             {(() => {
@@ -226,6 +208,24 @@ export default function SettingsPage() {
                                     direction="down"
                                     constrained
                                 />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="settings-section">
+                        <h2>Локальные данные</h2>
+                        <div className="setting-row">
+                            <div className="data-stats">
+                                <span><IconMessage size={16} /> {state.chats.length} чатов</span>
+                                <span><IconRobot size={16} /> {state.spaces.length} ИИ Помощников</span>
+                            </div>
+                            <div className="data-actions">
+                                <button className="btn-secondary" onClick={handleExport}>Экспорт всех данных (.json)</button>
+                                <label className="file-label btn-secondary">
+                                    Импорт данных (.json)
+                                    <input type="file" accept=".json" onChange={handleImport} hidden />
+                                </label>
+                                <button className="btn-danger" onClick={handleClear}>Очистить всё</button>
                             </div>
                         </div>
                     </div>
