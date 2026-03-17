@@ -98,6 +98,15 @@ export function AnimatedDiamond({ animationType, size = 120 }: AnimatedDiamondPr
         />
         <motion.path
           d="M12 6l-6 6 6 6 6-6-6-6z"
+          animate={{
+            scale: [0.8, 1.1, 0.8],
+          }}
+          transition={{
+            duration: 2,
+            repeat: Infinity,
+            ease: "easeInOut" as const
+          }}
+          style={{ transformOrigin: "center", transformBox: "fill-box" }}
         />
       </svg>
     </motion.div>
