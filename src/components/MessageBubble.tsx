@@ -7,6 +7,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeHighlight from 'rehype-highlight';
 import { IconCopy, IconCheck, IconRegenerate, IconDownload, IconEdit, IconMarkdown, IconPdf, IconDoc, IconFileText, IconChevronDown, IconChevronUp, IconUser, IconBrain, IconAttachment, IconHistory, IconSearch, IconChevronLeft, IconChevronRight, IconError, IconExternalLink, IconZap } from './Icons';
+import AnimatedLogo from './AnimatedLogo';
 import { useApp } from '../context/AppContext';
 
 import { ALL_POLZA_MODELS } from '../services/polzaApi';
@@ -193,7 +194,7 @@ export default function MessageBubble({ message, chatId, isLatest, isStreaming, 
     return (
         <div id={message.id} className={`message ${isUser ? 'message-user' : 'message-assistant'}`}>
             <div className="message-avatar">
-                {isUser ? <IconUser size={20} /> : <IconBrain size={20} />}
+                {isUser ? <IconUser size={20} /> : <AnimatedLogo size={20} isBreathing={isStreaming} showFrame={false} />}
             </div>
             <div className="message-body">
                 {isUser && message.attachments && message.attachments.length > 0 && (

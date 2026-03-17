@@ -408,8 +408,8 @@ export default function ChatView() {
                 {messages.length === 0 ? (
                     <div className="chat-empty">
                         <div className="chat-empty-content">
-                            <div className="chat-empty-icon">
-                                <AnimatedDiamond animationType="glow" size={120} />
+                            <div className="chat-empty-icon" style={{ marginBottom: '8px', display: 'flex', justifyContent: 'center' }}>
+                                <AnimatedDiamond size={200} />
                             </div>
                             <h2>{activeSpace ? activeSpace.name : 'Начните диалог'}</h2>
                             <p>{activeSpace?.description || 'Выберите модель и отправьте сообщение'}</p>

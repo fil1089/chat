@@ -49,7 +49,7 @@ export default function AuthPage() {
             <div className="auth-card">
                 {/* Logo */}
                 <div className="auth-header" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
-                    <AnimatedDiamond animationType="glow" size={32} />
+                    <AnimatedDiamond animationType="glow" size={64} />
                     <h1>{tab === 'login' ? 'С возвращением' : 'Создать аккаунт'}</h1>
                 </div>
 

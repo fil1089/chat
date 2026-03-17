@@ -1,6 +1,6 @@
 import { motion } from "motion/react";
 
-// Optimized paths from User Update Step 624
+// Optimized paths provided by user in Step 624
 const svgPaths = {
   p1: "M814.257 39.9865C944.106 28.1485 1016.56 124.372 992.382 246.661C951.097 455.548 775.783 677.406 606.332 801.792C588.389 790.531 574.517 781.521 557.414 768.846C604.075 730.866 651.532 693.437 694.431 647.926C807.598 527.89 930.942 363.778 937.248 193.035C939.925 120.821 880.343 88.9132 814.855 97.5361C619.761 123.226 413.278 274.537 287.199 420.756C214.821 498.031 144.815 605.662 108.745 704.765C4.37532 991.519 252.851 945.743 419.769 857.019L466.97 895.066C350.555 961.311 52.963 1076.78 28.1725 838.47C13.7495 699.797 135.485 512.307 223.098 406.528C355.265 246.963 601.154 58.2857 814.257 39.9865Z",
   p2: "M247.766 554C275.115 584.857 303.208 621.289 333.129 650.509C441.752 756.551 574.89 857.02 719.584 905.993C763.08 920.526 851.393 939.018 893.524 913.382C988.489 855.627 904.712 671.965 867.448 601.713L901.915 554C916.979 579.748 928.299 601.005 941.579 627.681C974.239 693.2 1001.66 781.127 992.056 853.967C977.653 963.085 877.623 998.676 780.082 980.471C575.991 942.381 335.236 763.033 215 598.992C225.998 582.712 235.715 569.528 247.766 554Z",
@@ -9,11 +9,19 @@ const svgPaths = {
   p4: "M605.463 224C616.38 227.331 661.142 264.464 669.888 272.331C720.613 317.906 770.592 368.424 812 422.765C804.679 433.288 787.339 460.338 778.439 467L775.546 464.818C696.325 367.482 651.519 334.089 560 254.522C574.862 242.847 589.527 233.972 605.463 224Z",
 };
 
-export function AnimatedDiamond({ size = 120 }: { size?: number }) {
+export default function AnimatedLogo({ 
+  size = 120, 
+  isBreathing = false,
+  showFrame = false // Default to false now as requested
+}: { 
+  size?: number;
+  isBreathing?: boolean;
+  showFrame?: boolean;
+}) {
   return (
     <div 
       style={{ width: size, height: size, position: 'relative' }} 
-      data-name="Diamond Corrected"
+      data-name="Logo Corrected"
     >
       <svg 
         className="absolute block" 
@@ -22,44 +30,51 @@ export function AnimatedDiamond({ size = 120 }: { size?: number }) {
         viewBox="0 0 1024 1024"
       >
         <g id="Logo Group">
-          {/* Main Loops - using drawing animation for entry */}
-          <motion.path 
+          {/* Static rectangle - optional, usually hidden in chat */}
+          {showFrame && (
+            <rect 
+              height="380.356" 
+              id="Rectangle 1" 
+              rx="16" 
+              stroke="var(--stroke-0, #F6F6F6)" 
+              strokeWidth="20" 
+              transform="rotate(45.1201 512.084 233.752)" 
+              width="381.108" 
+              x="512.084" 
+              y="233.752"
+            />
+          )}
+          
+          <path 
             d={svgPaths.p1} 
             fill="var(--fill-0, #F6F6F6)" 
-            initial={{ pathLength: 0, opacity: 0 }}
-            animate={{ pathLength: 1, opacity: 1 }}
-            transition={{ duration: 1.5, ease: "easeInOut" }}
           />
-          <motion.path 
+          <path 
             d={svgPaths.p2} 
             fill="var(--fill-0, #F6F6F6)" 
-            initial={{ pathLength: 0, opacity: 0 }}
-            animate={{ pathLength: 1, opacity: 1 }}
-            transition={{ duration: 1.5, ease: "easeInOut", delay: 0.3 }}
           />
           
           {/* Breathing center circle */}
           <motion.path 
             d={svgPaths.pCenter} 
             fill="var(--fill-0, #8F45FC)" 
-            initial={{ scale: 0, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ duration: 1, delay: 1.5 }}
+            id="Vector_3"
+            animate={isBreathing ? { scale: [1, 1.2, 1] } : {}}
+            transition={isBreathing ? { 
+              duration: 2,
+              ease: "easeInOut",
+              repeat: Infinity
+            } : {}}
+            style={{ transformOrigin: "513px 514px" }}
           />
           
-          <motion.path 
+          <path 
             d={svgPaths.p3} 
             fill="var(--fill-0, #F6F6F6)" 
-            initial={{ pathLength: 0, opacity: 0 }}
-            animate={{ pathLength: 1, opacity: 1 }}
-            transition={{ duration: 1.5, ease: "easeInOut", delay: 0.6 }}
           />
-          <motion.path 
+          <path 
             d={svgPaths.p4} 
             fill="var(--fill-0, #F6F6F6)" 
-            initial={{ pathLength: 0, opacity: 0 }}
-            animate={{ pathLength: 1, opacity: 1 }}
-            transition={{ duration: 1.5, ease: "easeInOut", delay: 0.9 }}
           />
         </g>
       </svg>

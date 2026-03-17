@@ -103,7 +103,7 @@ export default function Sidebar({ onLogout, onLogin, userEmail }: SidebarProps) 
             <aside className={`sidebar ${state.sidebarOpen ? '' : 'closed'}`}>
                 <div className="sidebar-header">
                     <div className="logo" onClick={handleNewChat} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <AnimatedDiamond animationType="glow" size={22} animateOnHover={true} />
+                        <AnimatedDiamond animationType="glow" size={32} animateOnHover={true} />
                         <span className="logo-text">Спроси ИИ</span>
                     </div>
                     <button

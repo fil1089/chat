@@ -845,18 +845,13 @@ input:checked + .toggle-slider:before {
 
 .chat-empty-content {
   text-align: center;
-  max-width: 420px;
+  max-width: 600px;
   padding: 40px;
 }
 
 .chat-empty-icon {
   font-size: 56px;
   margin-bottom: 20px;
-  background: linear-gradient(135deg, var(--accent), var(--green));
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  animation: pulse-glow 3s ease-in-out infinite;
 }
 
 @keyframes pulse-glow {
@@ -1016,8 +1011,9 @@ input:checked + .toggle-slider:before {
 }
 
 .message-assistant .message-avatar {
-  background: linear-gradient(135deg, var(--accent), #9c88ff);
-  color: white;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-light);
+  color: var(--accent-light);
   font-size: 11px;
 }
 

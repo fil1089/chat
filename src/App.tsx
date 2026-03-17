@@ -13,6 +13,7 @@ import AuthPage from './pages/AuthPage';
 import { useApp } from './context/AppContext';
 import { IconMenu } from './components/Icons';
 import { AnimatedDiamond } from './components/AnimatedDiamond';
+import AnimatedLogo from './components/AnimatedLogo';
 
 function Layout() {
     const { state, dispatch } = useApp();
@@ -24,9 +25,8 @@ function Layout() {
     if (!state.storageReady) {
         return (
             <div className="app-loading">
-                <AnimatedDiamond animationType="glow" size={160} />
+                <AnimatedLogo size={200} />
                 <span className="app-loading-text" style={{ 
-                    marginTop: '24px', 
                     fontSize: '24px', 
                     fontWeight: 600,
                     letterSpacing: '0.05em',
@@ -106,9 +106,8 @@ function MainApp() {
     if (isLoading) {
         return (
             <div className="app-loading">
-                <AnimatedDiamond animationType="glow" size={160} />
+                <AnimatedLogo size={200} />
                 <span className="app-loading-text" style={{ 
-                    marginTop: '24px', 
                     fontSize: '24px', 
                     fontWeight: 600,
                     letterSpacing: '0.05em',
