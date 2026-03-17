@@ -128,13 +128,13 @@ export function AnimatedDiamond({ animationType, size = 120, animateOnHover = fa
         </defs>
 
         <motion.rect
-          x="5"
-          y="5"
-          width="14"
-          height="14"
-          rx="3"
+          x="4"
+          y="4"
+          width="16"
+          height="16"
+          rx="1"
           stroke="currentColor"
-          strokeWidth="1.8"
+          strokeWidth="1.0"
           strokeLinecap="round"
           strokeLinejoin="round"
           style={{ 
@@ -147,7 +147,7 @@ export function AnimatedDiamond({ animationType, size = 120, animateOnHover = fa
         <motion.circle
           cx="12"
           cy="12"
-          r="4.2"
+          r="3.8"
           fill="url(#sphereGradient)"
           variants={sphereVariants}
           style={{ 
