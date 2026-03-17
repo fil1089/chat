@@ -72,7 +72,7 @@ export function AnimatedDiamond({ animationType, size = 120, animateOnHover = fa
   
   // Variants for coordinated animation
   const containerVariants = {
-    animate: getAnimation(),
+    animate: {},
   };
 
   const sphereVariants = {
