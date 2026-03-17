@@ -418,11 +418,11 @@ export default function ChatView() {
                             >
                                 <AnimatedDiamond size={200} isPulsating={isEmptyLogoHovered} isIntro={true} />
                             </div>
-                            <h2 style={{ minHeight: '1.2em' }}>
+                            <h2 style={{ minHeight: '1.4em', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                 <Typewriter text={activeSpace ? activeSpace.name : 'Начните диалог'} delay={2000} speed={70} />
                             </h2>
-                            <p style={{ minHeight: '1.5em', color: 'rgba(255,255,255,0.6)' }}>
-                                <Typewriter text={activeSpace?.description || 'Выберите модель и отправьте сообщение'} delay={4000} speed={40} />
+                            <p style={{ minHeight: '3em', color: 'rgba(255,255,255,0.6)', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', maxWidth: '400px', margin: '0 auto' }}>
+                                <Typewriter text={activeSpace?.description || 'Выберите модель и отправьте сообщение'} delay={3500} speed={40} />
                             </p>
                         </div>
                     </div>
