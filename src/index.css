@@ -141,16 +141,59 @@ a:hover {
 .mobile-menu-btn {
   display: none;
   position: absolute;
-  top: 12px;
-  left: 12px;
-  z-index: 100;
+  top: 10px;
+  left: 10px;
+  z-index: 1001;
   background: var(--bg-elevated);
   border: 1px solid var(--border);
   color: var(--text-primary);
   font-size: 18px;
-  padding: 8px 12px;
+  padding: 8px;
   border-radius: var(--radius-sm);
   cursor: pointer;
+}
+
+/* Mobile Header */
+.mobile-chat-header {
+    display: none;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 16px;
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    height: 56px;
+}
+
+.mobile-model-selector {
+    flex: 1;
+    min-width: 0;
+}
+
+.mobile-chat-header .mobile-menu-btn,
+.mobile-chat-header .mobile-right-panel-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+@media (max-width: 768px) {
+    .mobile-chat-header {
+        display: flex;
+    }
+    
+    .chat-main-area {
+        overflow-y: auto;
+    }
 }
 
 /* ===== Sidebar ===== */
@@ -1818,11 +1861,17 @@ input:checked + .toggle-slider:before {
   display: flex;
   flex-direction: column;
   gap: 2px;
+  min-width: 0;
+  flex: 1;
 }
 
 .model-trigger-content .model-name {
   font-size: 14px;
   font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
 
 .model-badge {
