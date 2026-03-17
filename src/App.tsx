@@ -6,8 +6,8 @@ import SpacesPage from './pages/SpacesPage';
 import HistoryPage from './pages/HistoryPage';
 import AuthPage from './pages/AuthPage';
 import SettingsPage from './pages/SettingsPage';
-import { useApp } from './context/AppContext';
-import { useAuth } from './context/AuthContext';
+import { useApp, AppProvider } from './context/AppContext';
+import { useAuth, AuthProvider } from './context/AuthContext';
 import * as storage from './services/storage';
 import AuthModal from './components/AuthModal';
 import { AnimatedDiamond } from './components/AnimatedDiamond';
@@ -52,7 +52,7 @@ function AppLayout({ children }: { children: React.ReactNode }) {
   );
 }
 
-function App() {
+function AppContent() {
   const { user, isLoading } = useAuth();
   const [appLoading, setAppLoading] = useState(true);
   
@@ -101,20 +101,30 @@ function App() {
   };
 
   return (
+    <GlobalAuthModalContext.Provider value={authModalValue}>
+      <AppLayout>
+        <Routes>
+          <Route path="/auth" element={!user ? <AuthPage /> : <Navigate to="/" />} />
+          <Route path="/" element={user ? <ChatView /> : <Navigate to="/auth" />} />
+          <Route path="/space/:id" element={user ? <ChatView /> : <Navigate to="/auth" />} />
+          <Route path="/spaces" element={user ? <SpacesPage /> : <Navigate to="/auth" />} />
+          <Route path="/history" element={user ? <HistoryPage /> : <Navigate to="/auth" />} />
+          <Route path="/settings" element={user ? <SettingsPage /> : <Navigate to="/auth" />} />
+        </Routes>
+      </AppLayout>
+      {isAuthModalOpen && <AuthModal onClose={closeAuthModal} title={modalTitle} />}
+    </GlobalAuthModalContext.Provider>
+  );
+}
+
+function App() {
+  return (
     <Router>
-      <GlobalAuthModalContext.Provider value={authModalValue}>
-        <AppLayout>
-          <Routes>
-            <Route path="/auth" element={!user ? <AuthPage /> : <Navigate to="/" />} />
-            <Route path="/" element={user ? <ChatView /> : <Navigate to="/auth" />} />
-            <Route path="/space/:id" element={user ? <ChatView /> : <Navigate to="/auth" />} />
-            <Route path="/spaces" element={user ? <SpacesPage /> : <Navigate to="/auth" />} />
-            <Route path="/history" element={user ? <HistoryPage /> : <Navigate to="/auth" />} />
-            <Route path="/settings" element={user ? <SettingsPage /> : <Navigate to="/auth" />} />
-          </Routes>
-        </AppLayout>
-        {isAuthModalOpen && <AuthModal onClose={closeAuthModal} title={modalTitle} />}
-      </GlobalAuthModalContext.Provider>
+      <AuthProvider>
+        <AppProvider>
+          <AppContent />
+        </AppProvider>
+      </AuthProvider>
     </Router>
   );
 }
