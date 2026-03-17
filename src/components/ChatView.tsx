@@ -503,36 +503,88 @@ export default function ChatView() {
                 <div className="sidebar-section" style={{ padding: '24px' }}>
                     {(() => {
                         const allModels = POLZA_MODELS;
-                        const currentModel = allModels.find(m => m.id === model);
-                        return currentModel ? (
+                        const m = allModels.find(m => m.id === model);
+                        if (!m) return null;
+
+                        return (
                             <div className="model-info-card">
                                 <div className="model-info-label">Модель</div>
-                                <div className="model-info-name">{currentModel.name}</div>
-                                <div className="model-info-desc">{currentModel.desc}</div>
-                                {(currentModel.pricing || currentModel.capabilities) && (
-                                    <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid var(--border-light)', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                                        {currentModel.pricing && (
-                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '11px', color: 'var(--text-secondary)' }}>
-                                                <span>Стоимость (1M):</span>
-                                                <span style={{ fontWeight: 500, color: 'var(--text-primary)' }}>{currentModel.pricing.prompt} / {currentModel.pricing.completion}</span>
+                                <div className="model-info-name">{m.name}</div>
+                                <div className="model-info-desc">{m.desc}</div>
+                                
+                                <div style={{ marginTop: '16px', paddingTop: '16px', borderTop: '1px solid var(--border-light)' }}>
+                                    <div className="model-details-grid" style={{ gridTemplateColumns: '1fr', gap: '8px' }}>
+                                        {m.pricing?.prompt && (
+                                            <div className="model-detail-item">
+                                                <span className="detail-label">Ввод:</span>
+                                                <span className="detail-value">{m.pricing.prompt}</span>
                                             </div>
                                         )}
-                                        {currentModel.capabilities && (
-                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '11px', color: 'var(--text-secondary)' }}>
-                                                <span>Возможности:</span>
-                                                <div style={{ display: 'flex', gap: '6px', opacity: 0.8, color: 'var(--accent-light)' }}>
-                                                    {currentModel.capabilities.text && <span title="Текст"><IconFileText size={14} /></span>}
-                                                    {currentModel.capabilities.image && <span title="Изображения"><IconImage size={14} /></span>}
-                                                    {currentModel.capabilities.file && <span title="Файлы"><IconAttachment size={14} /></span>}
-                                                    {currentModel.capabilities.audio && <span title="Аудио"><IconAudio size={14} /></span>}
-                                                    {currentModel.capabilities.video && <span title="Видео"><IconVideo size={14} /></span>}
-                                                </div>
+                                        {m.pricing?.completion && (
+                                            <div className="model-detail-item">
+                                                <span className="detail-label">Вывод:</span>
+                                                <span className="detail-value">{m.pricing.completion}</span>
+                                            </div>
+                                        )}
+                                        {m.pricing?.cacheRead && (
+                                            <div className="model-detail-item">
+                                                <span className="detail-label">Кэш чтение:</span>
+                                                <span className="detail-value">{m.pricing.cacheRead}</span>
+                                            </div>
+                                        )}
+                                        {m.pricing?.cacheWrite && (
+                                            <div className="model-detail-item">
+                                                <span className="detail-label">Кэш запись:</span>
+                                                <span className="detail-value">{m.pricing.cacheWrite}</span>
+                                            </div>
+                                        )}
+                                        {m.pricing?.search && (
+                                            <div className="model-detail-item">
+                                                <span className="detail-label">Веб-поиск:</span>
+                                                <span className="detail-value">{m.pricing.search}</span>
+                                            </div>
+                                        )}
+                                        {m.pricing?.image && (
+                                            <div className="model-detail-item">
+                                                <span className="detail-label">Изображение:</span>
+                                                <span className="detail-value">{m.pricing.image}</span>
+                                            </div>
+                                        )}
+                                        {m.pricing?.reasoning && (
+                                            <div className="model-detail-item">
+                                                <span className="detail-label">Рассуждения:</span>
+                                                <span className="detail-value">{m.pricing.reasoning}</span>
+                                            </div>
+                                        )}
+                                        {m.specs?.context && (
+                                            <div className="model-detail-item">
+                                                <span className="detail-label">Контекст:</span>
+                                                <span className="detail-value">{m.specs.context}</span>
+                                            </div>
+                                        )}
+                                        {m.specs?.tokens && (
+                                            <div className="model-detail-item">
+                                                <span className="detail-label">Макс. токены:</span>
+                                                <span className="detail-value">{m.specs.tokens}</span>
                                             </div>
                                         )}
                                     </div>
-                                )}
+
+                                    {m.capabilities && (
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '11px', color: 'var(--text-secondary)', marginTop: '12px' }}>
+                                            <span>Возможности:</span>
+                                            <div style={{ display: 'flex', gap: '6px', opacity: 0.8, color: 'var(--accent-light)' }}>
+                                                {m.capabilities.text && <span title="Текст"><IconFileText size={14} /></span>}
+                                                {m.capabilities.image && <span title="Изображения"><IconImage size={14} /></span>}
+                                                {m.capabilities.file && <span title="Файлы"><IconAttachment size={14} /></span>}
+                                                {m.capabilities.audio && <span title="Аудио"><IconAudio size={14} /></span>}
+                                                {m.capabilities.video && <span title="Видео"><IconVideo size={14} /></span>}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
-                        ) : null;
+                        );
                     })()}
                     <h3>Содержание беседы</h3>
                     {messages.length > 0 ? (

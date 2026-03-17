@@ -102,6 +102,15 @@ export interface AIModel {
     pricing?: {
         prompt: string;
         completion: string;
+        search?: string;
+        cacheRead?: string;
+        cacheWrite?: string;
+        image?: string;
+        reasoning?: string;
+    };
+    specs?: {
+        context?: string;
+        tokens?: string;
     };
     capabilities?: {
         text?: boolean;

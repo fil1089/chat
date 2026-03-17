@@ -6203,3 +6203,45 @@ input:checked + .toggle-slider:before {
 .card-glow-container:hover .card-glow-effect {
   opacity: 1;
 }
+
+/* ===== Model Details Grid ===== */
+.model-details-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 4px 12px;
+  margin-top: 6px;
+  opacity: 0.9;
+  padding: 4px 0;
+}
+
+.model-detail-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11px;
+  gap: 6px;
+  line-height: 1.2;
+}
+
+.detail-label {
+  color: var(--text-tertiary);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.detail-value {
+  color: var(--text-secondary);
+  font-weight: 600;
+  text-align: right;
+}
+
+@media (max-width: 768px) {
+  .model-details-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 4px 8px;
+  }
+  
+  .model-detail-item {
+    font-size: 10px;
+  }
+}

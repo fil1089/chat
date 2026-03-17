@@ -41,7 +41,7 @@ export default function ModelSelector({ model, onModelChange, direction = 'up', 
         });
 
         // Ensure proper category ordering
-        const order = ['Grok', 'GPT', 'Gemini', 'Claude', 'GLM'];
+        const order = ['Claude', 'Gemini', 'GPT', 'Grok', 'GLM'];
         const orderedHierarchy: Record<string, AIModel[]> = {};
 
         order.forEach(k => {
@@ -183,7 +183,7 @@ export default function ModelSelector({ model, onModelChange, direction = 'up', 
                                                     <div className="model-item-name-row">
                                                         <span className="model-item-name">{stripProvider(m.name)}</span>
                                                     </div>
-                                                    {m.pricing && (
+                                                     {m.pricing && (
                                                         <span className="model-pricing-info">
                                                             {m.pricing.prompt} / {m.pricing.completion}
                                                         </span>
@@ -237,11 +237,11 @@ export default function ModelSelector({ model, onModelChange, direction = 'up', 
                                                                 <div className="model-item-name-row">
                                                                     <span className="model-item-name">{stripProvider(m.name)}</span>
                                                                 </div>
-                                                                {m.pricing && (
-                                                                    <span className="model-pricing-info">
-                                                                        {m.pricing.prompt} / {m.pricing.completion}
-                                                                    </span>
-                                                                )}
+                                                                 {m.pricing && (
+                                                        <span className="model-pricing-info">
+                                                            {m.pricing.prompt} / {m.pricing.completion}
+                                                        </span>
+                                                    )}
                                                                 {m.capabilities && (
                                                                     <div className="model-capabilities" style={{ display: 'flex', gap: '8px', marginTop: '4px', opacity: 0.6 }}>
                                                                         {m.capabilities.text && <IconFileText size={12} />}
