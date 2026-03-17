@@ -194,7 +194,7 @@ export default function MessageBubble({ message, chatId, isLatest, isStreaming, 
     return (
         <div id={message.id} className={`message ${isUser ? 'message-user' : 'message-assistant'}`}>
             <div className="message-avatar">
-                {isUser ? <IconUser size={20} /> : <AnimatedLogo size={20} isBreathing={isStreaming} showFrame={false} />}
+                {isUser ? <IconUser size={20} /> : <AnimatedLogo size={20} isBreathing={isStreaming} isRotating={isStreaming} showFrame={false} />}
             </div>
             <div className="message-body">
                 {isUser && message.attachments && message.attachments.length > 0 && (

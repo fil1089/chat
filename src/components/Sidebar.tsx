@@ -20,6 +20,7 @@ export default function Sidebar({ onLogout, onLogin, userEmail }: SidebarProps) 
     const [searchQuery, setSearchQuery] = useState('');
     const [spacesCollapsed, setSpacesCollapsed] = useState(true);
     const [balance, setBalance] = useState<string | null>(null);
+    const [isLogoHovered, setIsLogoHovered] = useState(false);
 
     useEffect(() => {
         let intervalId: NodeJS.Timeout;
@@ -102,8 +103,14 @@ export default function Sidebar({ onLogout, onLogin, userEmail }: SidebarProps) 
             )}
             <aside className={`sidebar ${state.sidebarOpen ? '' : 'closed'}`}>
                 <div className="sidebar-header">
-                    <div className="logo" onClick={handleNewChat} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <AnimatedDiamond size={32} />
+                    <div 
+                        className="logo" 
+                        onClick={handleNewChat} 
+                        onMouseEnter={() => setIsLogoHovered(true)}
+                        onMouseLeave={() => setIsLogoHovered(false)}
+                        style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px' }}
+                    >
+                        <AnimatedDiamond size={32} isPulsating={isLogoHovered} />
                         <span className="logo-text">Спроси ИИ</span>
                     </div>
                     <button

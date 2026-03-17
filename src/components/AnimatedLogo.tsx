@@ -12,10 +12,12 @@ const svgPaths = {
 export default function AnimatedLogo({ 
   size = 120, 
   isBreathing = false,
+  isRotating = false,
   showFrame = false // Default to false now as requested
 }: { 
   size?: number;
   isBreathing?: boolean;
+  isRotating?: boolean;
   showFrame?: boolean;
 }) {
   return (
@@ -47,8 +49,8 @@ export default function AnimatedLogo({
           
           {/* Rotating atom paths */}
           <motion.g
-            animate={isBreathing ? { rotate: 360 } : {}}
-            transition={isBreathing ? { 
+            animate={isRotating ? { rotate: 360 } : {}}
+            transition={isRotating ? { 
               duration: 4,
               ease: "linear",
               repeat: Infinity

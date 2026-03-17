@@ -9,7 +9,15 @@ const svgPaths = {
   p4: "M586.753 279.954C595.542 282.635 631.582 312.533 638.624 318.868C679.465 355.562 719.706 396.237 753.046 439.99C747.151 448.463 733.191 470.243 726.025 475.606L723.695 473.849C659.91 395.479 623.834 368.592 550.147 304.529C562.114 295.129 573.921 287.983 586.753 279.954Z",
 };
 
-export function AnimatedDiamond({ size = 120 }: { size?: number }) {
+export function AnimatedDiamond({ 
+  size = 120, 
+  isPulsating = false, 
+  isRotating = false 
+}: { 
+  size?: number; 
+  isPulsating?: boolean; 
+  isRotating?: boolean; 
+}) {
   return (
     <div 
       style={{ width: size, height: size, position: 'relative' }} 
@@ -24,12 +32,12 @@ export function AnimatedDiamond({ size = 120 }: { size?: number }) {
         <g id="Logo Group">
           {/* Rotating atom paths */}
           <motion.g
-            animate={{ rotate: 360 }}
-            transition={{ 
+            animate={isRotating ? { rotate: 360 } : {}}
+            transition={isRotating ? { 
               duration: 4,
               ease: "linear",
               repeat: Infinity
-            }}
+            } : {}}
             style={{ transformOrigin: "512px 512px" }}
           >
             <path 
@@ -56,12 +64,12 @@ export function AnimatedDiamond({ size = 120 }: { size?: number }) {
             cy="514"
             r="110"
             fill="var(--fill-0, #8F45FC)" 
-            animate={{ scale: [1, 1.15, 1] }}
-            transition={{ 
+            animate={isPulsating ? { scale: [1, 1.15, 1] } : {}}
+            transition={isPulsating ? { 
               duration: 2,
               ease: "easeInOut",
               repeat: Infinity
-            }}
+            } : {}}
             style={{ transformOrigin: "513px 514px" }}
           />
 
