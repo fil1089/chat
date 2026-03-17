@@ -5,7 +5,6 @@ import { IconPlus, IconTrash, IconEdit, IconRobot, IconHistory, IconMessage, Ico
 import ModelSelector from '../components/ModelSelector';
 import { v4 as uuidv4 } from 'uuid';
 import type { Space, Attachment } from '../types';
-import CardGlow from '../components/CardGlow';
 
 export default function SpacesPage() {
     const { state, dispatch } = useApp();
@@ -326,7 +325,7 @@ export default function SpacesPage() {
                         <h3 className="helpers-section-title">Мои помощники</h3>
                         <div className="helpers-grid">
                             {state.spaces.map((space, index) => (
-                                <CardGlow
+                                <div
                                     key={space.id}
                                     className={`helper-card ${activeActionsId === space.id ? 'actions-open' : ''}`}
                                     draggable
@@ -402,7 +401,7 @@ export default function SpacesPage() {
                                         <span>Удалить</span>
                                     </button>
                                 </div>
-                            </CardGlow>
+                            </div>
                         ))}
                     </div>
                 </div>
@@ -430,7 +429,7 @@ export default function SpacesPage() {
                             {publicSpaces.map((space) => {
                                 const hasAlready = state.spaces.some(s => s.id === space.id);
                                 return (
-                                    <CardGlow
+                                    <div
                                         key={space.id}
                                         className="helper-card"
                                         style={{
@@ -468,7 +467,7 @@ export default function SpacesPage() {
                                                 Уже добавлен
                                             </div>
                                         )}
-                                    </CardGlow>
+                                    </div>
                                 );
                             })}
                         </div>

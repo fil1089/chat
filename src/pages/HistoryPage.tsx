@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { IconHistory, IconSearch, IconTrash, IconMessage, IconCheck, IconClose, IconPlus, IconChevronDown } from '../components/Icons';
 import type { Chat } from '../types';
-import CardGlow from '../components/CardGlow';
 
 type SortOption = 'newest' | 'oldest' | 'name';
 
@@ -174,7 +173,7 @@ export default function HistoryPage() {
             {hasChats && (
                 <div className="history-list">
                     {sortedChats.map((chat) => (
-                        <CardGlow
+                        <div
                             key={chat.id}
                             className={`history-item ${selectedChats.has(chat.id) ? 'selected' : ''}`}
                             onClick={() => handleSelectChat(chat)}
@@ -205,7 +204,7 @@ export default function HistoryPage() {
                                     <IconTrash size={14} />
                                 </button>
                             )}
-                        </CardGlow>
+                        </div>
                     ))}
                 </div>
             )}
