@@ -75,7 +75,7 @@ export default function AuthModal({ onClose, title = "Необходима ав�
                 </button>
 
                 <div className="auth-logo" style={{ marginTop: '10px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
-                    <AnimatedDiamond animationType="glow" size={32} />
+                    <AnimatedDiamond size={32} />
                     <span className="auth-logo-text">Спроси ИИ</span>
                 </div>
 
