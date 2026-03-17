@@ -43,7 +43,7 @@ export function AnimatedDiamond({ animationType, size = 120 }: AnimatedDiamondPr
         return {
           rotate: [0, 360],
           transition: {
-            duration: 9, // Even slower for elegant rotation
+            duration: 10, // Even slower for refined feel
             repeat: Infinity,
             ease: "linear" as const
           }
@@ -70,7 +70,7 @@ export function AnimatedDiamond({ animationType, size = 120 }: AnimatedDiamondPr
       style={{
         display: "inline-flex",
         perspective: "1000px",
-        color: isGlow ? "rgba(240, 248, 255, 0.95)" : "var(--accent)"
+        color: isGlow ? "rgba(224, 231, 255, 0.95)" : "var(--accent)"
       }}
     >
       <svg
@@ -102,23 +102,29 @@ export function AnimatedDiamond({ animationType, size = 120 }: AnimatedDiamondPr
           </filter>
         </defs>
 
-        {/* Outer Frame - Light with a hint of purple tint */}
-        <motion.path
-          d="M12 2L2 12l10 10 10-10L12 2z"
+        {/* Outer Frame - Rounded Diamond (Rotated Square) */}
+        <motion.rect
+          x="5"
+          y="5"
+          width="14"
+          height="14"
+          rx="3"
           stroke="currentColor"
-          strokeWidth="1.1"
+          strokeWidth="1.8"
           strokeLinecap="round"
           strokeLinejoin="round"
           style={{ 
+            transform: "rotate(45deg)",
+            transformOrigin: "center",
             filter: isGlow ? "drop-shadow(0 0 2px rgba(199, 210, 254, 0.4))" : "none"
           }}
         />
 
-        {/* Central Pulse Sphere */}
+        {/* Central Pulse Sphere - Slightly smaller for better padding */}
         <motion.circle
           cx="12"
           cy="12"
-          r="4.6"
+          r="4.2"
           fill="url(#sphereGradient)"
           animate={isGlow ? {
             scale: [0.93, 1.07, 0.93],
