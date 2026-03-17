@@ -1,136 +1,146 @@
-import { useState, useEffect, createContext, useContext } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import React, { useState } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
+import { AppProvider } from './context/AppContext';
+import { AuthProvider, useAuth } from './context/AuthContext';
 import Sidebar from './components/Sidebar';
 import ChatView from './components/ChatView';
 import SpacesPage from './pages/SpacesPage';
+import SettingsPage from './pages/SettingsPage';
+import SpaceDashboard from './pages/SpaceDashboard';
+import ImagesPage from './pages/ImagesPage';
 import HistoryPage from './pages/HistoryPage';
 import AuthPage from './pages/AuthPage';
-import SettingsPage from './pages/SettingsPage';
-import { useApp, AppProvider } from './context/AppContext';
-import { useAuth, AuthProvider } from './context/AuthContext';
-import * as storage from './services/storage';
-import AuthModal from './components/AuthModal';
+import { useApp } from './context/AppContext';
+import { IconMenu } from './components/Icons';
 import { AnimatedDiamond } from './components/AnimatedDiamond';
-import { BackgroundEffects } from './components/BackgroundEffects';
 
-// --- Global Auth Modal Context ---
-interface GlobalAuthModalContextType {
-    isAuthModalOpen: boolean;
-    showAuthModal: (title?: string) => void;
-    closeAuthModal: () => void;
-    modalTitle: string;
+function Layout() {
+    const { state, dispatch } = useApp();
+    const { logout, user } = useAuth();
+    const navigate = useNavigate();
+    const { showAuthModal } = useGlobalAuthModal();
+    const location = useLocation();
+
+    if (!state.storageReady) {
+        return (
+            <div className="app-loading">
+                <AnimatedDiamond animationType="glow" size={160} />
+                <span className="app-loading-text" style={{ 
+                    marginTop: '40px', 
+                    fontSize: '24px', 
+                    fontWeight: 500,
+                    letterSpacing: '0.05em',
+                    opacity: 0.9
+                }}>
+                    Спроси ИИ
+                </span>
+            </div>
+        );
+    }
+
+    // Determine the title for the mobile header based on the current route
+    let mobileHeaderTitle = '';
+    if (location.pathname === '/settings') mobileHeaderTitle = 'Настройки';
+    else if (location.pathname === '/history') mobileHeaderTitle = 'История';
+    else if (location.pathname === '/spaces') mobileHeaderTitle = 'ИИ Помощники';
+    else if (location.pathname === '/images') mobileHeaderTitle = 'Изображения';
+    else if (location.pathname.startsWith('/space/')) mobileHeaderTitle = 'Помощник';
+
+    const showMobileHeader = location.pathname !== '/' && !location.pathname.startsWith('/space/');
+
+    return (
+        <div className={`app-layout ${state.sidebarOpen ? '' : 'sidebar-collapsed'}`}>
+            <div
+                className="sidebar-overlay"
+                onClick={() => state.sidebarOpen && dispatch({ type: 'TOGGLE_SIDEBAR' })}
+            />
+            <Sidebar onLogout={logout} onLogin={() => showAuthModal('Вход в аккаунт')} userEmail={user?.email} />
+            <main className="main-content">
+                {showMobileHeader && (
+                    <div className="mobile-chat-header">
+                        <button className="mobile-menu-btn-header" onClick={() => dispatch({ type: 'TOGGLE_SIDEBAR' })}>
+                            <IconMenu size={20} />
+                        </button>
+                        <div className="mobile-space-title" style={{ fontWeight: 500, flex: 1, textAlign: 'center' }}>
+                            {mobileHeaderTitle}
+                        </div>
+                        <div style={{ width: '36px' }}></div> {/* Spacer for centering */}
+                    </div>
+                )}
+                <Routes>
+                    <Route path="/" element={<ChatView />} />
+                    <Route path="/space/:id" element={<SpaceDashboard />} />
+                    <Route path="/spaces" element={<SpacesPage />} />
+                    <Route path="/images" element={<ImagesPage />} />
+                    <Route path="/history" element={<HistoryPage />} />
+                    <Route path="/settings" element={<SettingsPage />} />
+                    <Route path="*" element={<Navigate to="/" replace />} />
+                </Routes>
+            </main>
+        </div>
+    );
 }
 
-const GlobalAuthModalContext = createContext<GlobalAuthModalContextType | null>(null);
+import AuthModal from './components/AuthModal';
+
+export const GlobalAuthModalContext = React.createContext<{
+    showAuthModal: (title?: string) => void;
+} | null>(null);
 
 export function useGlobalAuthModal() {
-    const context = useContext(GlobalAuthModalContext);
-    if (!context) throw new Error('useGlobalAuthModal must be used within GlobalAuthModalProvider');
-    return context;
+    const ctx = React.useContext(GlobalAuthModalContext);
+    if (!ctx) throw new Error('useGlobalAuthModal must be used within App component');
+    return ctx;
 }
 
-function AppLayout({ children }: { children: React.ReactNode }) {
-  const { state } = useApp();
-  const location = useLocation();
-  const isAuthPage = location.pathname === '/auth';
+function MainApp() {
+    const { user, isLoading } = useAuth();
+    const [authModalVisible, setAuthModalVisible] = useState(false);
+    const [authModalTitle, setAuthModalTitle] = useState('Необходима авторизация');
 
-  if (isAuthPage) return (
-    <>
-      <BackgroundEffects />
-      <div style={{ position: 'relative', zIndex: 1, width: '100%', height: '100%' }}>
-        {children}
-      </div>
-    </>
-  );
-
-  return (
-    <>
-      <BackgroundEffects />
-      <div className={`app-container ${!state.sidebarOpen ? 'sidebar-collapsed' : ''}`} style={{ position: 'relative', zIndex: 1 }}>
-        <Sidebar />
-        <main className="main-content">
-          {children}
-        </main>
-      </div>
-    </>
-  );
-}
-
-function AppContent() {
-  const { user, isLoading } = useAuth();
-  const [appLoading, setAppLoading] = useState(true);
-  
-  // Auth Modal State
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  const [modalTitle, setModalTitle] = useState('');
-
-  const showAuthModal = (title?: string) => {
-    setModalTitle(title || "Необходима авторизация");
-    setIsAuthModalOpen(true);
-  };
-
-  const closeAuthModal = () => setIsAuthModalOpen(false);
-
-  useEffect(() => {
-    const initApp = async () => {
-      try {
-        // AppContext handles loading data from storage automatically via its own useEffect
-        // We just wait for a small delay to show the splash screen
-      } catch (error) {
-        console.error('Failed to init app:', error);
-      } finally {
-        setTimeout(() => setAppLoading(false), 800);
-      }
+    const showAuthModal = (title?: string) => {
+        if (title) setAuthModalTitle(title);
+        setAuthModalVisible(true);
     };
 
-    initApp();
-  }, []);
+    if (isLoading) {
+        return (
+            <div className="app-loading">
+                <AnimatedDiamond animationType="glow" size={160} />
+                <span className="app-loading-text" style={{ 
+                    marginTop: '40px', 
+                    fontSize: '24px', 
+                    fontWeight: 500,
+                    letterSpacing: '0.05em',
+                    opacity: 0.9
+                }}>
+                    Спроси ИИ
+                </span>
+            </div>
+        );
+    }
 
-  if (appLoading || isLoading) {
     return (
-      <div className="app-loading" style={{ position: 'relative', zIndex: 10 }}>
-        <div className="app-loading-content">
-          <AnimatedDiamond size={160} animationType="glow" />
-          <div className="app-loading-text">Спроси ИИ</div>
-        </div>
-      </div>
+        <GlobalAuthModalContext.Provider value={{ showAuthModal }}>
+            <Layout />
+            {(!user && authModalVisible) && (
+                <AuthModal
+                    onClose={() => setAuthModalVisible(false)}
+                    title={authModalTitle}
+                />
+            )}
+        </GlobalAuthModalContext.Provider>
     );
-  }
-
-  const authModalValue = {
-    isAuthModalOpen,
-    showAuthModal,
-    closeAuthModal,
-    modalTitle
-  };
-
-  return (
-    <GlobalAuthModalContext.Provider value={authModalValue}>
-      <AppLayout>
-        <Routes>
-          <Route path="/auth" element={!user ? <AuthPage /> : <Navigate to="/" />} />
-          <Route path="/" element={user ? <ChatView /> : <Navigate to="/auth" />} />
-          <Route path="/space/:id" element={user ? <ChatView /> : <Navigate to="/auth" />} />
-          <Route path="/spaces" element={user ? <SpacesPage /> : <Navigate to="/auth" />} />
-          <Route path="/history" element={user ? <HistoryPage /> : <Navigate to="/auth" />} />
-          <Route path="/settings" element={user ? <SettingsPage /> : <Navigate to="/auth" />} />
-        </Routes>
-      </AppLayout>
-      {isAuthModalOpen && <AuthModal onClose={closeAuthModal} title={modalTitle} />}
-    </GlobalAuthModalContext.Provider>
-  );
 }
 
-function App() {
-  return (
-    <Router>
-      <AuthProvider>
-        <AppProvider>
-          <AppContent />
-        </AppProvider>
-      </AuthProvider>
-    </Router>
-  );
+export default function App() {
+    return (
+        <Router>
+            <AuthProvider>
+                <AppProvider>
+                    <MainApp />
+                </AppProvider>
+            </AuthProvider>
+        </Router>
+    );
 }
-
-export default App;
