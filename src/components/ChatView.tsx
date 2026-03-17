@@ -415,7 +415,7 @@ export default function ChatView() {
                                 onMouseLeave={() => setIsEmptyLogoHovered(false)}
                                 style={{ marginBottom: '8px', display: 'flex', justifyContent: 'center', cursor: 'pointer' }}
                             >
-                                <AnimatedDiamond size={200} isPulsating={isEmptyLogoHovered} />
+                                <AnimatedDiamond size={200} isPulsating={isEmptyLogoHovered} isIntro={true} />
                             </div>
                             <h2>{activeSpace ? activeSpace.name : 'Начните диалог'}</h2>
                             <p>{activeSpace?.description || 'Выберите модель и отправьте сообщение'}</p>
