@@ -100,9 +100,13 @@ export function AnimatedDiamond({ animationType, size = 120 }: AnimatedDiamondPr
               <feMergeNode in="softSource" />
             </feMerge>
           </filter>
+          {/* Subtle blur for the outer frame */}
+          <filter id="frameBlur" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="0.4" />
+          </filter>
         </defs>
 
-        {/* Outer Frame - Rounded Diamond (Rotated Square) */}
+        {/* Outer Frame - Rounded Diamond (Rotated Square) with subtle blur */}
         <motion.rect
           x="5"
           y="5"
@@ -116,7 +120,7 @@ export function AnimatedDiamond({ animationType, size = 120 }: AnimatedDiamondPr
           style={{ 
             transform: "rotate(45deg)",
             transformOrigin: "center",
-            filter: isGlow ? "drop-shadow(0 0 2px rgba(199, 210, 254, 0.4))" : "none"
+            filter: isGlow ? "url(#frameBlur) drop-shadow(0 0 2px rgba(199, 210, 254, 0.4))" : "none"
           }}
         />
 
