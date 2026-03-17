@@ -25,7 +25,7 @@ function Layout() {
     if (!state.storageReady) {
         return (
             <div className="app-loading">
-                <AnimatedLogo size={200} />
+                <AnimatedLogo size={200} isBreathing={true} isRotating={true} />
                 <span className="app-loading-text" style={{ 
                     fontSize: '24px', 
                     fontWeight: 600,
@@ -106,7 +106,7 @@ function MainApp() {
     if (isLoading) {
         return (
             <div className="app-loading">
-                <AnimatedLogo size={200} />
+                <AnimatedLogo size={200} isBreathing={true} isRotating={true} />
                 <span className="app-loading-text" style={{ 
                     fontSize: '24px', 
                     fontWeight: 600,
