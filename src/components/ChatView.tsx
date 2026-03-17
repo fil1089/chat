@@ -12,6 +12,7 @@ import { IconBrain, IconFolder, IconMessage, IconArrowUp, IconArrowDown, IconFil
 import { v4 as uuidv4 } from 'uuid';
 import type { Message, Chat, Attachment, StatusEvent, Space, ContextMode } from '../types';
 import ModelSelector from './ModelSelector';
+import { AnimatedDiamond } from './AnimatedDiamond';
 
 interface StreamStatus {
     type: string;
@@ -408,7 +409,7 @@ export default function ChatView() {
                     <div className="chat-empty">
                         <div className="chat-empty-content">
                             <div className="chat-empty-icon">
-                                <IconBrain size={48} />
+                                <AnimatedDiamond animationType="glow" size={120} />
                             </div>
                             <h2>{activeSpace ? activeSpace.name : 'Начните диалог'}</h2>
                             <p>{activeSpace?.description || 'Выберите модель и отправьте сообщение'}</p>

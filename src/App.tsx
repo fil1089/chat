@@ -24,8 +24,16 @@ function Layout() {
     if (!state.storageReady) {
         return (
             <div className="app-loading">
-                <AnimatedDiamond animationType="glow" size={80} />
-                <span className="app-loading-text" style={{ marginTop: '24px' }}>Спроси ИИ</span>
+                <AnimatedDiamond animationType="glow" size={160} />
+                <span className="app-loading-text" style={{ 
+                    marginTop: '40px', 
+                    fontSize: '24px', 
+                    fontWeight: 500,
+                    letterSpacing: '0.05em',
+                    opacity: 0.9
+                }}>
+                    Спроси ИИ
+                </span>
             </div>
         );
     }
@@ -98,8 +106,16 @@ function MainApp() {
     if (isLoading) {
         return (
             <div className="app-loading">
-                <AnimatedDiamond animationType="glow" size={80} />
-                <span className="app-loading-text" style={{ marginTop: '24px' }}>Спроси ИИ</span>
+                <AnimatedDiamond animationType="glow" size={160} />
+                <span className="app-loading-text" style={{ 
+                    marginTop: '40px', 
+                    fontSize: '24px', 
+                    fontWeight: 500,
+                    letterSpacing: '0.05em',
+                    opacity: 0.9
+                }}>
+                    Спроси ИИ
+                </span>
             </div>
         );
     }
