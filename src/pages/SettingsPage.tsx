@@ -162,13 +162,25 @@ export default function SettingsPage() {
                     <div className="settings-section">
                         <h2>Модель по умолчанию</h2>
                         <div className="setting-row">
+                            <div className="settings-model-wrapper" style={{ marginBottom: '20px' }}>
+                                <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, color: 'var(--text-secondary)', marginBottom: '8px' }}>
+                                    Сменить модель
+                                </label>
+                                <ModelSelector
+                                    model={state.settings.defaultModel || 'openai/gpt-4o'}
+                                    onModelChange={(val) => handleSave('defaultModel', val)}
+                                    direction="down"
+                                    constrained
+                                />
+                            </div>
+
                             {(() => {
                                 const defaultModelId = state.settings.defaultModel || 'openai/gpt-4o';
                                 const allModels = POLZA_MODELS;
                                 const currentModel = allModels.find(m => m.id === defaultModelId);
 
                                 return currentModel ? (
-                                    <div className="model-info-card" style={{ marginBottom: '16px', background: 'rgba(255,255,255,0.02)', padding: '16px', borderRadius: '12px', border: '1px solid var(--border)' }}>
+                                    <div className="model-info-card" style={{ background: 'rgba(255,255,255,0.02)', padding: '16px', borderRadius: '12px', border: '1px solid var(--border)' }}>
                                         <div className="model-info-label" style={{ fontSize: '11px', color: 'var(--text-tertiary)', textTransform: 'uppercase', marginBottom: '4px' }}>Текущая модель</div>
                                         <div className="model-info-name" style={{ fontSize: '16px', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '4px' }}>{currentModel.name}</div>
                                         <div className="model-info-desc" style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '12px' }}>{currentModel.desc}</div>
@@ -197,18 +209,6 @@ export default function SettingsPage() {
                                     </div>
                                 ) : null;
                             })()}
-
-                            <div className="settings-model-wrapper">
-                                <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, color: 'var(--text-secondary)', marginBottom: '8px' }}>
-                                    Сменить модель
-                                </label>
-                                <ModelSelector
-                                    model={state.settings.defaultModel || 'openai/gpt-4o'}
-                                    onModelChange={(val) => handleSave('defaultModel', val)}
-                                    direction="down"
-                                    constrained
-                                />
-                            </div>
                         </div>
                     </div>
 
