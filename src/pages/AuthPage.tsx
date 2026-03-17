@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { IconLogo, IconEye, IconEyeOff } from '../components/Icons';
+import { IconEye, IconEyeOff } from '../components/Icons';
+import { AnimatedDiamond } from '../components/AnimatedDiamond';
 
 export default function AuthPage() {
     const { login, register } = useAuth();
@@ -47,9 +48,9 @@ export default function AuthPage() {
         <div className="auth-page">
             <div className="auth-card">
                 {/* Logo */}
-                <div className="auth-logo">
-                    <IconLogo size={32} className="logo-svg" />
-                    <span className="auth-logo-text">Спроси ИИ</span>
+                <div className="auth-header" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
+                    <AnimatedDiamond animationType="glow" size={32} />
+                    <h1>{tab === 'login' ? 'С возвращением' : 'Создать аккаунт'}</h1>
                 </div>
 
                 {/* Tabs */}

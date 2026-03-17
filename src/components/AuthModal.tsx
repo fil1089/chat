@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { IconLogo, IconEye, IconEyeOff, IconClose } from './Icons';
+import { IconEye, IconEyeOff, IconClose } from './Icons';
+import { AnimatedDiamond } from './AnimatedDiamond';
 
 interface AuthModalProps {
     onClose: () => void;
@@ -73,9 +74,8 @@ export default function AuthModal({ onClose, title = "Необходима ав�
                     <IconClose size={20} />
                 </button>
 
-                {/* Logo */}
-                <div className="auth-logo" style={{ marginTop: '10px' }}>
-                    <IconLogo size={32} className="logo-svg" />
+                <div className="auth-logo" style={{ marginTop: '10px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
+                    <AnimatedDiamond animationType="glow" size={32} />
                     <span className="auth-logo-text">Спроси ИИ</span>
                 </div>
 

@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
-import { IconPlus, IconSidebar, IconMessage, IconFolder, IconHistory, IconSettings, IconSearch, IconTrash, IconLogo, SpaceIcon, IconRobot, IconChevronDown, IconClose, IconImage, IconUser } from './Icons';
+import { IconPlus, IconSidebar, IconMessage, IconFolder, IconHistory, IconSettings, IconSearch, IconTrash, SpaceIcon, IconRobot, IconChevronDown, IconClose, IconImage, IconUser } from './Icons';
+import { AnimatedDiamond } from './AnimatedDiamond';
 import { checkPolzaBalance } from '../services/polzaApi';
 import { v4 as uuidv4 } from 'uuid';
 import type { Chat } from '../types';
@@ -101,8 +102,8 @@ export default function Sidebar({ onLogout, onLogin, userEmail }: SidebarProps) 
             )}
             <aside className={`sidebar ${state.sidebarOpen ? '' : 'closed'}`}>
                 <div className="sidebar-header">
-                    <div className="logo" onClick={handleNewChat} style={{ cursor: 'pointer' }}>
-                        <IconLogo size={22} className="logo-svg" />
+                    <div className="logo" onClick={handleNewChat} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <AnimatedDiamond animationType="glow" size={22} />
                         <span className="logo-text">Спроси ИИ</span>
                     </div>
                     <button

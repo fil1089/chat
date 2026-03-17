@@ -95,26 +95,9 @@ export function AnimatedDiamond({ animationType, size = 120 }: AnimatedDiamondPr
       >
         <motion.path
           d="M12 2L2 12l10 10 10-10L12 2z"
-          initial={{ pathLength: 0 }}
-          animate={{ pathLength: 1 }}
-          transition={{
-            duration: 2,
-            repeat: Infinity,
-            repeatType: "reverse",
-            ease: "easeInOut" as const
-          }}
         />
         <motion.path
           d="M12 6l-6 6 6 6 6-6-6-6z"
-          initial={{ pathLength: 0 }}
-          animate={{ pathLength: 1 }}
-          transition={{
-            duration: 2,
-            delay: 0.3,
-            repeat: Infinity,
-            repeatType: "reverse",
-            ease: "easeInOut" as const
-          }}
         />
       </svg>
     </motion.div>
