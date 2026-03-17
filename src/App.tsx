@@ -13,6 +13,7 @@ import AuthPage from './pages/AuthPage';
 import { useApp } from './context/AppContext';
 import { IconMenu } from './components/Icons';
 import { AnimatedDiamond } from './components/AnimatedDiamond';
+import BackgroundEffects from './components/BackgroundEffects';
 
 function Layout() {
     const { state, dispatch } = useApp();
@@ -122,6 +123,7 @@ function MainApp() {
 
     return (
         <GlobalAuthModalContext.Provider value={{ showAuthModal }}>
+            <BackgroundEffects />
             <Layout />
             {(!user && authModalVisible) && (
                 <AuthModal

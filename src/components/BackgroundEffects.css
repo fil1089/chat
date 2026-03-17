@@ -1,0 +1,97 @@
+:root {
+  --bg-glow-color: rgba(151, 151, 175, 0.15);
+  --bg-glow-size: 800px;
+  --accent-glow: rgba(124, 58, 237, 0.1);
+  --grid-opacity: 0.03;
+}
+
+.background-effects {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: -1;
+  overflow: hidden;
+  background-color: #0a0a0c;
+}
+
+.cursor-glow {
+  position: absolute;
+  width: var(--bg-glow-size);
+  height: var(--bg-glow-size);
+  background: radial-gradient(
+    circle closest-side,
+    var(--bg-glow-color),
+    transparent
+  );
+  transform: translate(-50%, -50%);
+  transition: opacity 0.3s ease;
+  will-change: left, top;
+}
+
+.ambient-glow {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.glow-spot {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.5;
+  animation: pulse 10s infinite ease-in-out;
+}
+
+.glow-spot-1 {
+  top: 10%;
+  right: 15%;
+  width: 400px;
+  height: 400px;
+  background: var(--accent-glow);
+  animation-delay: 0s;
+}
+
+.glow-spot-2 {
+  bottom: 15%;
+  left: 10%;
+  width: 500px;
+  height: 500px;
+  background: rgba(30, 41, 59, 0.4);
+  animation-delay: -5s;
+}
+
+.grid-overlay {
+  position: absolute;
+  inset: 0;
+  background-image: 
+    linear-gradient(to right, rgba(255, 255, 255, var(--grid-opacity)) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, var(--grid-opacity)) 1px, transparent 1px);
+  background-size: 40px 40px;
+  mask-image: radial-gradient(circle at center, black, transparent 80%);
+}
+
+.vignette-overlay {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle at center,
+    transparent 20%,
+    rgba(0, 0, 0, 0.4) 100%
+  );
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.4;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.6;
+  }
+}

@@ -6102,3 +6102,26 @@ input:checked + .toggle-slider:before {
     font-size: 18px !important;
   }
 }
+/* ===== Card Glow Effects ===== */
+.card-glow-container {
+  position: relative;
+  overflow: hidden;
+}
+
+.card-glow-effect {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 10;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  background: radial-gradient(
+    600px circle at var(--mouse-x) var(--mouse-y),
+    rgba(108, 92, 231, 0.1),
+    transparent 40%
+  );
+}
+
+.card-glow-container:hover .card-glow-effect {
+  opacity: 1;
+}
