@@ -118,6 +118,20 @@ export default function ModelSelector({ model, onModelChange, direction = 'up', 
         setExpandedFamilies(next);
     };
 
+    const stripProvider = (name: string) => name.includes(': ') ? name.split(': ')[1] : name;
+
+    const getCategoryIcon = (category: string | undefined, size = 16) => {
+        if (!category) return null;
+        switch (category) {
+            case 'GPT': return <IconGPT size={size} />;
+            case 'Gemini': return <IconGoogle size={size} />;
+            case 'Claude': return <IconAnthropic size={size} />;
+            case 'Grok': return <IconGrok size={size} />;
+            case 'GLM': return <IconZAi size={size} />;
+            default: return null;
+        }
+    };
+
     return (
         <div className={`custom-model-selector ${inline ? 'inline-mode' : ''}`} ref={ref}>
             {!inline && (
@@ -126,9 +140,9 @@ export default function ModelSelector({ model, onModelChange, direction = 'up', 
                     onClick={() => setOpen(!open)}
                 >
                     <div className="model-trigger-content">
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                            <span className="model-name">{currentModel?.name || model}</span>
-                            {/* Удален тег актуальная */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            {currentModel && getCategoryIcon(currentModel.category, 18)}
+                            <span className="model-name">{currentModel ? stripProvider(currentModel.name) : model}</span>
                         </div>
                     </div>
                     {direction === 'up' ? <IconChevronUp size={14} /> : <IconChevronDown size={14} />}
@@ -166,15 +180,14 @@ export default function ModelSelector({ model, onModelChange, direction = 'up', 
                                         >
                                             <div className="model-item-main">
                                                 <div className="model-item-info">
-                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-                                                        <span className="model-item-name">{m.name}</span>
-                                                        {m.pricing && (
-                                                            <span className="model-pricing-info" style={{ fontSize: '10px', color: 'var(--text-secondary)', opacity: 0.8 }}>
-                                                                {m.pricing.prompt} / {m.pricing.completion}
-                                                            </span>
-                                                        )}
+                                                    <div className="model-item-name-row">
+                                                        <span className="model-item-name">{stripProvider(m.name)}</span>
                                                     </div>
-                                                    <span className="model-item-type">{m.desc}</span>
+                                                    {m.pricing && (
+                                                        <span className="model-pricing-info">
+                                                            {m.pricing.prompt} / {m.pricing.completion}
+                                                        </span>
+                                                    )}
                                                     {m.capabilities && (
                                                         <div className="model-capabilities" style={{ display: 'flex', gap: '8px', marginTop: '4px', opacity: 0.6 }}>
                                                             {m.capabilities.text && <IconFileText size={12} />}
@@ -221,15 +234,14 @@ export default function ModelSelector({ model, onModelChange, direction = 'up', 
                                                     >
                                                         <div className="model-item-main">
                                                             <div className="model-item-info">
-                                                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-                                                                    <span className="model-item-name">{m.name}</span>
-                                                                    {m.pricing && (
-                                                                        <span className="model-pricing-info" style={{ fontSize: '10px', color: 'var(--text-secondary)', opacity: 0.8 }}>
-                                                                            {m.pricing.prompt} / {m.pricing.completion}
-                                                                        </span>
-                                                                    )}
+                                                                <div className="model-item-name-row">
+                                                                    <span className="model-item-name">{stripProvider(m.name)}</span>
                                                                 </div>
-                                                                <span className="model-item-type">{m.desc}</span>
+                                                                {m.pricing && (
+                                                                    <span className="model-pricing-info">
+                                                                        {m.pricing.prompt} / {m.pricing.completion}
+                                                                    </span>
+                                                                )}
                                                                 {m.capabilities && (
                                                                     <div className="model-capabilities" style={{ display: 'flex', gap: '8px', marginTop: '4px', opacity: 0.6 }}>
                                                                         {m.capabilities.text && <IconFileText size={12} />}

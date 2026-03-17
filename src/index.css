@@ -5473,11 +5473,23 @@ input:checked + .toggle-slider:before {
     display: none !important;
   }
 
+  .custom-model-selector .model-item-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    width: 100%;
+  }
+
   .custom-model-selector .model-item-name {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 180px;
+    white-space: normal;
+    font-size: 14px;
+    line-height: 1.3;
+  }
+
+  .custom-model-selector .model-pricing-info {
+    font-size: 11px;
+    color: var(--text-tertiary);
+    opacity: 0.8;
   }
 
   .custom-model-selector .model-selector-dropdown {
