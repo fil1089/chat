@@ -5467,6 +5467,24 @@ input:checked + .toggle-slider:before {
     right: 12px;
   }
 
+  /* ===== Model Selector Mobile Refinement ===== */
+  .custom-model-selector .model-item-type,
+  .custom-model-selector .model-capabilities {
+    display: none !important;
+  }
+
+  .custom-model-selector .model-item-name {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 180px;
+  }
+
+  .custom-model-selector .model-selector-dropdown {
+    width:calc(100vw - 32px) !important;
+    max-width: 340px !important;
+  }
+
   /* ===== Empty Chat ===== */
   .chat-empty-content {
     padding: 24px 16px;
