@@ -176,59 +176,58 @@ export default function SettingsPage() {
                             </div>
                         </div>
                     </div>
-                </div>
-            </div>
 
-            <div className="dialogue-nav-sidebar">
-                <div className="sidebar-section" style={{ padding: '24px' }}>
-                    <h2 style={{ marginBottom: '16px' }}>Модель по умолчанию</h2>
+                    <div className="settings-section">
+                        <h2>Модель по умолчанию</h2>
+                        <div className="setting-row">
+                            {(() => {
+                                const defaultModelId = state.settings.defaultModel || 'openai/gpt-4o';
+                                const allModels = POLZA_MODELS;
+                                const currentModel = allModels.find(m => m.id === defaultModelId);
 
-                    {(() => {
-                        const defaultModelId = state.settings.defaultModel || 'openai/gpt-4o';
-                        const allModels = POLZA_MODELS;
-                        const currentModel = allModels.find(m => m.id === defaultModelId);
-
-                        return currentModel ? (
-                            <div className="model-info-card">
-                                <div className="model-info-label">Текущая модель</div>
-                                <div className="model-info-name">{currentModel.name}</div>
-                                <div className="model-info-desc">{currentModel.desc}</div>
-                                {(currentModel.pricing || currentModel.capabilities) && (
-                                    <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid var(--border-light)', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                                        {currentModel.pricing && (
-                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '11px', color: 'var(--text-secondary)' }}>
-                                                <span>Стоимость (1M):</span>
-                                                <span style={{ fontWeight: 500, color: 'var(--text-primary)' }}>{currentModel.pricing.prompt} / {currentModel.pricing.completion}</span>
-                                            </div>
-                                        )}
-                                        {currentModel.capabilities && (
-                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '11px', color: 'var(--text-secondary)' }}>
-                                                <span>Возможности:</span>
-                                                <div style={{ display: 'flex', gap: '6px', opacity: 0.8, color: 'var(--accent-light)' }}>
-                                                    {currentModel.capabilities.text && <span title="Текст"><IconFileText size={14} /></span>}
-                                                    {currentModel.capabilities.image && <span title="Изображения"><IconImage size={14} /></span>}
-                                                    {currentModel.capabilities.file && <span title="Файлы"><IconAttachment size={14} /></span>}
-                                                    {currentModel.capabilities.audio && <span title="Аудио"><IconAudio size={14} /></span>}
-                                                    {currentModel.capabilities.video && <span title="Видео"><IconVideo size={14} /></span>}
-                                                </div>
+                                return currentModel ? (
+                                    <div className="model-info-card" style={{ marginBottom: '16px', background: 'rgba(255,255,255,0.02)', padding: '16px', borderRadius: '12px', border: '1px solid var(--border)' }}>
+                                        <div className="model-info-label" style={{ fontSize: '11px', color: 'var(--text-tertiary)', textTransform: 'uppercase', marginBottom: '4px' }}>Текущая модель</div>
+                                        <div className="model-info-name" style={{ fontSize: '16px', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '4px' }}>{currentModel.name}</div>
+                                        <div className="model-info-desc" style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '12px' }}>{currentModel.desc}</div>
+                                        {(currentModel.pricing || currentModel.capabilities) && (
+                                            <div style={{ paddingTop: '12px', borderTop: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                                {currentModel.pricing && (
+                                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12px', color: 'var(--text-secondary)' }}>
+                                                        <span>Стоимость (1M):</span>
+                                                        <span style={{ fontWeight: 500, color: 'var(--text-primary)' }}>{currentModel.pricing.prompt} / {currentModel.pricing.completion}</span>
+                                                    </div>
+                                                )}
+                                                {currentModel.capabilities && (
+                                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12px', color: 'var(--text-secondary)' }}>
+                                                        <span>Возможности:</span>
+                                                        <div style={{ display: 'flex', gap: '8px', color: 'var(--accent-light)' }}>
+                                                            {currentModel.capabilities.text && <span title="Текст"><IconFileText size={16} /></span>}
+                                                            {currentModel.capabilities.image && <span title="Изображения"><IconImage size={16} /></span>}
+                                                            {currentModel.capabilities.file && <span title="Файлы"><IconAttachment size={16} /></span>}
+                                                            {currentModel.capabilities.audio && <span title="Аудио"><IconAudio size={16} /></span>}
+                                                            {currentModel.capabilities.video && <span title="Видео"><IconVideo size={16} /></span>}
+                                                        </div>
+                                                    </div>
+                                                )}
                                             </div>
                                         )}
                                     </div>
-                                )}
-                            </div>
-                        ) : null;
-                    })()}
+                                ) : null;
+                            })()}
 
-                    <div className="settings-model-wrapper" style={{ marginTop: '16px' }}>
-                        <div style={{ fontSize: '10px', fontWeight: 700, color: 'var(--text-tertiary)', letterSpacing: '0.05em', marginBottom: '8px' }}>
-                            Сменить модель
+                            <div className="settings-model-wrapper">
+                                <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, color: 'var(--text-secondary)', marginBottom: '8px' }}>
+                                    Сменить модель
+                                </label>
+                                <ModelSelector
+                                    model={state.settings.defaultModel || 'openai/gpt-4o'}
+                                    onModelChange={(val) => handleSave('defaultModel', val)}
+                                    direction="down"
+                                    constrained
+                                />
+                            </div>
                         </div>
-                        <ModelSelector
-                            model={state.settings.defaultModel || 'openai/gpt-4o'}
-                            onModelChange={(val) => handleSave('defaultModel', val)}
-                            direction="down"
-                            constrained
-                        />
                     </div>
                 </div>
             </div>
