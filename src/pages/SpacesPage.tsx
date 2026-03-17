@@ -282,14 +282,16 @@ export default function SpacesPage() {
                             </div>
                         </div>
                         <div className="form-row">
-                            <label className="checkbox-label" style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', marginTop: '10px' }}>
-                                <input
-                                    type="checkbox"
-                                    checked={form.isPublic}
-                                    onChange={(e) => setForm({ ...form, isPublic: e.target.checked })}
-                                    style={{ width: '16px', height: '16px', accentColor: 'var(--accent)' }}
-                                />
+                            <label className="checkbox-label" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer', marginTop: '10px' }}>
                                 <span>Сделать публичным (опубликовать для всех)</span>
+                                <div className="toggle-switch">
+                                    <input
+                                        type="checkbox"
+                                        checked={form.isPublic}
+                                        onChange={(e) => setForm({ ...form, isPublic: e.target.checked })}
+                                    />
+                                    <span className="toggle-slider"></span>
+                                </div>
                             </label>
                         </div>
                         {form.isPublic && (

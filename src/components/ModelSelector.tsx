@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useMemo } from 'react';
 import { useApp } from '../context/AppContext';
-import { IconChevronDown, IconChevronUp, IconCheck, IconSearch, IconFileText, IconImage, IconAttachment, IconAudio, IconVideo, IconFilter, IconSort } from './Icons';
+import { IconChevronDown, IconChevronUp, IconCheck, IconSearch, IconFileText, IconImage, IconAttachment, IconAudio, IconVideo } from './Icons';
 import { IconGPT, IconGoogle, IconAnthropic, IconGrok, IconZAi } from './CategoryIcons';
 import type { AIModel } from '../types';
 import { ALL_POLZA_MODELS } from '../services/polzaApi';
@@ -31,20 +31,18 @@ export default function ModelSelector({ model, onModelChange, direction = 'up', 
             'GLM': 'GLM'
         };
 
-        const hierarchy: Record<string, Record<string, AIModel[]>> = {};
+        const hierarchy: Record<string, AIModel[]> = {};
 
         chatModels.forEach((m) => {
             const mappedCat = CATEGORY_MAP[m.category] || m.category || 'Other';
-            const subCat = m.subCategory || 'other';
 
-            if (!hierarchy[mappedCat]) hierarchy[mappedCat] = {};
-            if (!hierarchy[mappedCat][subCat]) hierarchy[mappedCat][subCat] = [];
-            hierarchy[mappedCat][subCat].push(m);
+            if (!hierarchy[mappedCat]) hierarchy[mappedCat] = [];
+            hierarchy[mappedCat].push(m);
         });
 
         // Ensure proper category ordering
         const order = ['Grok', 'GPT', 'Gemini', 'Claude', 'GLM'];
-        const orderedHierarchy: Record<string, Record<string, AIModel[]>> = {};
+        const orderedHierarchy: Record<string, AIModel[]> = {};
 
         order.forEach(k => {
             if (hierarchy[k]) orderedHierarchy[k] = hierarchy[k];
@@ -59,10 +57,6 @@ export default function ModelSelector({ model, onModelChange, direction = 'up', 
 
     const [open, setOpen] = useState(false);
     const [search, setSearch] = useState('');
-    const [filterOption, setFilterOption] = useState('all');
-    const [sortOption, setSortOption] = useState('default');
-    const [showFilters, setShowFilters] = useState(false);
-    const [showSort, setShowSort] = useState(false);
     const [expandedFamilies, setExpandedFamilies] = useState<Set<string>>(new Set());
     const ref = useRef<HTMLDivElement>(null);
     const searchRef = useRef<HTMLInputElement>(null);
@@ -88,57 +82,24 @@ export default function ModelSelector({ model, onModelChange, direction = 'up', 
         if (open && searchRef.current) {
             setTimeout(() => searchRef.current?.focus(), 50);
             const familiesToExpand = new Set<string>();
-            Object.entries(groupedModels).forEach(([category, subs]) => {
-                Object.values(subs).forEach(models => {
-                    if (models.some(m => m.id === model)) {
-                        familiesToExpand.add(category);
-                    }
-                });
+            Object.entries(groupedModels).forEach(([category, models]) => {
+                if (models.some(m => m.id === model)) {
+                    familiesToExpand.add(category);
+                }
             });
             setExpandedFamilies(familiesToExpand);
         } else {
             setSearch('');
-            setFilterOption('all');
-            setSortOption('default');
-            setShowFilters(false);
-            setShowSort(false);
         }
     }, [open, model, groupedModels]);
 
-    const getFilteredAndSortedFlat = () => {
+    const getFilteredFlat = () => {
         const chatModels = ALL_POLZA_MODELS;
-
         let res = chatModels;
-
-        if (filterOption !== 'all') {
-            if (filterOption === 'reasoning') res = res.filter(m => m.subCategory === 'thinking' || (m.desc && m.desc.toLowerCase().includes('thinking')));
-            if (filterOption === 'advanced') res = res.filter(m => m.subCategory === 'advanced' || m.isActual);
-            if (filterOption === 'fast') res = res.filter(m => m.subCategory === 'fast' || (m.desc && m.desc.toLowerCase().includes('fast')));
-            if (filterOption === 'files') res = res.filter(m => m.capabilities?.file || m.capabilities?.image);
-            if (filterOption === 'cheap') res = res.filter(m => {
-                if (!m.pricing) return false;
-                const p = parseFloat(m.pricing.prompt.replace(/[^0-9.]/g, ''));
-                return p < 1;
-            });
-        }
 
         if (search) {
             const q = search.toLowerCase();
             res = res.filter((m) => m.name.toLowerCase().includes(q) || m.id.toLowerCase().includes(q) || (m.desc && m.desc.toLowerCase().includes(q)));
-        }
-
-        if (sortOption === 'price_asc' || sortOption === 'price_desc') {
-            res.sort((a, b) => {
-                const getPrice = (m: AIModel) => {
-                    if (!m.pricing) return 999999;
-                    const prompt = parseFloat(m.pricing.prompt.replace(/[^0-9.]/g, '')) || 0;
-                    const comp = parseFloat(m.pricing.completion.replace(/[^0-9.]/g, '')) || 0;
-                    return prompt + comp;
-                };
-                const pa = getPrice(a);
-                const pb = getPrice(b);
-                return sortOption === 'price_asc' ? pa - pb : pb - pa;
-            });
         }
 
         return res;
@@ -178,7 +139,7 @@ export default function ModelSelector({ model, onModelChange, direction = 'up', 
                 <div className={`model-selector-dropdown ${direction === 'down' ? 'down' : ''} ${align === 'left' ? 'left-aligned' : ''} ${inline ? 'inline' : ''}`} style={constrained ? { width: '100%', maxWidth: '100%', minWidth: 0, left: 0, right: 'auto', boxSizing: 'border-box' as const, maxHeight: '70vh' } : undefined}>
                     <div style={{ padding: '12px', borderBottom: '1px solid var(--border)' }}>
                         <div className="model-selector-top-bar">
-                            <div className="model-search-container">
+                            <div className="model-search-container" style={{ flex: 1 }}>
                                 <IconSearch size={14} />
                                 <input
                                     ref={searchRef}
@@ -189,80 +150,15 @@ export default function ModelSelector({ model, onModelChange, direction = 'up', 
                                     onClick={(e) => e.stopPropagation()}
                                 />
                             </div>
-                            <button
-                                className={`filter-sort-icon-btn ${showFilters ? 'active' : ''}`}
-                                onClick={(e) => { e.stopPropagation(); setShowFilters(!showFilters); setShowSort(false); }}
-                                title="Фильтры"
-                            >
-                                <IconFilter size={18} />
-                            </button>
-                            <button
-                                className={`filter-sort-icon-btn ${showSort ? 'active' : ''}`}
-                                onClick={(e) => { e.stopPropagation(); setShowSort(!showSort); setShowFilters(false); }}
-                                title="Сортировка"
-                            >
-                                <IconSort size={18} />
-                            </button>
                         </div>
-
-                        {showFilters && (
-                            <div className="model-filters-row hide-scrollbar">
-                                {[
-                                    { id: 'all', label: 'Все' },
-                                    { id: 'reasoning', label: 'Рассуждающие' },
-                                    { id: 'advanced', label: 'Продвинутые' },
-                                    { id: 'fast', label: 'Быстрые' },
-                                    { id: 'files', label: 'С файлами' },
-                                    { id: 'cheap', label: 'Дешевые' }
-                                ].map(f => (
-                                    <button
-                                        key={f.id}
-                                        onClick={(e) => { e.stopPropagation(); setFilterOption(f.id); }}
-                                        style={{
-                                            whiteSpace: 'nowrap', padding: '6px 12px', fontSize: '12px',
-                                            borderRadius: '16px', border: '1px solid var(--border)',
-                                            background: filterOption === f.id ? 'var(--accent)' : 'var(--surface-glass)',
-                                            color: filterOption === f.id ? '#fff' : 'var(--text-secondary)',
-                                            cursor: 'pointer', transition: 'var(--transition)'
-                                        }}
-                                    >
-                                        {f.label}
-                                    </button>
-                                ))}
-                            </div>
-                        )}
-
-                        {showSort && (
-                            <div className="model-filters-row hide-scrollbar" style={{ borderBottomColor: 'transparent', marginBottom: 0 }}>
-                                {[
-                                    { id: 'default', label: 'По умолчанию' },
-                                    { id: 'price_asc', label: 'Дешёвые сначала' },
-                                    { id: 'price_desc', label: 'Дорогие сначала' }
-                                ].map(s => (
-                                    <button
-                                        key={s.id}
-                                        onClick={(e) => { e.stopPropagation(); setSortOption(s.id); }}
-                                        style={{
-                                            whiteSpace: 'nowrap', padding: '6px 12px', fontSize: '12px',
-                                            borderRadius: '16px', border: '1px solid var(--border)',
-                                            background: sortOption === s.id ? 'var(--accent)' : 'var(--surface-glass)',
-                                            color: sortOption === s.id ? '#fff' : 'var(--text-secondary)',
-                                            cursor: 'pointer', transition: 'var(--transition)'
-                                        }}
-                                    >
-                                        {s.label}
-                                    </button>
-                                ))}
-                            </div>
-                        )}
                     </div>
                     <div className="model-dropdown-scroll">
-                        {(filterOption !== 'all' || sortOption !== 'default' || search) ? (
+                        {search ? (
                             <div className="model-items">
-                                {getFilteredAndSortedFlat().length === 0 ? (
+                                {getFilteredFlat().length === 0 ? (
                                     <div style={{ padding: '16px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '12px' }}>Ничего не найдено</div>
                                 ) : (
-                                    getFilteredAndSortedFlat().map((m: AIModel) => (
+                                    getFilteredFlat().map((m: AIModel) => (
                                         <div
                                             key={m.id}
                                             className={`model-item ${model === m.id ? 'active' : ''}`}
@@ -272,7 +168,6 @@ export default function ModelSelector({ model, onModelChange, direction = 'up', 
                                                 <div className="model-item-info">
                                                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
                                                         <span className="model-item-name">{m.name}</span>
-                                                        {/* Удален тег актуальная */}
                                                         {m.pricing && (
                                                             <span className="model-pricing-info" style={{ fontSize: '10px', color: 'var(--text-secondary)', opacity: 0.8 }}>
                                                                 {m.pricing.prompt} / {m.pricing.completion}
@@ -299,12 +194,8 @@ export default function ModelSelector({ model, onModelChange, direction = 'up', 
                                 )}
                             </div>
                         ) : (
-                            Object.entries(groupedModels).map(([category, subs]) => {
-                                // Filter models across all subcategories for search
-                                const hasMatch = Object.values(subs).some(models => filterModels(models).length > 0);
-                                if (!hasMatch) return null;
-
-                                const isCategoryExpanded = expandedFamilies.has(category) || !!search;
+                            Object.entries(groupedModels).map(([category, models]) => {
+                                const isCategoryExpanded = expandedFamilies.has(category);
 
                                 return (
                                     <div key={category} className={`model-family-group ${isCategoryExpanded ? 'expanded' : ''}`}>
@@ -321,73 +212,40 @@ export default function ModelSelector({ model, onModelChange, direction = 'up', 
                                         </div>
 
                                         {isCategoryExpanded && (
-                                            <div className="model-subcategories">
-                                                {/* Order subcategories: thinking, advanced, fast, other */}
-                                                {['thinking', 'advanced', 'fast', 'other'].map(subKey => {
-                                                    const subModels = subs[subKey];
-                                                    if (!subModels) return null;
-                                                    const filtered = filterModels(subModels);
-                                                    if (filtered.length === 0) return null;
-
-                                                    const subLabelMap: Record<string, string> = {
-                                                        'thinking': 'Рассуждающие',
-                                                        'advanced': 'Продвинутые',
-                                                        'fast': 'Быстрые',
-                                                        'other': 'Прочие'
-                                                    };
-
-                                                    const subId = `${category}-${subKey}`;
-                                                    const isSubExpanded = expandedFamilies.has(subId) || !!search || filtered.length === 1;
-
-                                                    return (
-                                                        <div key={subKey} className={`model-subcategory-group ${isSubExpanded ? 'expanded' : ''}`}>
-                                                            {filtered.length > 0 && (
-                                                                <div className="model-subcategory-header" onClick={() => toggleFamily(subId)}>
-                                                                    <span>{subLabelMap[subKey] || subKey}</span>
-                                                                    {isSubExpanded ? <IconChevronUp size={10} /> : <IconChevronDown size={10} />}
+                                            <div className="model-items nested">
+                                                {models.map((m) => (
+                                                    <div
+                                                        key={m.id}
+                                                        className={`model-item ${model === m.id ? 'active' : ''}`}
+                                                        onClick={() => { onModelChange(m.id); setOpen(false); }}
+                                                    >
+                                                        <div className="model-item-main">
+                                                            <div className="model-item-info">
+                                                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                                                                    <span className="model-item-name">{m.name}</span>
+                                                                    {m.pricing && (
+                                                                        <span className="model-pricing-info" style={{ fontSize: '10px', color: 'var(--text-secondary)', opacity: 0.8 }}>
+                                                                            {m.pricing.prompt} / {m.pricing.completion}
+                                                                        </span>
+                                                                    )}
                                                                 </div>
-                                                            )}
-                                                            {isSubExpanded && (
-                                                                <div className="model-items nested">
-                                                                    {filtered.map((m) => (
-                                                                        <div
-                                                                            key={m.id}
-                                                                            className={`model-item ${model === m.id ? 'active' : ''}`}
-                                                                            onClick={() => { onModelChange(m.id); setOpen(false); }}
-                                                                        >
-                                                                            <div className="model-item-main">
-                                                                                <div className="model-item-info">
-                                                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-                                                                                        <span className="model-item-name">{m.name}</span>
-                                                                                        {/* Удален тег актуальная */}
-                                                                                        {m.pricing && (
-                                                                                            <span className="model-pricing-info" style={{ fontSize: '10px', color: 'var(--text-secondary)', opacity: 0.8 }}>
-                                                                                                {m.pricing.prompt} / {m.pricing.completion}
-                                                                                            </span>
-                                                                                        )}
-                                                                                    </div>
-                                                                                    <span className="model-item-type">{m.desc}</span>
-                                                                                    {m.capabilities && (
-                                                                                        <div className="model-capabilities" style={{ display: 'flex', gap: '8px', marginTop: '4px', opacity: 0.6 }}>
-                                                                                            {m.capabilities.text && <IconFileText size={12} />}
-                                                                                            {m.capabilities.image && <IconImage size={12} />}
-                                                                                            {m.capabilities.file && <IconAttachment size={12} />}
-                                                                                            {m.capabilities.audio && <IconAudio size={12} />}
-                                                                                            {m.capabilities.video && <IconVideo size={12} />}
-                                                                                        </div>
-                                                                                    )}
-                                                                                </div>
-                                                                                <div className="model-item-actions">
-                                                                                    {model === m.id && <IconCheck size={16} className="check-icon" />}
-                                                                                </div>
-                                                                            </div>
-                                                                        </div>
-                                                                    ))}
-                                                                </div>
-                                                            )}
+                                                                <span className="model-item-type">{m.desc}</span>
+                                                                {m.capabilities && (
+                                                                    <div className="model-capabilities" style={{ display: 'flex', gap: '8px', marginTop: '4px', opacity: 0.6 }}>
+                                                                        {m.capabilities.text && <IconFileText size={12} />}
+                                                                        {m.capabilities.image && <IconImage size={12} />}
+                                                                        {m.capabilities.file && <IconAttachment size={12} />}
+                                                                        {m.capabilities.audio && <IconAudio size={12} />}
+                                                                        {m.capabilities.video && <IconVideo size={12} />}
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                            <div className="model-item-actions">
+                                                                {model === m.id && <IconCheck size={16} className="check-icon" />}
+                                                            </div>
                                                         </div>
-                                                    );
-                                                })}
+                                                    </div>
+                                                ))}
                                             </div>
                                         )}
                                     </div>

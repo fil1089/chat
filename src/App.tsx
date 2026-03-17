@@ -12,6 +12,7 @@ import HistoryPage from './pages/HistoryPage';
 import AuthPage from './pages/AuthPage';
 import { useApp } from './context/AppContext';
 import { IconMenu, IconLogo } from './components/Icons';
+import { AnimatedDiamond } from './components/AnimatedDiamond';
 
 function Layout() {
     const { state, dispatch } = useApp();
@@ -23,8 +24,8 @@ function Layout() {
     if (!state.storageReady) {
         return (
             <div className="app-loading">
-                <IconLogo size={36} className="app-loading-icon" />
-                <span className="app-loading-text">Спроси ИИ</span>
+                <AnimatedDiamond animationType="glow" size={80} />
+                <span className="app-loading-text" style={{ marginTop: '24px' }}>Спроси ИИ</span>
             </div>
         );
     }
@@ -97,8 +98,8 @@ function MainApp() {
     if (isLoading) {
         return (
             <div className="app-loading">
-                <IconLogo size={36} className="app-loading-icon" />
-                <span className="app-loading-text">Спроси ИИ</span>
+                <AnimatedDiamond animationType="glow" size={80} />
+                <span className="app-loading-text" style={{ marginTop: '24px' }}>Спроси ИИ</span>
             </div>
         );
     }
