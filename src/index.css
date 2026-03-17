@@ -5488,7 +5488,6 @@ input:checked + .toggle-slider:before {
   /* ===== Empty Chat ===== */
   .chat-empty-content {
     padding: 24px 16px;
-    min-height: 420px; /* Base height to prevent expansion when second line appears */
     display: flex;
     flex-direction: column;
     justify-content: center;
