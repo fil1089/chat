@@ -26,9 +26,9 @@ function Layout() {
             <div className="app-loading">
                 <AnimatedDiamond animationType="glow" size={160} />
                 <span className="app-loading-text" style={{ 
-                    marginTop: '40px', 
+                    marginTop: '24px', 
                     fontSize: '24px', 
-                    fontWeight: 500,
+                    fontWeight: 600,
                     letterSpacing: '0.05em',
                     opacity: 0.9
                 }}>
@@ -108,9 +108,9 @@ function MainApp() {
             <div className="app-loading">
                 <AnimatedDiamond animationType="glow" size={160} />
                 <span className="app-loading-text" style={{ 
-                    marginTop: '40px', 
+                    marginTop: '24px', 
                     fontSize: '24px', 
-                    fontWeight: 500,
+                    fontWeight: 600,
                     letterSpacing: '0.05em',
                     opacity: 0.9
                 }}>
