@@ -43,6 +43,7 @@ export default function ChatView() {
     const [contextMode, setContextMode] = useState<ContextMode>('full');
     const [contextN, setContextN] = useState(5);
     const [rightPanelOpen, setRightPanelOpen] = useState(window.innerWidth > 768);
+    const [isEmptyLogoHovered, setIsEmptyLogoHovered] = useState(false);
 
     const activeChat = state.chats.find((c) => c.id === state.activeChat);
     const activeSpace = state.spaces.find((s) => s.id === state.activeSpace) as Space | undefined;
@@ -408,8 +409,13 @@ export default function ChatView() {
                 {messages.length === 0 ? (
                     <div className="chat-empty">
                         <div className="chat-empty-content">
-                            <div className="chat-empty-icon" style={{ marginBottom: '8px', display: 'flex', justifyContent: 'center' }}>
-                                <AnimatedDiamond size={200} />
+                            <div 
+                                className="chat-empty-icon" 
+                                onMouseEnter={() => setIsEmptyLogoHovered(true)}
+                                onMouseLeave={() => setIsEmptyLogoHovered(false)}
+                                style={{ marginBottom: '8px', display: 'flex', justifyContent: 'center', cursor: 'pointer' }}
+                            >
+                                <AnimatedDiamond size={200} isPulsating={isEmptyLogoHovered} />
                             </div>
                             <h2>{activeSpace ? activeSpace.name : 'Начните диалог'}</h2>
                             <p>{activeSpace?.description || 'Выберите модель и отправьте сообщение'}</p>
