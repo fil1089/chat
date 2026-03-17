@@ -306,6 +306,15 @@ const DEFAULT_SETTINGS: Settings = {
     imageSize: '1024x1024',
     imageQuality: 'high',
     enableReasoning: false,
+    logoSettings: {
+        frameBlur: 0,
+        sphereBlur: 0.8,
+        glowStrength: 0.5,
+        primaryColor: '#f0f7ff',
+        secondaryColor: '#c7d2fe',
+        accentColor: '#818cf8',
+        frameColor: '#e0e7ff',
+    },
 };
 
 export async function getSettings(): Promise<Settings> {

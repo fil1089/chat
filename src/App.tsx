@@ -122,15 +122,13 @@ function MainApp() {
 
     return (
         <GlobalAuthModalContext.Provider value={{ showAuthModal }}>
-            <AppProvider>
-                <Layout />
-                {(!user && authModalVisible) && (
-                    <AuthModal
-                        onClose={() => setAuthModalVisible(false)}
-                        title={authModalTitle}
-                    />
-                )}
-            </AppProvider>
+            <Layout />
+            {(!user && authModalVisible) && (
+                <AuthModal
+                    onClose={() => setAuthModalVisible(false)}
+                    title={authModalTitle}
+                />
+            )}
         </GlobalAuthModalContext.Provider>
     );
 }
@@ -139,7 +137,9 @@ export default function App() {
     return (
         <Router>
             <AuthProvider>
-                <MainApp />
+                <AppProvider>
+                    <MainApp />
+                </AppProvider>
             </AuthProvider>
         </Router>
     );

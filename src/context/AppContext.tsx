@@ -25,6 +25,15 @@ const initialState: AppState = {
         enableReasoning: false,
         enableWebSearch: false,
         autoTranslate: false,
+        logoSettings: {
+            frameBlur: 0,
+            sphereBlur: 0.8,
+            glowStrength: 0.5,
+            primaryColor: '#f0f7ff',
+            secondaryColor: '#c7d2fe',
+            accentColor: '#818cf8',
+            frameColor: '#e0e7ff',
+        },
     },
     sidebarOpen: typeof window !== 'undefined' ? window.innerWidth > 768 : true,
     storageReady: false,
@@ -37,7 +46,7 @@ function reducer(state: AppState, action: AppAction): AppState {
                 ...state,
                 chats: action.payload.chats,
                 spaces: action.payload.spaces,
-                settings: { ...action.payload.settings, enableWebSearch: false },
+                settings: { ...state.settings, ...action.payload.settings, enableWebSearch: false },
                 storageReady: true,
             };
 

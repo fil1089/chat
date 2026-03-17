@@ -1,4 +1,5 @@
 import { motion } from "motion/react";
+import { useApp } from "../context/AppContext";
 
 type AnimationType = "rotate" | "pulse" | "bounce" | "glow" | "spin3d";
 
@@ -8,6 +9,17 @@ interface AnimatedDiamondProps {
 }
 
 export function AnimatedDiamond({ animationType, size = 120 }: AnimatedDiamondProps) {
+  const { state } = useApp();
+  const settings = state.settings.logoSettings || {
+    frameBlur: 0.1,
+    sphereBlur: 0.8,
+    glowStrength: 3.5,
+    primaryColor: '#f0f7ff',
+    secondaryColor: '#c7d2fe',
+    accentColor: '#818cf8',
+    frameColor: '#e0e7ff',
+  };
+
   const getAnimation = (): any => {
     switch (animationType) {
       case "rotate":
@@ -40,14 +52,7 @@ export function AnimatedDiamond({ animationType, size = 120 }: AnimatedDiamondPr
           }
         };
       case "glow":
-        return {
-          rotate: [0, 360],
-          transition: {
-            duration: 10, // Even slower for refined feel
-            repeat: Infinity,
-            ease: "linear" as const
-          }
-        };
+        return {};
       case "spin3d":
         return {
           rotateY: [0, 360],
@@ -70,7 +75,7 @@ export function AnimatedDiamond({ animationType, size = 120 }: AnimatedDiamondPr
       style={{
         display: "inline-flex",
         perspective: "1000px",
-        color: isGlow ? "rgba(224, 231, 255, 0.95)" : "var(--accent)"
+        color: isGlow ? settings.frameColor : "var(--accent)"
       }}
     >
       <svg
@@ -84,15 +89,15 @@ export function AnimatedDiamond({ animationType, size = 120 }: AnimatedDiamondPr
         <defs>
           {/* Refined Cold Blue-Purple Gradient */}
           <radialGradient id="sphereGradient" cx="35%" cy="35%" r="55%">
-            <stop offset="0%" stopColor="#f0f7ff" /> {/* Light pearl highlight */}
-            <stop offset="45%" stopColor="#c7d2fe" /> {/* Soft cold blue-purple */}
-            <stop offset="100%" stopColor="#818cf8" /> {/* Deep cold indigo */}
+            <stop offset="0%" stopColor={settings.primaryColor} /> 
+            <stop offset="45%" stopColor={settings.secondaryColor} />
+            <stop offset="100%" stopColor={settings.accentColor} />
           </radialGradient>
 
           {/* Cold Spread Glow Filter with soft dissolving edges */}
           <filter id="coldGlow" x="-100%" y="-100%" width="300%" height="300%">
-            <feGaussianBlur in="SourceGraphic" stdDeviation="0.8" result="softSource" />
-            <feGaussianBlur in="SourceGraphic" stdDeviation="3.5" result="blur" />
+            <feGaussianBlur in="SourceGraphic" stdDeviation={settings.sphereBlur} result="softSource" />
+            <feGaussianBlur in="SourceGraphic" stdDeviation={settings.glowStrength} result="blur" />
             {/* Matrices for cold blue/purple shift */}
             <feColorMatrix in="blur" type="matrix" values="0 0 0 0 0.4  0 0 0 0 0.5  0 0 0 0 1  0 0 0 0.7 0" result="coloredBlur" />
             <feMerge>
@@ -102,7 +107,7 @@ export function AnimatedDiamond({ animationType, size = 120 }: AnimatedDiamondPr
           </filter>
           {/* Subtle blur for the outer frame */}
           <filter id="frameBlur" x="-50%" y="-50%" width="200%" height="200%">
-            <feGaussianBlur in="SourceGraphic" stdDeviation="0.4" />
+            <feGaussianBlur in="SourceGraphic" stdDeviation={settings.frameBlur} />
           </filter>
         </defs>
 
@@ -120,7 +125,7 @@ export function AnimatedDiamond({ animationType, size = 120 }: AnimatedDiamondPr
           style={{ 
             transform: "rotate(45deg)",
             transformOrigin: "center",
-            filter: isGlow ? "url(#frameBlur) drop-shadow(0 0 2px rgba(199, 210, 254, 0.4))" : "none"
+            filter: isGlow && settings.frameBlur > 0 ? `url(#frameBlur) drop-shadow(0 0 2px rgba(199, 210, 254, 0.4))` : (isGlow ? "drop-shadow(0 0 2px rgba(199, 210, 254, 0.4))" : "none")
           }}
         />
 
