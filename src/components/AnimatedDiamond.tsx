@@ -43,7 +43,7 @@ export function AnimatedDiamond({ animationType, size = 120 }: AnimatedDiamondPr
         return {
           rotate: [0, 360],
           transition: {
-            duration: 8, // Slower rotation for premium feel
+            duration: 9, // Even slower for elegant rotation
             repeat: Infinity,
             ease: "linear" as const
           }
@@ -70,7 +70,7 @@ export function AnimatedDiamond({ animationType, size = 120 }: AnimatedDiamondPr
       style={{
         display: "inline-flex",
         perspective: "1000px",
-        color: isGlow ? "rgba(255, 255, 255, 0.95)" : "var(--accent)"
+        color: isGlow ? "rgba(240, 248, 255, 0.95)" : "var(--accent)"
       }}
     >
       <svg
@@ -82,61 +82,57 @@ export function AnimatedDiamond({ animationType, size = 120 }: AnimatedDiamondPr
         style={{ overflow: 'visible' }}
       >
         <defs>
-          {/* Sphere Gradient */}
-          <radialGradient id="sphereGradient" cx="40%" cy="40%" r="50%">
-            <stop offset="0%" stopColor="#c4b5fd" /> {/* Light purple/lavender highlight */}
-            <stop offset="40%" stopColor="#8b5cf6" /> {/* Main purple */}
-            <stop offset="100%" stopColor="#3b82f6" /> {/* Outer blue */}
+          {/* Refined Cold Blue-Purple Gradient */}
+          <radialGradient id="sphereGradient" cx="35%" cy="35%" r="55%">
+            <stop offset="0%" stopColor="#f0f7ff" /> {/* Light pearl highlight */}
+            <stop offset="45%" stopColor="#c7d2fe" /> {/* Soft cold blue-purple */}
+            <stop offset="100%" stopColor="#818cf8" /> {/* Deep cold indigo */}
           </radialGradient>
 
-          {/* Soft Glow Filter */}
-          <filter id="softGlow" x="-50%" y="-50%" width="200%" height="200%">
-            <feGaussianBlur stdDeviation="1.5" result="blur" />
-            <feComposite in="SourceGraphic" in2="blur" operator="over" />
-          </filter>
-
-          {/* Background Spread Glow */}
-          <filter id="spreadGlow" x="-100%" y="-100%" width="300%" height="300%">
-            <feGaussianBlur stdDeviation="3" result="blur" />
-            <feColorMatrix type="matrix" values="0 0 0 0 0.5  0 0 0 0 0.4  0 0 0 0 1  0 0 0 1 0" />
+          {/* Cold Spread Glow Filter with soft dissolving edges */}
+          <filter id="coldGlow" x="-100%" y="-100%" width="300%" height="300%">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="0.8" result="softSource" />
+            <feGaussianBlur in="SourceGraphic" stdDeviation="3.5" result="blur" />
+            {/* Matrices for cold blue/purple shift */}
+            <feColorMatrix in="blur" type="matrix" values="0 0 0 0 0.4  0 0 0 0 0.5  0 0 0 0 1  0 0 0 0.7 0" result="coloredBlur" />
             <feMerge>
-              <feMergeNode in="blur" />
-              <feMergeNode in="SourceGraphic" />
+              <feMergeNode in="coloredBlur" />
+              <feMergeNode in="softSource" />
             </feMerge>
           </filter>
         </defs>
 
-        {/* Outer Diamond Frame */}
+        {/* Outer Frame - Light with a hint of purple tint */}
         <motion.path
           d="M12 2L2 12l10 10 10-10L12 2z"
           stroke="currentColor"
-          strokeWidth="1.2"
+          strokeWidth="1.1"
           strokeLinecap="round"
           strokeLinejoin="round"
           style={{ 
-            filter: isGlow ? "drop-shadow(0 0 2px rgba(255,255,255,0.3))" : "none"
+            filter: isGlow ? "drop-shadow(0 0 2px rgba(199, 210, 254, 0.4))" : "none"
           }}
         />
 
-        {/* Glowing Sphere */}
+        {/* Central Pulse Sphere */}
         <motion.circle
           cx="12"
           cy="12"
-          r="4.8"
+          r="4.6"
           fill="url(#sphereGradient)"
           animate={isGlow ? {
-            scale: [0.9, 1.1, 0.9],
-            opacity: [0.9, 1, 0.9]
+            scale: [0.93, 1.07, 0.93],
+            opacity: [0.85, 1, 0.85]
           } : {}}
           transition={{
-            duration: 3,
+            duration: 3.5,
             repeat: Infinity,
             ease: "easeInOut" as const
           }}
           style={{ 
             transformOrigin: "center", 
             transformBox: "fill-box",
-            filter: isGlow ? "url(#spreadGlow)" : "none"
+            filter: isGlow ? "url(#coldGlow)" : "none"
           }}
         />
       </svg>
