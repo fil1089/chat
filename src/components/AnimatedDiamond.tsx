@@ -42,22 +42,10 @@ export function AnimatedDiamond({ animationType, size = 120 }: AnimatedDiamondPr
       case "glow":
         return {
           rotate: [0, 360],
-          filter: [
-            "drop-shadow(0 0 2px var(--accent))",
-            "drop-shadow(0 0 20px var(--accent))",
-            "drop-shadow(0 0 2px var(--accent))"
-          ],
           transition: {
-            rotate: {
-              duration: 3,
-              repeat: Infinity,
-              ease: "linear" as const
-            },
-            filter: {
-              duration: 2,
-              repeat: Infinity,
-              ease: "easeInOut" as const
-            }
+            duration: 4,
+            repeat: Infinity,
+            ease: "linear" as const
           }
         };
       case "spin3d":
@@ -74,13 +62,15 @@ export function AnimatedDiamond({ animationType, size = 120 }: AnimatedDiamondPr
     }
   };
 
+  const isGlow = animationType === "glow";
+
   return (
     <motion.div
       animate={getAnimation()}
       style={{
         display: "inline-flex",
         perspective: "1000px",
-        color: "var(--accent)"
+        color: isGlow ? "rgba(255, 255, 255, 0.85)" : "var(--accent)"
       }}
     >
       <svg
@@ -89,17 +79,27 @@ export function AnimatedDiamond({ animationType, size = 120 }: AnimatedDiamondPr
         viewBox="0 0 24 24"
         fill="none"
         stroke="currentColor"
-        strokeWidth="2"
+        strokeWidth="1.5"
         strokeLinecap="round"
         strokeLinejoin="round"
+        style={{ overflow: 'visible' }}
       >
         <motion.path
           d="M12 2L2 12l10 10 10-10L12 2z"
         />
-        <motion.path
-          d="M12 6l-6 6 6 6 6-6-6-6z"
+        <motion.circle
+          cx="12"
+          cy="12"
+          r="4.5"
+          fill="var(--accent)"
+          stroke="none"
           animate={{
-            scale: [0.8, 1.1, 0.8],
+            scale: [0.8, 1.15, 0.8],
+            filter: isGlow ? [
+              "drop-shadow(0 0 2px var(--accent))",
+              "drop-shadow(0 0 12px var(--accent))",
+              "drop-shadow(0 0 2px var(--accent))"
+            ] : "none"
           }}
           transition={{
             duration: 2,
