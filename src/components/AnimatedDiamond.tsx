@@ -1,4 +1,5 @@
 import { motion } from "motion/react";
+import { useState, useEffect } from "react";
 
 // Optimized paths from User Update Step 624
 const svgPaths = {
@@ -20,6 +21,17 @@ export function AnimatedDiamond({
   isRotating?: boolean; 
   isIntro?: boolean;
 }) {
+  const [introDone, setIntroDone] = useState(!isIntro);
+
+  useEffect(() => {
+    if (isIntro && !introDone) {
+      const timer = setTimeout(() => {
+        setIntroDone(true);
+      }, 4000); // New sequence ends around 3.8s
+      return () => clearTimeout(timer);
+    }
+  }, [isIntro, introDone]);
+
   return (
     <div 
       style={{ width: size, height: size, position: 'relative' }} 
@@ -32,28 +44,6 @@ export function AnimatedDiamond({
         viewBox="0 0 1024 1024"
       >
         <g id="Logo Group">
-          {/* Animated rectangle drawing (Frame) - only shown during intro or if explicitly requested */}
-          {(isIntro) && (
-            <motion.rect 
-              height="380.356" 
-              id="Rectangle 1" 
-              rx="16" 
-              stroke="var(--stroke-0, #F6F6F6)" 
-              strokeWidth="20" 
-              transform="rotate(45.1201 512.084 233.752)" 
-              width="381.108" 
-              x="512.084" 
-              y="233.752"
-              fill="none"
-              initial={{ pathLength: 0, opacity: 0 }}
-              animate={{ pathLength: 1, opacity: 1 }}
-              transition={{ 
-                pathLength: { duration: 2, ease: "easeInOut" },
-                opacity: { duration: 0.3 }
-              }}
-            />
-          )}
-
           {/* Rotating atom paths */}
           <motion.g
             animate={isRotating ? { rotate: 360 } : {}}
@@ -64,93 +54,82 @@ export function AnimatedDiamond({
             } : {}}
             style={{ transformOrigin: "512px 512px" }}
           >
-            {/* Orbit paths with intro drawing effect or normal display */}
+            {/* Orbit paths with integrated intro drawing and static states */}
             {[
-              { d: svgPaths.p1, delay: 2.0 },
-              { d: svgPaths.p2, delay: 2.3 },
-              { d: svgPaths.p3, delay: 2.6 },
-              { d: svgPaths.p4, delay: 2.9 }
+              { d: svgPaths.p1, delayCount: 0, drawDuration: 2.0, fillDelay: 2.0 },
+              { d: svgPaths.p2, delayCount: 1, drawDuration: 1.5, fillDelay: 1.8 },
+              { d: svgPaths.p3, delayCount: 2, drawDuration: 1.5, fillDelay: 2.1 },
+              { d: svgPaths.p4, delayCount: 3, drawDuration: 1.5, fillDelay: 2.4 }
             ].map((p, idx) => (
               <g key={idx}>
-                {isIntro ? (
-                  <>
-                    <motion.path 
-                      d={p.d} 
-                      stroke="var(--fill-0, #F6F6F6)" 
-                      strokeWidth="2"
-                      fill="transparent"
-                      initial={{ pathLength: 0 }}
-                      animate={{ pathLength: 1 }}
-                      transition={{ 
-                        duration: 1.5,
-                        delay: p.delay,
-                        ease: "easeInOut"
-                      }}
-                    />
-                    <motion.path 
-                      d={p.d} 
-                      fill="var(--fill-0, #F6F6F6)" 
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ 
-                        duration: 0.3,
-                        delay: p.delay + 1.5
-                      }}
-                    />
-                  </>
-                ) : (
-                  <path 
+                {/* Stroke layer for intro drawing */}
+                {isIntro && !introDone && (
+                  <motion.path 
                     d={p.d} 
-                    fill="var(--fill-0, #F6F6F6)" 
+                    stroke="var(--fill-0, #F6F6F6)" 
+                    strokeWidth="2"
+                    fill="transparent"
+                    initial={{ pathLength: 0 }}
+                    animate={{ pathLength: 1 }}
+                    transition={{ 
+                      duration: p.drawDuration,
+                      delay: p.delayCount * 0.3,
+                      ease: "easeInOut"
+                    }}
                   />
                 )}
+                {/* Main filled layer */}
+                <motion.path 
+                  d={p.d} 
+                  fill="var(--fill-0, #F6F6F6)" 
+                  initial={isIntro && !introDone ? { opacity: 0 } : false}
+                  animate={{ opacity: 1 }}
+                  transition={isIntro && !introDone ? { 
+                    duration: 0.3,
+                    delay: p.fillDelay
+                  } : { duration: 0 }}
+                />
               </g>
             ))}
           </motion.g>
           
-          {/* Center circle with intro drawing effect or pulsating/static state */}
+          {/* Center circle with seamless transition from intro drawing to pulsating/static state */}
           <g>
-            {isIntro ? (
-              <>
-                <motion.path 
-                  d={svgPaths.pCenter} 
-                  stroke="var(--fill-0, #8F45FC)" 
-                  strokeWidth="3"
-                  fill="transparent"
-                  initial={{ pathLength: 0 }}
-                  animate={{ pathLength: 1 }}
-                  transition={{ 
-                    duration: 1,
-                    delay: 4.5,
-                    ease: "easeInOut"
-                  }}
-                />
-                <motion.path 
-                  d={svgPaths.pCenter} 
-                  fill="var(--fill-0, #8F45FC)" 
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ 
-                    duration: 0.3,
-                    delay: 5.5
-                  }}
-                />
-              </>
-            ) : (
-              <motion.circle
-                cx="513"
-                cy="514"
-                r="110"
-                fill="var(--fill-0, #8F45FC)" 
-                animate={isPulsating ? { scale: [1, 1.15, 1] } : {}}
-                transition={isPulsating ? { 
-                  duration: 2,
-                  ease: "easeInOut",
-                  repeat: Infinity
-                } : {}}
-                style={{ transformOrigin: "513px 514px" }}
+            {/* Stroke layer for intro drawing */}
+            {isIntro && !introDone && (
+              <motion.path 
+                d={svgPaths.pCenter} 
+                stroke="var(--fill-0, #8F45FC)" 
+                strokeWidth="3"
+                fill="transparent"
+                initial={{ pathLength: 0 }}
+                animate={{ pathLength: 1 }}
+                transition={{ 
+                  duration: 1,
+                  delay: 2.5,
+                  ease: "easeInOut"
+                }}
               />
             )}
+            {/* Main filled layer with optional pulsation */}
+            <motion.path 
+              d={svgPaths.pCenter} 
+              fill="var(--fill-0, #8F45FC)" 
+              initial={isIntro && !introDone ? { opacity: 0 } : false}
+              animate={{ 
+                opacity: 1,
+                scale: (introDone && isPulsating) ? [1, 1.15, 1] : 1
+              }}
+              transition={{
+                opacity: isIntro && !introDone ? { duration: 0.3, delay: 3.5 } : { duration: 0 },
+                scale: (introDone && isPulsating) ? { 
+                  duration: 2, 
+                  ease: "easeInOut", 
+                  repeat: Infinity 
+                } : { duration: 0.3 }
+              }}
+              style={{ transformOrigin: "513px 514px" }}
+            />
           </g>
         </g>
       </svg>
