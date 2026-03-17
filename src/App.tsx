@@ -11,6 +11,7 @@ import { useAuth } from './context/AuthContext';
 import * as storage from './services/storage';
 import AuthModal from './components/AuthModal';
 import { AnimatedDiamond } from './components/AnimatedDiamond';
+import { BackgroundEffects } from './components/BackgroundEffects';
 
 // --- Global Auth Modal Context ---
 interface GlobalAuthModalContextType {
@@ -33,10 +34,16 @@ function AppLayout({ children }: { children: React.ReactNode }) {
   const location = useLocation();
   const isAuthPage = location.pathname === '/auth';
 
-  if (isAuthPage) return <>{children}</>;
+  if (isAuthPage) return (
+    <>
+      <BackgroundEffects />
+      {children}
+    </>
+  );
 
   return (
     <div className={`app-container ${!state.sidebarOpen ? 'sidebar-collapsed' : ''}`}>
+      <BackgroundEffects />
       <Sidebar />
       <main className="main-content">
         {children}
