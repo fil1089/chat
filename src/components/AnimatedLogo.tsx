@@ -78,7 +78,7 @@ export default function AnimatedLogo({
           {/* Breathing center circle */}
           <motion.path 
             d={svgPaths.pCenter} 
-            fill="var(--fill-0, #8F45FC)" 
+            fill="var(--fill-0, #795ce7)" 
             id="Vector_3"
             animate={isBreathing ? { scale: [1, 1.2, 1] } : {}}
             transition={isBreathing ? { 
