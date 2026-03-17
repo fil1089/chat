@@ -11,7 +11,7 @@ import ImagesPage from './pages/ImagesPage';
 import HistoryPage from './pages/HistoryPage';
 import AuthPage from './pages/AuthPage';
 import { useApp } from './context/AppContext';
-import { IconMenu, IconLogo } from './components/Icons';
+import { IconMenu } from './components/Icons';
 import { AnimatedDiamond } from './components/AnimatedDiamond';
 
 function Layout() {
