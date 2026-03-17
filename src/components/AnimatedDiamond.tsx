@@ -6,9 +6,10 @@ type AnimationType = "rotate" | "pulse" | "bounce" | "glow" | "spin3d";
 interface AnimatedDiamondProps {
   animationType: AnimationType;
   size?: number;
+  animateOnHover?: boolean;
 }
 
-export function AnimatedDiamond({ animationType, size = 120 }: AnimatedDiamondProps) {
+export function AnimatedDiamond({ animationType, size = 120, animateOnHover = false }: AnimatedDiamondProps) {
   const { state } = useApp();
   const settings = state.settings.logoSettings || {
     frameBlur: 0.1,
@@ -68,10 +69,29 @@ export function AnimatedDiamond({ animationType, size = 120 }: AnimatedDiamondPr
   };
 
   const isGlow = animationType === "glow";
+  
+  // Variants for coordinated animation
+  const containerVariants = {
+    animate: getAnimation(),
+  };
+
+  const sphereVariants = {
+    animate: isGlow ? {
+      scale: [0.93, 1.07, 0.93],
+      opacity: [0.85, 1, 0.85],
+      transition: {
+        duration: 3.5,
+        repeat: Infinity,
+        ease: "easeInOut" as const
+      }
+    } : {}
+  };
 
   return (
     <motion.div
-      animate={getAnimation()}
+      variants={containerVariants}
+      animate={!animateOnHover ? "animate" : undefined}
+      whileHover={animateOnHover ? "animate" : undefined}
       style={{
         display: "inline-flex",
         perspective: "1000px",
@@ -87,31 +107,26 @@ export function AnimatedDiamond({ animationType, size = 120 }: AnimatedDiamondPr
         style={{ overflow: 'visible' }}
       >
         <defs>
-          {/* Refined Cold Blue-Purple Gradient */}
           <radialGradient id="sphereGradient" cx="35%" cy="35%" r="55%">
             <stop offset="0%" stopColor={settings.primaryColor} /> 
             <stop offset="45%" stopColor={settings.secondaryColor} />
             <stop offset="100%" stopColor={settings.accentColor} />
           </radialGradient>
 
-          {/* Cold Spread Glow Filter with soft dissolving edges */}
           <filter id="coldGlow" x="-100%" y="-100%" width="300%" height="300%">
             <feGaussianBlur in="SourceGraphic" stdDeviation={settings.sphereBlur} result="softSource" />
             <feGaussianBlur in="SourceGraphic" stdDeviation={settings.glowStrength} result="blur" />
-            {/* Matrices for cold blue/purple shift */}
             <feColorMatrix in="blur" type="matrix" values="0 0 0 0 0.4  0 0 0 0 0.5  0 0 0 0 1  0 0 0 0.7 0" result="coloredBlur" />
             <feMerge>
               <feMergeNode in="coloredBlur" />
               <feMergeNode in="softSource" />
             </feMerge>
           </filter>
-          {/* Subtle blur for the outer frame */}
           <filter id="frameBlur" x="-50%" y="-50%" width="200%" height="200%">
             <feGaussianBlur in="SourceGraphic" stdDeviation={settings.frameBlur} />
           </filter>
         </defs>
 
-        {/* Outer Frame - Rounded Diamond (Rotated Square) with subtle blur */}
         <motion.rect
           x="5"
           y="5"
@@ -129,21 +144,12 @@ export function AnimatedDiamond({ animationType, size = 120 }: AnimatedDiamondPr
           }}
         />
 
-        {/* Central Pulse Sphere - Slightly smaller for better padding */}
         <motion.circle
           cx="12"
           cy="12"
           r="4.2"
           fill="url(#sphereGradient)"
-          animate={isGlow ? {
-            scale: [0.93, 1.07, 0.93],
-            opacity: [0.85, 1, 0.85]
-          } : {}}
-          transition={{
-            duration: 3.5,
-            repeat: Infinity,
-            ease: "easeInOut" as const
-          }}
+          variants={sphereVariants}
           style={{ 
             transformOrigin: "center", 
             transformBox: "fill-box",
