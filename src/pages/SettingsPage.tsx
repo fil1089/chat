@@ -154,7 +154,7 @@ export default function SettingsPage() {
                                 </div>
                             )}
                             <p className="setting-hint">
-                                Получите ключ на <a href="https://polza.ai/dashboard/api-keys" target="_blank" rel="noopener noreferrer">polza.ai</a>
+                                Получите ключ на <a href="https://polza.ai?referral=lEslRDmmIS" target="_blank" rel="noopener noreferrer">polza.ai</a>
                             </p>
                         </div>
                     </div>
