@@ -6,7 +6,6 @@ import ModelSelector from '../components/ModelSelector';
 import { exportAllData, importAllData, clearAllData } from '../services/storage';
 import { POLZA_MODELS } from '../services/polzaModels';
 import type { ChangeEvent } from 'react';
-import { AnimatedDiamond } from '../components/AnimatedDiamond';
 interface TestResult {
     ok: boolean;
     msg: string;
@@ -157,124 +156,6 @@ export default function SettingsPage() {
                             <p className="setting-hint">
                                 Получите ключ на <a href="https://polza.ai/dashboard/api-keys" target="_blank" rel="noopener noreferrer">polza.ai</a>
                             </p>
-                        </div>
-                    </div>
-
-                    <div className="settings-section">
-                        <h2>Внешний вид логотипа</h2>
-                        <div className="logo-customizer" style={{ display: 'flex', gap: '32px', alignItems: 'flex-start', flexWrap: 'wrap', marginTop: '16px' }}>
-                            <div className="logo-preview-box" style={{ 
-                                padding: '32px', 
-                                background: 'rgba(0,0,0,0.15)', 
-                                borderRadius: '16px',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                minWidth: '180px',
-                                border: '1px solid var(--border-light)'
-                            }}>
-                                <AnimatedDiamond animationType="glow" size={120} />
-                            </div>
-                            
-                            <div style={{ flex: 1, minWidth: '300px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                                <div className="setting-control">
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                                        <label style={{ fontSize: '13px', fontWeight: 500 }}>Размытие рамки</label>
-                                        <span style={{ fontSize: '12px', color: 'var(--text-tertiary)' }}>{state.settings.logoSettings?.frameBlur ?? 0.1}</span>
-                                    </div>
-                                    <input 
-                                        type="range" min="0" max="2" step="0.1" 
-                                        style={{ width: '100%', accentColor: 'var(--accent)' }}
-                                        value={state.settings.logoSettings?.frameBlur ?? 0.1}
-                                        onChange={(e) => {
-                                            const val = parseFloat(e.target.value);
-                                            dispatch({ type: 'UPDATE_SETTINGS', payload: { 
-                                                logoSettings: { ...state.settings.logoSettings!, frameBlur: val } 
-                                            }});
-                                        }}
-                                    />
-                                </div>
-
-                                <div className="setting-control">
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                                        <label style={{ fontSize: '13px', fontWeight: 500 }}>Размытие сферы</label>
-                                        <span style={{ fontSize: '12px', color: 'var(--text-tertiary)' }}>{state.settings.logoSettings?.sphereBlur ?? 0.8}</span>
-                                    </div>
-                                    <input 
-                                        type="range" min="0" max="3" step="0.1" 
-                                        style={{ width: '100%', accentColor: 'var(--accent)' }}
-                                        value={state.settings.logoSettings?.sphereBlur ?? 0.8}
-                                        onChange={(e) => {
-                                            const val = parseFloat(e.target.value);
-                                            dispatch({ type: 'UPDATE_SETTINGS', payload: { 
-                                                logoSettings: { ...state.settings.logoSettings!, sphereBlur: val } 
-                                            }});
-                                        }}
-                                    />
-                                </div>
-
-                                <div className="setting-control">
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                                        <label style={{ fontSize: '13px', fontWeight: 500 }}>Сила свечения</label>
-                                        <span style={{ fontSize: '12px', color: 'var(--text-tertiary)' }}>{state.settings.logoSettings?.glowStrength ?? 3.5}</span>
-                                    </div>
-                                    <input 
-                                        type="range" min="0" max="10" step="0.5" 
-                                        style={{ width: '100%', accentColor: 'var(--accent)' }}
-                                        value={state.settings.logoSettings?.glowStrength ?? 3.5}
-                                        onChange={(e) => {
-                                            const val = parseFloat(e.target.value);
-                                            dispatch({ type: 'UPDATE_SETTINGS', payload: { 
-                                                logoSettings: { ...state.settings.logoSettings!, glowStrength: val } 
-                                            }});
-                                        }}
-                                    />
-                                </div>
-
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginTop: '8px' }}>
-                                    <div className="setting-control">
-                                        <label style={{ fontSize: '12px', color: 'var(--text-secondary)', display: 'block', marginBottom: '8px' }}>Цвет рамки</label>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                            <input 
-                                                type="color" 
-                                                style={{ border: 'none', background: 'none', width: '30px', height: '30px', cursor: 'pointer' }}
-                                                value={state.settings.logoSettings?.frameColor ?? '#e0e7ff'}
-                                                onChange={(e) => dispatch({ type: 'UPDATE_SETTINGS', payload: { 
-                                                    logoSettings: { ...state.settings.logoSettings!, frameColor: e.target.value } 
-                                                }})}
-                                            />
-                                            <span style={{ fontSize: '12px', fontFamily: 'monospace' }}>{state.settings.logoSettings?.frameColor ?? '#e0e7ff'}</span>
-                                        </div>
-                                    </div>
-                                    <div className="setting-control">
-                                        <label style={{ fontSize: '12px', color: 'var(--text-secondary)', display: 'block', marginBottom: '8px' }}>Цвет сферы</label>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                            <input 
-                                                type="color" 
-                                                style={{ border: 'none', background: 'none', width: '30px', height: '30px', cursor: 'pointer' }}
-                                                value={state.settings.logoSettings?.primaryColor ?? '#f0f7ff'}
-                                                onChange={(e) => dispatch({ type: 'UPDATE_SETTINGS', payload: { 
-                                                    logoSettings: { ...state.settings.logoSettings!, primaryColor: e.target.value } 
-                                                }})}
-                                            />
-                                            <span style={{ fontSize: '12px', fontFamily: 'monospace' }}>{state.settings.logoSettings?.primaryColor ?? '#f0f7ff'}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <button className="btn-ghost" style={{ alignSelf: 'flex-start', fontSize: '12px', marginTop: '12px' }} onClick={() => {
-                                    dispatch({ type: 'UPDATE_SETTINGS', payload: { 
-                                        logoSettings: {
-                                            frameBlur: 0.1,
-                                            sphereBlur: 0.8,
-                                            glowStrength: 3.5,
-                                            primaryColor: '#f0f7ff',
-                                            secondaryColor: '#c7d2fe',
-                                            accentColor: '#818cf8',
-                                            frameColor: '#e0e7ff',
-                                        }
-                                    }});
-                                }}>Сбросить параметры логотипа</button>
-                            </div>
                         </div>
                     </div>
 

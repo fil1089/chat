@@ -61,15 +61,6 @@ export interface Settings {
     imageQuality?: string;
     enableReasoning: boolean;
     enableWebSearch?: boolean;
-    logoSettings?: {
-        frameBlur: number;
-        sphereBlur: number;
-        glowStrength: number;
-        primaryColor: string;
-        secondaryColor: string;
-        accentColor: string;
-        frameColor: string;
-    };
 }
 
 export interface AppState {

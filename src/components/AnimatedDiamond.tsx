@@ -1,5 +1,4 @@
 import { motion } from "motion/react";
-import { useApp } from "../context/AppContext";
 
 type AnimationType = "rotate" | "pulse" | "bounce" | "glow" | "spin3d";
 
@@ -10,8 +9,7 @@ interface AnimatedDiamondProps {
 }
 
 export function AnimatedDiamond({ animationType, size = 120, animateOnHover = false }: AnimatedDiamondProps) {
-  const { state } = useApp();
-  const settings = state.settings.logoSettings || {
+  const settings = {
     frameBlur: 0.1,
     sphereBlur: 0.8,
     glowStrength: 3.5,
