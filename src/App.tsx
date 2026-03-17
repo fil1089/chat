@@ -37,18 +37,22 @@ function AppLayout({ children }: { children: React.ReactNode }) {
   if (isAuthPage) return (
     <>
       <BackgroundEffects />
-      {children}
+      <div style={{ position: 'relative', zIndex: 1, width: '100%', height: '100%' }}>
+        {children}
+      </div>
     </>
   );
 
   return (
-    <div className={`app-container ${!state.sidebarOpen ? 'sidebar-collapsed' : ''}`}>
+    <>
       <BackgroundEffects />
-      <Sidebar />
-      <main className="main-content">
-        {children}
-      </main>
-    </div>
+      <div className={`app-container ${!state.sidebarOpen ? 'sidebar-collapsed' : ''}`} style={{ position: 'relative', zIndex: 1 }}>
+        <Sidebar />
+        <main className="main-content">
+          {children}
+        </main>
+      </div>
+    </>
   );
 }
 
@@ -84,10 +88,10 @@ function AppContent() {
 
   if (appLoading || isLoading) {
     return (
-      <div className="app-loading">
+      <div className="app-loading" style={{ position: 'relative', zIndex: 10 }}>
         <div className="app-loading-content">
           <AnimatedDiamond size={160} animationType="glow" />
-          <div className="app-loading-text">Polza</div>
+          <div className="app-loading-text">Спроси ИИ</div>
         </div>
       </div>
     );
