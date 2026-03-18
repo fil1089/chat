@@ -521,7 +521,7 @@ export default function ChatInput({ onSend, model, onModelChange, isStreaming, o
                                                 <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', cursor: 'pointer', margin: 0 }}>
                                                     <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                                                         <span style={{ fontSize: '13px', textTransform: 'none', fontWeight: 600 }}>Токены рассуждений</span>
-                                                        <div title="для моделей с рассуждениями" style={{ cursor: 'help', color: 'var(--text-muted)', display: 'flex' }}>
+                                                        <div title="Отображает внутренний процесс размышления для улучшения качества ответов" style={{ cursor: 'help', color: 'var(--text-muted)', display: 'flex' }}>
                                                             <IconInfo size={12} />
                                                         </div>
                                                     </div>
