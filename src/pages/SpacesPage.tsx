@@ -450,6 +450,17 @@ export default function SpacesPage() {
                                             </div>
                                         </div>
                                         
+                                        <button 
+                                            className="helper-info-btn"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                setSelectedSpaceForInfo(space);
+                                            }}
+                                            title="Информация"
+                                        >
+                                            <IconInfo size={18} />
+                                        </button>
+
                                         {!hasAlready ? (
                                             <button 
                                                 className="btn-primary" 
