@@ -389,11 +389,12 @@ export default function ChatInput({ onSend, model, onModelChange, isStreaming, o
                 )}
             </div>
 
-            <div className="chat-input-wrapper" style={{ borderRadius: '24px', background: 'var(--bg-elevated)', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+            <div className="chat-input-wrapper" style={{ borderRadius: '24px', background: 'var(--bg-elevated)', display: 'flex', flexDirection: 'column' }}>
                 {/* Mode hints */}
                 {isFocused && modeHints.length > 0 && (
                     <div 
                         className="mode-hints-row"
+                        style={{ borderTopLeftRadius: '24px', borderTopRightRadius: '24px' }}
                         onWheel={(e) => {
                             if (e.deltaY !== 0) {
                                 e.preventDefault();
