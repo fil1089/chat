@@ -375,7 +375,10 @@ export default function ChatView() {
                     {activeSpace && (
                         <div 
                             className="mobile-space-title desktop-only" 
-                            onClick={() => dispatch({ type: 'SET_ACTIVE_CHAT', payload: null })} 
+                            onClick={() => {
+                                dispatch({ type: 'SET_ACTIVE_CHAT', payload: null });
+                                navigate(`/space/${activeSpace.id}`);
+                            }} 
                             style={{ cursor: 'pointer' }}
                         >
                             {activeSpace.name}
@@ -400,7 +403,10 @@ export default function ChatView() {
 
                 {activeSpace && (
                     <div className="space-banner desktop-only" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <div onClick={() => dispatch({ type: 'SET_ACTIVE_CHAT', payload: null })} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', flex: 1, gap: '8px' }}>
+                        <div onClick={() => {
+                            dispatch({ type: 'SET_ACTIVE_CHAT', payload: null });
+                            navigate(`/space/${activeSpace.id}`);
+                        }} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', flex: 1, gap: '8px' }}>
                             <IconFolder size={16} className="space-banner-icon" />
                             {activeSpace.name}
                         </div>
