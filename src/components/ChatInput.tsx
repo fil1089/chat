@@ -246,6 +246,21 @@ export default function ChatInput({ onSend, model, onModelChange, isStreaming, o
         }
     };
 
+    useEffect(() => {
+        const el = modeHintsRef.current;
+        if (!el) return;
+
+        const handleWheel = (e: WheelEvent) => {
+            if (e.deltaY !== 0) {
+                e.preventDefault();
+                el.scrollLeft += e.deltaY;
+            }
+        };
+
+        el.addEventListener('wheel', handleWheel, { passive: false });
+        return () => el.removeEventListener('wheel', handleWheel);
+    });
+
     const handleFocus = () => {
         if (focusTimeoutRef.current) clearTimeout(focusTimeoutRef.current);
         setIsFocused(true);
