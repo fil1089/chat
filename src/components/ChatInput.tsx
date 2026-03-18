@@ -196,21 +196,6 @@ export default function ChatInput({ onSend, model, onModelChange, isStreaming, o
     const focusTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const modeHintsRef = useRef<HTMLDivElement>(null);
 
-    useEffect(() => {
-        const el = modeHintsRef.current;
-        if (!el) return;
-
-        const handleWheel = (e: WheelEvent) => {
-            if (e.deltaY !== 0) {
-                e.preventDefault();
-                el.scrollLeft += e.deltaY;
-            }
-        };
-
-        el.addEventListener('wheel', handleWheel, { passive: false });
-        return () => el.removeEventListener('wheel', handleWheel);
-    }, [isFocused, modeHints.length]);
-
     // Extract @Mode hints from active space instructions
     const activeSpace = state.activeSpace ? state.spaces.find(s => s.id === state.activeSpace) : null;
     const modeHints: string[] = [];
