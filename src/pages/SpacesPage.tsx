@@ -181,6 +181,8 @@ export default function SpacesPage() {
                         <div className="form-row">
                             <label>Название</label>
                             <input
+                                id="space-name"
+                                name="spaceName"
                                 type="text"
                                 value={form.name}
                                 onChange={(e) => setForm({ ...form, name: e.target.value })}
@@ -286,6 +288,8 @@ export default function SpacesPage() {
                                 <span>Сделать публичным (опубликовать для всех)</span>
                                 <div className="toggle-switch">
                                     <input
+                                        id="space-is-public"
+                                        name="spaceIsPublic"
                                         type="checkbox"
                                         checked={form.isPublic}
                                         onChange={(e) => setForm({ ...form, isPublic: e.target.checked })}
@@ -298,6 +302,8 @@ export default function SpacesPage() {
                             <div className="form-row" style={{ marginTop: '0' }}>
                                 <label>Имя автора (опционально)</label>
                                 <input
+                                    id="space-author-name"
+                                    name="spaceAuthorName"
                                     type="text"
                                     value={form.authorName}
                                     onChange={(e) => setForm({ ...form, authorName: e.target.value })}

@@ -104,6 +104,8 @@ export default function HistoryPage() {
                 <div className="history-toolbar">
                     <div className="history-search-wrapper">
                         <input
+                            id="history-search"
+                            name="historySearch"
                             type="text"
                             placeholder="Поиск в истории..."
                             value={search}

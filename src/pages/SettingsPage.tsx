@@ -131,6 +131,8 @@ export default function SettingsPage() {
                             <label>API Ключ (Polza API)</label>
                             <div className="api-key-input">
                                 <input
+                                    id="polza-api-key"
+                                    name="polzaApiKey"
                                     type={showKey ? 'text' : 'password'}
                                     value={state.settings.polzaApiKey || ''}
                                     onChange={(e) => handleSave('polzaApiKey', e.target.value)}
@@ -223,7 +225,7 @@ export default function SettingsPage() {
                                 <button className="btn-secondary" onClick={handleExport}>Экспорт всех данных (.json)</button>
                                 <label className="file-label btn-secondary">
                                     Импорт данных (.json)
-                                    <input type="file" accept=".json" onChange={handleImport} hidden />
+                                    <input id="import-data" name="importData" type="file" accept=".json" onChange={handleImport} hidden />
                                 </label>
                                 <button className="btn-danger" onClick={handleClear}>Очистить всё</button>
                             </div>

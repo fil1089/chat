@@ -120,6 +120,8 @@ export default function ImagesPage() {
                                             <div className="chat-list-info">
                                                 {editingChatId === chat.id ? (
                                                     <input
+                                                        id="image-chat-rename-input"
+                                                        name="imageChatRename"
                                                         autoFocus
                                                         className="chat-rename-input"
                                                         value={editTitle}

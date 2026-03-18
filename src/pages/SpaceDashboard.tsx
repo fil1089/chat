@@ -152,6 +152,8 @@ export default function SpaceDashboard() {
                                             <div className="chat-list-info">
                                                 {editingChatId === chat.id ? (
                                                     <input
+                                                        id="chat-rename-input"
+                                                        name="chatRename"
                                                         autoFocus
                                                         className="chat-rename-input"
                                                         value={editTitle}

@@ -200,6 +200,8 @@ export default function Sidebar({ onLogout, onLogin, userEmail }: SidebarProps) 
 
                 <div className="sidebar-search">
                     <input
+                        id="sidebar-search"
+                        name="sidebarSearch"
                         type="text"
                         placeholder="Поиск чатов..."
                         value={searchQuery}

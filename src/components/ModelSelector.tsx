@@ -156,6 +156,8 @@ export default function ModelSelector({ model, onModelChange, direction = 'up', 
                             <div className="model-search-container" style={{ flex: 1 }}>
                                 <IconSearch size={14} />
                                 <input
+                                    id="model-search"
+                                    name="modelSearch"
                                     ref={searchRef}
                                     type="text"
                                     placeholder="Поиск модели..."
