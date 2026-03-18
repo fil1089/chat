@@ -1,5 +1,6 @@
 import type { Chat, Space, Settings } from '../types';
 import { supabase } from '../lib/supabase';
+import { get as idbGet, set as idbSet, del as idbDel, clear as idbClear } from 'idb-keyval';
 
 const KEYS = {
     CHATS: 'aggregator_chats',
@@ -139,7 +140,27 @@ async function apiDelete(key: string): Promise<void> {
 
 // --- Chats ---
 export async function getChats(): Promise<Chat[]> {
-    return (await apiGet<Chat[]>(KEYS.CHATS)) ?? [];
+    const apiChats = (await apiGet<Chat[]>(KEYS.CHATS)) ?? [];
+    try {
+        const localChats = await idbGet<Chat[]>(KEYS.CHATS);
+        if (localChats && Array.isArray(localChats)) {
+            const merged = [...apiChats];
+            for (const localC of localChats) {
+                const idx = merged.findIndex(c => c.id === localC.id);
+                if (idx >= 0) {
+                    if ((localC.updatedAt || 0) >= (merged[idx].updatedAt || 0)) {
+                        merged[idx] = localC;
+                    }
+                } else {
+                    merged.push(localC);
+                }
+            }
+            return merged.sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
+        }
+    } catch (e) {
+        console.warn('[Storage IDB] load chats failed:', e);
+    }
+    return apiChats;
 }
 
 export async function saveChat(chat: Chat): Promise<Chat[]> {
@@ -149,6 +170,12 @@ export async function saveChat(chat: Chat): Promise<Chat[]> {
         chats[idx] = { ...chat, updatedAt: Date.now() };
     } else {
         chats.unshift({ ...chat, createdAt: Date.now(), updatedAt: Date.now() });
+    }
+
+    try {
+        await idbSet(KEYS.CHATS, chats);
+    } catch (e) {
+        console.warn('[Storage IDB] save chats failed:', e);
     }
 
     // Strip extremely large base64 attachments before saving to DB 
@@ -210,13 +237,34 @@ export async function saveChat(chat: Chat): Promise<Chat[]> {
 
 export async function deleteChat(chatId: string): Promise<Chat[]> {
     const chats = (await getChats()).filter((c) => c.id !== chatId);
+    try { await idbSet(KEYS.CHATS, chats); } catch {}
     await apiSet(KEYS.CHATS, chats);
     return chats;
 }
 
 // --- Spaces ---
 export async function getSpaces(): Promise<Space[]> {
-    return (await apiGet<Space[]>(KEYS.SPACES)) ?? [];
+    const apiSpaces = (await apiGet<Space[]>(KEYS.SPACES)) ?? [];
+    try {
+        const localSpaces = await idbGet<Space[]>(KEYS.SPACES);
+        if (localSpaces && Array.isArray(localSpaces)) {
+            const merged = [...apiSpaces];
+            for (const localS of localSpaces) {
+                const idx = merged.findIndex(s => s.id === localS.id);
+                if (idx >= 0) {
+                    if ((localS.updatedAt || 0) >= (merged[idx].updatedAt || 0)) {
+                        merged[idx] = localS;
+                    }
+                } else {
+                    merged.push(localS);
+                }
+            }
+            return merged.sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
+        }
+    } catch (e) {
+        console.warn('[Storage IDB] load spaces failed:', e);
+    }
+    return apiSpaces;
 }
 
 export async function saveSpace(space: Space): Promise<Space[]> {
@@ -227,6 +275,8 @@ export async function saveSpace(space: Space): Promise<Space[]> {
     } else {
         spaces.unshift({ ...space, createdAt: Date.now(), updatedAt: Date.now() });
     }
+
+    try { await idbSet(KEYS.SPACES, spaces); } catch {}
 
     // Strip large attachments to prevent Vercel 4.5MB error
     const dbSpaces = spaces.map(s => {
@@ -247,6 +297,7 @@ export async function saveSpace(space: Space): Promise<Space[]> {
 }
 
 export async function saveAllSpaces(spaces: Space[]): Promise<Space[]> {
+    try { await idbSet(KEYS.SPACES, spaces); } catch {}
     // Strip large attachments to prevent Vercel 4.5MB error
     const dbSpaces = spaces.map(s => {
         if (!s.files || s.files.length === 0) return s;
@@ -267,8 +318,10 @@ export async function saveAllSpaces(spaces: Space[]): Promise<Space[]> {
 
 export async function deleteSpace(spaceId: string): Promise<Space[]> {
     const spaces = (await getSpaces()).filter((s) => s.id !== spaceId);
+    try { await idbSet(KEYS.SPACES, spaces); } catch {}
     await apiSet(KEYS.SPACES, spaces);
     const chats = (await getChats()).filter((c) => c.spaceId !== spaceId);
+    try { await idbSet(KEYS.CHATS, chats); } catch {}
     await apiSet(KEYS.CHATS, chats);
     return spaces;
 }
@@ -341,4 +394,5 @@ export async function clearAllData(): Promise<void> {
     await apiDelete(KEYS.CHATS);
     await apiDelete(KEYS.SPACES);
     await apiDelete(KEYS.SETTINGS);
+    try { await idbClear(); } catch {}
 }

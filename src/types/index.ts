@@ -45,6 +45,7 @@ export interface Space {
     files?: Attachment[];
     isPublic?: boolean;
     authorName?: string;
+    isCopiedFrom?: string;
     createdAt?: number;
     updatedAt?: number;
 }

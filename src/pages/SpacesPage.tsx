@@ -427,7 +427,11 @@ export default function SpacesPage() {
                     ) : publicSpaces.length > 0 ? (
                         <div className="helpers-grid">
                             {publicSpaces.map((space) => {
-                                const hasAlready = state.spaces.some(s => s.id === space.id);
+                                const hasAlready = state.spaces.some(s => 
+                                    s.id === space.id || 
+                                    s.isCopiedFrom === space.id || 
+                                    (s.name === space.name && s.description === space.description)
+                                );
                                 return (
                                     <div
                                         key={space.id}
@@ -467,7 +471,7 @@ export default function SpacesPage() {
                                                 style={{ marginTop: '12px', width: '100%', padding: '6px' }}
                                                 onClick={(e) => {
                                                     e.stopPropagation();
-                                                    dispatch({ type: 'SAVE_SPACE', payload: { ...space, id: uuidv4(), isPublic: false } });
+                                                    dispatch({ type: 'SAVE_SPACE', payload: { ...space, id: uuidv4(), isCopiedFrom: space.id, isPublic: false } });
                                                     setActiveTab('mine');
                                                 }}
                                             >
