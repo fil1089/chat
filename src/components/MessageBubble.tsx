@@ -197,13 +197,81 @@ export default function MessageBubble({ message, chatId, isLatest, isStreaming, 
                 {isUser ? <IconUser size={20} /> : <AnimatedLogo size={20} isBreathing={isStreaming} isRotating={isStreaming} showFrame={false} />}
             </div>
             <div className="message-body">
-                {isUser && message.attachments && message.attachments.length > 0 && (
+                {isUser && ((message.fullAttachments && message.fullAttachments.length > 0) ? message.fullAttachments : message.attachments) && ((message.fullAttachments && message.fullAttachments.length > 0) ? message.fullAttachments : message.attachments)!.length > 0 && (
                     <div className="message-attachments" style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '8px' }}>
-                        {message.attachments.map((att: { name: string; size: number }, i: number) => (
-                            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px', padding: '4px 8px', background: 'var(--surface-glass)', borderRadius: '6px', border: '1px solid var(--border)' }}>
-                                <IconAttachment size={14} /> {att.name} ({(att.size / 1024).toFixed(1)} KB)
-                            </div>
-                        ))}
+                        {((message.fullAttachments && message.fullAttachments.length > 0) ? message.fullAttachments : message.attachments)!.map((att: any, i: number) => {
+                            const isClickable = !!att.content;
+                            
+                            const handleClick = async () => {
+                                if (!isClickable) return;
+                                try {
+                                    let url = att.content;
+                                    let isBlob = false;
+                                    if (att.content.startsWith('data:')) {
+                                        const res = await fetch(att.content);
+                                        const blob = await res.blob();
+                                        url = URL.createObjectURL(blob);
+                                        isBlob = true;
+                                    } else {
+                                        const blob = new Blob([att.content], { type: att.mimeType || 'text/plain' });
+                                        url = URL.createObjectURL(blob);
+                                        isBlob = true;
+                                    }
+                                    
+                                    const newWindow = window.open(url, '_blank');
+                                    // Fallback to download if browser blocks new tab
+                                    if (!newWindow) {
+                                        const a = document.createElement('a');
+                                        a.href = url;
+                                        a.download = att.name;
+                                        a.click();
+                                    }
+                                    
+                                    if (isBlob) {
+                                        setTimeout(() => URL.revokeObjectURL(url), 1000);
+                                    }
+                                } catch (e) {
+                                    console.error('Failed to open attachment', e);
+                                }
+                            };
+
+                            return (
+                                <button 
+                                    key={i} 
+                                    onClick={handleClick}
+                                    title={isClickable ? "Открыть файл" : "Файл недоступен для открытия"}
+                                    style={{ 
+                                        display: 'flex', 
+                                        alignItems: 'center', 
+                                        gap: '4px', 
+                                        fontSize: '12px', 
+                                        padding: '4px 8px', 
+                                        background: isClickable ? 'var(--surface-hover)' : 'var(--surface-glass)', 
+                                        borderRadius: '6px', 
+                                        border: '1px solid var(--border)',
+                                        cursor: isClickable ? 'pointer' : 'default',
+                                        color: 'inherit',
+                                        transition: 'background 0.2s, border-color 0.2s'
+                                    }}
+                                    onMouseOver={(e) => {
+                                        if (isClickable) {
+                                            e.currentTarget.style.border = '1px solid var(--accent)';
+                                        }
+                                    }}
+                                    onMouseOut={(e) => {
+                                        if (isClickable) {
+                                            e.currentTarget.style.border = '1px solid var(--border)';
+                                        }
+                                    }}
+                                >
+                                    <IconAttachment size={14} style={{ color: isClickable ? 'var(--accent)' : 'inherit' }} /> 
+                                    <span style={{ maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                        {att.name}
+                                    </span>
+                                    <span style={{ opacity: 0.6 }}>({(att.size / 1024).toFixed(1)} KB)</span>
+                                </button>
+                            );
+                        })}
                     </div>
                 )}
 
