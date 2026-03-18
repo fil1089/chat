@@ -259,7 +259,7 @@ export default function ChatInput({ onSend, model, onModelChange, isStreaming, o
 
         el.addEventListener('wheel', handleWheel, { passive: false });
         return () => el.removeEventListener('wheel', handleWheel);
-    });
+    }, []);
 
     const handleFocus = () => {
         if (focusTimeoutRef.current) clearTimeout(focusTimeoutRef.current);
@@ -407,24 +407,26 @@ export default function ChatInput({ onSend, model, onModelChange, isStreaming, o
 
             <div className="chat-input-wrapper" style={{ borderRadius: '24px', background: 'var(--bg-elevated)', display: 'flex', flexDirection: 'column' }}>
                 {/* Mode hints */}
-                {isFocused && modeHints.length > 0 && (
-                    <div 
-                        ref={modeHintsRef}
-                        className="mode-hints-row"
-                        style={{ borderTopLeftRadius: '24px', borderTopRightRadius: '24px' }}
-                    >
-                        {modeHints.map((mode) => (
-                            <button
-                                key={mode}
-                                className="mode-hint-chip"
-                                title={dynamicDescriptions[mode] || mode}
-                                onMouseDown={(e) => { e.preventDefault(); handleModeClick(mode); }}
-                            >
-                                {mode}
-                            </button>
-                        ))}
-                    </div>
-                )}
+                <div 
+                    ref={modeHintsRef}
+                    className="mode-hints-row"
+                    style={{ 
+                        borderTopLeftRadius: '24px', 
+                        borderTopRightRadius: '24px',
+                        display: (isFocused && modeHints.length > 0) ? 'flex' : 'none'
+                    }}
+                >
+                    {modeHints.map((mode) => (
+                        <button
+                            key={mode}
+                            className="mode-hint-chip"
+                            title={dynamicDescriptions[mode] || mode}
+                            onMouseDown={(e) => { e.preventDefault(); handleModeClick(mode); }}
+                        >
+                            {mode}
+                        </button>
+                    ))}
+                </div>
                 {/* Attachments relocated to header */}
 
                 <div className="chat-input-main-row" style={{ display: 'flex', alignItems: 'flex-end', padding: '8px 12px', gap: '8px' }}>
