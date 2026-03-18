@@ -25,10 +25,15 @@ export default function SpaceDashboard() {
     const space = state.spaces.find((s) => s.id === id);
 
     useEffect(() => {
-        if (space?.model) {
-            setSelectedModel(space.model);
+        if (space) {
+            if (space.model) {
+                setSelectedModel(space.model);
+            }
+            if (state.activeSpace !== space.id) {
+                dispatch({ type: 'SET_ACTIVE_SPACE', payload: space.id });
+            }
         }
-    }, [space?.id, space?.model]);
+    }, [space?.id, space?.model, state.activeSpace, dispatch]);
 
     if (!space) {
         return (
