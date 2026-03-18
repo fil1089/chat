@@ -225,7 +225,7 @@ export default function MessageBubble({ message, chatId, isLatest, isStreaming, 
                     {combinedReasoning && (
                         <details className="reasoning-details" style={{ marginBottom: '12px', background: 'var(--surface-hover)', padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--border)' }}>
                             <summary style={{ cursor: 'pointer', fontWeight: 600, fontSize: '13px', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                <IconBrain size={14} /> Процесс размышления
+                                <IconBrain size={14} /> <span className={isStreaming ? 'shimmer-text' : ''}>Процесс размышления</span>
                             </summary>
                             <div style={{ marginTop: '8px', fontSize: '13px', color: 'var(--text-secondary)', whiteSpace: 'pre-wrap', borderTop: '1px solid var(--border)', paddingTop: '8px' }}>
                                 {combinedReasoning}

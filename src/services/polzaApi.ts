@@ -123,10 +123,11 @@ export async function streamResponsePolza({
             stream: true,
         };
 
+        body.reasoning = {
+            enabled: !!enableReasoning
+        };
         if (enableReasoning) {
-            body.reasoning = {
-                effort: "medium"
-            };
+            body.reasoning.effort = "medium";
         }
 
         const plugins: any[] = [];

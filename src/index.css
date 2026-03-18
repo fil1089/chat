@@ -771,6 +771,26 @@ input:checked + .toggle-slider:before {
   animation: msg-highlight 1.5s ease-out;
 }
 
+/* Shimmer Animation for Reasoning Process */
+@keyframes shimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+.shimmer-text {
+  background: linear-gradient(
+    90deg, 
+    var(--text-secondary) 0%, 
+    var(--text-primary) 50%, 
+    var(--text-secondary) 100%
+  );
+  background-size: 200% auto;
+  color: transparent;
+  -webkit-background-clip: text;
+  background-clip: text;
+  animation: shimmer 2s linear infinite;
+}
+
 /* ===== Message Action Bar & Dropdowns ===== */
 .msg-action-bar {
   display: flex;
