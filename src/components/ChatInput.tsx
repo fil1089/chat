@@ -194,6 +194,22 @@ export default function ChatInput({ onSend, model, onModelChange, isStreaming, o
     const fileInputRef = useRef<HTMLInputElement>(null);
     const settingsRef = useRef<HTMLDivElement>(null);
     const focusTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const modeHintsRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const el = modeHintsRef.current;
+        if (!el) return;
+
+        const handleWheel = (e: WheelEvent) => {
+            if (e.deltaY !== 0) {
+                e.preventDefault();
+                el.scrollLeft += e.deltaY;
+            }
+        };
+
+        el.addEventListener('wheel', handleWheel, { passive: false });
+        return () => el.removeEventListener('wheel', handleWheel);
+    }, [isFocused, modeHints.length]);
 
     // Extract @Mode hints from active space instructions
     const activeSpace = state.activeSpace ? state.spaces.find(s => s.id === state.activeSpace) : null;
@@ -393,14 +409,9 @@ export default function ChatInput({ onSend, model, onModelChange, isStreaming, o
                 {/* Mode hints */}
                 {isFocused && modeHints.length > 0 && (
                     <div 
+                        ref={modeHintsRef}
                         className="mode-hints-row"
                         style={{ borderTopLeftRadius: '24px', borderTopRightRadius: '24px' }}
-                        onWheel={(e) => {
-                            if (e.deltaY !== 0) {
-                                e.preventDefault();
-                                e.currentTarget.scrollLeft += e.deltaY;
-                            }
-                        }}
                     >
                         {modeHints.map((mode) => (
                             <button
