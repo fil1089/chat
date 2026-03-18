@@ -518,15 +518,36 @@ export default function ChatInput({ onSend, model, onModelChange, isStreaming, o
                                         {(contextMode === 'last_n' || contextMode === 'first_n') && (
                                             <div className="settings-field">
                                                 <label>Количество пар</label>
-                                                <input
-                                                    id="context-n"
-                                                    name="contextN"
-                                                    type="number"
-                                                    min={1}
-                                                    max={50}
-                                                    value={contextN}
-                                                    onChange={(e) => onContextNChange(Number(e.target.value))}
-                                                />
+                                                <div className="custom-number-input" style={{ position: 'relative', width: '100%' }}>
+                                                    <input
+                                                        id="context-n"
+                                                        name="contextN"
+                                                        type="number"
+                                                        min={1}
+                                                        max={50}
+                                                        value={contextN}
+                                                        onChange={(e) => onContextNChange(Number(e.target.value))}
+                                                        style={{ paddingRight: '28px' }}
+                                                    />
+                                                    <div className="custom-number-spinners" style={{ position: 'absolute', right: '4px', top: '4px', bottom: '4px', display: 'flex', flexDirection: 'column', width: '24px', borderRadius: '4px', overflow: 'hidden' }}>
+                                                        <button 
+                                                            type="button" 
+                                                            onClick={(e) => { e.stopPropagation(); onContextNChange(Math.min(50, contextN + 1)); }}
+                                                            style={{ flex: 1, padding: 0, background: 'var(--surface-glass)', border: 'none', borderBottom: '1px solid var(--border)', color: 'var(--text-secondary)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                                            title="Увеличить"
+                                                        >
+                                                            <IconChevronUp size={12} />
+                                                        </button>
+                                                        <button 
+                                                            type="button" 
+                                                            onClick={(e) => { e.stopPropagation(); onContextNChange(Math.max(1, contextN - 1)); }}
+                                                            style={{ flex: 1, padding: 0, background: 'var(--surface-glass)', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                                            title="Уменьшить"
+                                                        >
+                                                            <IconChevronDown size={12} />
+                                                        </button>
+                                                    </div>
+                                                </div>
                                             </div>
                                         )}
                                         {contextMode === 'system_only' && (
