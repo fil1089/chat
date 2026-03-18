@@ -440,6 +440,8 @@ export default function ChatInput({ onSend, model, onModelChange, isStreaming, o
                     </button>
 
                     <textarea
+                        id="chat-input"
+                        name="chat-input"
                         ref={textareaRef}
                         className="chat-textarea"
                         placeholder={isDragging ? "Перетащите файлы сюда..." : (placeholder || "Введите сообщение...")}
@@ -517,6 +519,8 @@ export default function ChatInput({ onSend, model, onModelChange, isStreaming, o
                                             <div className="settings-field">
                                                 <label>Количество пар</label>
                                                 <input
+                                                    id="context-n"
+                                                    name="contextN"
                                                     type="number"
                                                     min={1}
                                                     max={50}
@@ -544,6 +548,8 @@ export default function ChatInput({ onSend, model, onModelChange, isStreaming, o
                                                     </div>
                                                     <div className="toggle-switch" style={{ transform: 'scale(0.8)', transformOrigin: 'right center', margin: 0 }}>
                                                         <input
+                                                            id="enable-reasoning"
+                                                            name="enableReasoning"
                                                             type="checkbox"
                                                             checked={!!enableReasoning}
                                                             onChange={(e) => onReasoningChange(e.target.checked)}
@@ -564,6 +570,8 @@ export default function ChatInput({ onSend, model, onModelChange, isStreaming, o
                                                     </div>
                                                     <div className="toggle-switch" style={{ transform: 'scale(0.8)', transformOrigin: 'right center', margin: 0 }}>
                                                         <input
+                                                            id="enable-websearch"
+                                                            name="enableWebSearch"
                                                             type="checkbox"
                                                             checked={!!enableWebSearch}
                                                             onChange={(e) => onWebSearchChange(e.target.checked)}
@@ -632,6 +640,8 @@ export default function ChatInput({ onSend, model, onModelChange, isStreaming, o
                     </div>
 
                     <input
+                        id="file-upload"
+                        name="fileUpload"
                         type="file"
                         ref={fileInputRef}
                         style={{ display: 'none' }}

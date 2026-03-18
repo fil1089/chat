@@ -103,6 +103,8 @@ export default function AuthModal({ onClose, title = "Необходима ав�
                     <div className="auth-field">
                         <label>Email</label>
                         <input
+                            id="modal-email"
+                            name="email"
                             type="email"
                             value={email}
                             onChange={e => setEmail(e.target.value)}
@@ -118,6 +120,8 @@ export default function AuthModal({ onClose, title = "Необходима ав�
                             <label>Пароль</label>
                             <div className="auth-password-wrapper">
                                 <input
+                                    id="modal-password"
+                                    name="password"
                                     type={showPassword ? 'text' : 'password'}
                                     value={password}
                                     onChange={e => setPassword(e.target.value)}
