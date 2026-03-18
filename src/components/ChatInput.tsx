@@ -389,7 +389,7 @@ export default function ChatInput({ onSend, model, onModelChange, isStreaming, o
                 )}
             </div>
 
-            <div className="chat-input-wrapper" style={{ borderRadius: '24px', background: 'var(--bg-elevated)', display: 'flex', flexDirection: 'column' }}>
+            <div className="chat-input-wrapper" style={{ borderRadius: '24px', background: 'var(--bg-elevated)', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
                 {/* Mode hints */}
                 {isFocused && modeHints.length > 0 && (
                     <div 
@@ -608,9 +608,11 @@ export default function ChatInput({ onSend, model, onModelChange, isStreaming, o
                                 onClick={handleSubmit}
                                 disabled={!text.trim() && attachments.length === 0}
                                 title="Отправить (Enter)"
-                                style={{ padding: '8px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: text.trim() || attachments.length > 0 ? 'var(--surface-glass-hover)' : 'transparent', color: text.trim() || attachments.length > 0 ? 'var(--text-primary)' : 'var(--text-muted)' }}
+                                style={{ padding: '8px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: text.trim() || attachments.length > 0 ? 'var(--accent)' : 'var(--surface-glass)', color: text.trim() || attachments.length > 0 ? 'white' : 'var(--text-muted)' }}
                             >
-                                <IconSend size={18} />
+                                <div style={{ display: 'flex', transform: 'translate(-1px, 1px)' }}>
+                                    <IconSend size={18} />
+                                </div>
                             </button>
                         )}
                     </div>
