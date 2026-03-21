@@ -60,9 +60,11 @@ async function renderPdfAsImages(file: File): Promise<Attachment[]> {
     return attachments;
 }
 
-async function compressImage(file: File, maxSizeMB: number = 2): Promise<string> {
+async function compressImage(file: File, maxSizeMB: number = 0.5): Promise<string> {
     return new Promise((resolve) => {
-        if (file.size <= maxSizeMB * 1024 * 1024) {
+        // We always compress images if they are larger than the small limit
+        // But for safety, even if small, we might want to just let it pass
+        if (file.size <= maxSizeMB * 1024 * 1024 && file.type === 'image/jpeg') {
             const r = new FileReader();
             r.onload = e => resolve((e.target?.result as string) || '');
             r.readAsDataURL(file);
@@ -77,8 +79,9 @@ async function compressImage(file: File, maxSizeMB: number = 2): Promise<string>
                 let width = img.width;
                 let height = img.height;
                 
-                // Max dimensions to prevent huge canvases
-                const MAX_SIZE = 1920;
+                // Max dimensions to prevent huge canvases and reduce base64 size for AI
+                // 1200px is excellent for vision models while keeping size minimal
+                const MAX_SIZE = 1200;
                 if (width > height && width > MAX_SIZE) {
                     height = Math.round((height * MAX_SIZE) / width);
                     width = MAX_SIZE;
@@ -93,11 +96,11 @@ async function compressImage(file: File, maxSizeMB: number = 2): Promise<string>
                 ctx.drawImage(img, 0, 0, width, height);
 
                 // Try compressing to target size by decrementing quality
-                let quality = 0.9;
+                let quality = 0.85;
                 let dataUrl = canvas.toDataURL('image/jpeg', quality);
                 
-                // Keep compressing if still too large, but stop at quality 0.5
-                while (dataUrl.length > maxSizeMB * 1024 * 1024 && quality > 0.5) {
+                // Keep compressing if still too large, but stop at quality 0.4
+                while (dataUrl.length > maxSizeMB * 1024 * 1024 && quality > 0.4) {
                     quality -= 0.1;
                     dataUrl = canvas.toDataURL('image/jpeg', quality);
                 }
@@ -115,8 +118,8 @@ async function readFile(file: File, isPolza: boolean): Promise<Attachment[]> {
     const isPdf = file.type === 'application/pdf' || /\.pdf$/i.test(file.name);
 
     if (isImage) {
-        // Compress image if larger than 2MB
-        const dataUrl = await compressImage(file, 2);
+        // Compress image to max 0.5 MB so multiple images don't exceed the total ~4.5MB Vercel limit
+        const dataUrl = await compressImage(file, 0.5);
         return [{
             name: file.name,
             content: dataUrl,
