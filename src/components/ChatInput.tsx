@@ -60,22 +60,70 @@ async function renderPdfAsImages(file: File): Promise<Attachment[]> {
     return attachments;
 }
 
+async function compressImage(file: File, maxSizeMB: number = 2): Promise<string> {
+    return new Promise((resolve) => {
+        if (file.size <= maxSizeMB * 1024 * 1024) {
+            const r = new FileReader();
+            r.onload = e => resolve((e.target?.result as string) || '');
+            r.readAsDataURL(file);
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const img = new Image();
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                let width = img.width;
+                let height = img.height;
+                
+                // Max dimensions to prevent huge canvases
+                const MAX_SIZE = 1920;
+                if (width > height && width > MAX_SIZE) {
+                    height = Math.round((height * MAX_SIZE) / width);
+                    width = MAX_SIZE;
+                } else if (height > MAX_SIZE) {
+                    width = Math.round((width * MAX_SIZE) / height);
+                    height = MAX_SIZE;
+                }
+
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext('2d')!;
+                ctx.drawImage(img, 0, 0, width, height);
+
+                // Try compressing to target size by decrementing quality
+                let quality = 0.9;
+                let dataUrl = canvas.toDataURL('image/jpeg', quality);
+                
+                // Keep compressing if still too large, but stop at quality 0.5
+                while (dataUrl.length > maxSizeMB * 1024 * 1024 && quality > 0.5) {
+                    quality -= 0.1;
+                    dataUrl = canvas.toDataURL('image/jpeg', quality);
+                }
+                
+                resolve(dataUrl);
+            };
+            img.src = e.target?.result as string;
+        };
+        reader.readAsDataURL(file);
+    });
+}
+
 async function readFile(file: File, isPolza: boolean): Promise<Attachment[]> {
     const isImage = IMAGE_TYPES.includes(file.type) || /\.(jpe?g|png|gif|webp|bmp|svg)$/i.test(file.name);
     const isPdf = file.type === 'application/pdf' || /\.pdf$/i.test(file.name);
 
     if (isImage) {
-        return new Promise((resolve) => {
-            const reader = new FileReader();
-            reader.onload = (e) => resolve([{
-                name: file.name,
-                content: (e.target?.result as string) || '',
-                size: file.size,
-                type: 'image',
-                mimeType: file.type || undefined,
-            }]);
-            reader.readAsDataURL(file);
-        });
+        // Compress image if larger than 2MB
+        const dataUrl = await compressImage(file, 2);
+        return [{
+            name: file.name,
+            content: dataUrl,
+            size: Math.round((dataUrl.length * 3) / 4), // Approximate bytes of base64
+            type: 'image',
+            mimeType: 'image/jpeg',
+        }];
     }
 
     if (isPdf) {

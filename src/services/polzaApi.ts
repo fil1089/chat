@@ -216,32 +216,43 @@ export async function streamResponsePolza({
             for (const line of lines) {
                 const trimmedLine = line.trim();
                 if (trimmedLine.startsWith('data: ') && trimmedLine !== 'data: [DONE]') {
+                    let parsedData: any = null;
                     try {
                         const jsonStr = trimmedLine.slice(6);
-                        const data = JSON.parse(jsonStr);
-                        console.log('[Polza Chunk]', data);
+                        parsedData = JSON.parse(jsonStr);
+                    } catch (e) {
+                        // Ignore incomplete JSON chunks, common in SSE streaming
+                        continue;
+                    }
+
+                    if (parsedData) {
+                        console.log('[Polza Chunk]', parsedData);
+
+                        if (parsedData.error) {
+                            throw new Error(parsedData.error.message || JSON.stringify(parsedData.error));
+                        }
 
                         // Handle usage statistics if present (including cached tokens)
-                        if (data.usage?.prompt_tokens && onUsage) {
-                            const cached = data.usage.prompt_tokens_details?.cached_tokens
-                                || data.usage.cache_read_input_tokens
-                                || data.usage.cached_tokens
+                        if (parsedData.usage?.prompt_tokens && onUsage) {
+                            const cached = parsedData.usage.prompt_tokens_details?.cached_tokens
+                                || parsedData.usage.cache_read_input_tokens
+                                || parsedData.usage.cached_tokens
                                 || 0;
-                            onUsage({ ...data.usage, cached_tokens: cached });
+                            onUsage({ ...parsedData.usage, cached_tokens: cached });
                         }
 
                         // Handle reasoning chunks
-                        const reasoning = data.choices && (
-                            data.choices[0]?.delta?.reasoning ||
-                            data.choices[0]?.delta?.reasoning_content ||
-                            data.choices[0]?.delta?.thinking_content
+                        const reasoning = parsedData.choices && (
+                            parsedData.choices[0]?.delta?.reasoning ||
+                            parsedData.choices[0]?.delta?.reasoning_content ||
+                            parsedData.choices[0]?.delta?.thinking_content
                         );
                         if (reasoning && onStatus) {
                             onStatus({ type: 'reasoning', message: reasoning });
                         }
 
                         // Handle citations/annotations
-                        const annotations = data.choices && data.choices[0]?.delta?.annotations;
+                        const annotations = parsedData.choices && parsedData.choices[0]?.delta?.annotations;
                         if (annotations && annotations.length > 0 && onAnnotations) {
                             onAnnotations(annotations);
                             if (onStatus) {
@@ -250,13 +261,20 @@ export async function streamResponsePolza({
                         }
 
                         // Collect text content
-                        const content = data.choices && data.choices[0]?.delta?.content;
+                        const content = parsedData.choices && parsedData.choices[0]?.delta?.content;
                         if (content) {
                             fullContent += content;
                             onUpdate(fullContent);
                         }
+                    }
+                } else if (trimmedLine.startsWith('{') && trimmedLine.endsWith('}')) {
+                    try {
+                        const parsedData = JSON.parse(trimmedLine);
+                        if (parsedData.error) {
+                            throw new Error(parsedData.error.message || JSON.stringify(parsedData.error));
+                        }
                     } catch (e) {
-                        // Ignore incomplete JSON chunks, common in SSE streaming
+                        // Ignore if it's not valid JSON or doesn't have an error
                     }
                 }
             }
