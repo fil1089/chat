@@ -366,6 +366,50 @@ export async function generateImagePolza({
     }
 }
 
+export async function summarizeChat({
+    apiKey,
+    model,
+    messages,
+}: {
+    apiKey: string;
+    model: string;
+    messages: { role: string; content: string }[];
+}): Promise<string> {
+    if (!apiKey) throw new Error('Укажите API ключ Polza.ai в настройках');
+
+    const summaryPrompt = `Ты — ассистент, который делает краткие саммари диалогов. Проанализируй диалог ниже и создай структурированное саммари. Сохрани:
+- Ключевую тему/цель разговора
+- Все важные решения и договоренности
+- Контекст, который нужен для продолжения разговора
+- Важные факты и детали, упомянутые пользователем
+
+Формат: лаконично, структурированно, на языке диалога. Не добавляй ничего от себя.`;
+
+    const response = await fetch(`${API_URLS.polza}/v1/chat/completions`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+            model,
+            messages: [
+                { role: 'system', content: summaryPrompt },
+                ...messages,
+            ],
+            stream: false,
+        }),
+    });
+
+    if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Ошибка API при создании саммари: ${response.status} - ${errorText.slice(0, 200)}`);
+    }
+
+    const data = await response.json();
+    return data.choices?.[0]?.message?.content || 'Не удалось создать саммари.';
+}
+
 export async function checkPolzaBalance(apiKey: string): Promise<string> {
     if (!apiKey) return '0.00';
     try {

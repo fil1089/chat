@@ -3,12 +3,12 @@ import { useApp } from '../context/AppContext';
 import { useAuth } from '../context/AuthContext';
 import { useGlobalAuthModal } from '../App';
 import { useNavigate } from 'react-router-dom';
-import { streamResponsePolza } from '../services/polzaApi';
+import { streamResponsePolza, summarizeChat } from '../services/polzaApi';
 import { POLZA_MODELS } from '../services/polzaModels';
 import ChatInput from './ChatInput';
 import MessageBubble from './MessageBubble';
 import ThreadNav from './ThreadNav';
-import { IconBrain, IconFolder, IconMessage, IconArrowUp, IconArrowDown, IconFileText, IconImage, IconAttachment, IconAudio, IconVideo, IconMenu, IconSidebarRight, IconClose } from './Icons';
+import { IconBrain, IconFolder, IconMessage, IconArrowUp, IconArrowDown, IconFileText, IconImage, IconAttachment, IconAudio, IconVideo, IconMenu, IconSidebarRight, IconClose, IconCompress } from './Icons';
 import { v4 as uuidv4 } from 'uuid';
 import type { Message, Chat, Attachment, StatusEvent, Space, ContextMode } from '../types';
 import ModelSelector from './ModelSelector';
@@ -45,6 +45,7 @@ export default function ChatView() {
     const [contextN, setContextN] = useState(5);
     const [rightPanelOpen, setRightPanelOpen] = useState(window.innerWidth > 768);
     const [isEmptyLogoHovered, setIsEmptyLogoHovered] = useState(false);
+    const [isSummarizing, setIsSummarizing] = useState(false);
 
     const activeChat = state.chats.find((c) => c.id === state.activeChat);
     const activeSpace = state.spaces.find((s) => s.id === state.activeSpace) as Space | undefined;
@@ -356,6 +357,61 @@ export default function ChatView() {
         window.dispatchEvent(new CustomEvent('edit-chat-message', { detail: { text } }));
     };
 
+    const handleSummarizeAndContinue = useCallback(async () => {
+        if (!activeChat || activeChat.messages.length < 2 || isSummarizing) return;
+        if (!state.settings.polzaApiKey) {
+            navigate('/settings');
+            return;
+        }
+
+        setIsSummarizing(true);
+        try {
+            const messagesToSummarize = activeChat.messages.map(m => ({
+                role: m.role,
+                content: m.content,
+            }));
+
+            const summary = await summarizeChat({
+                apiKey: state.settings.polzaApiKey,
+                model: model,
+                messages: messagesToSummarize,
+            });
+
+            const systemMessage: Message = {
+                id: uuidv4(),
+                role: 'system',
+                content: `Это продолжение предыдущего диалога. Ниже — краткое саммари того, что обсуждалось ранее. Используй эту информацию как контекст для продолжения разговора. Отвечай так, будто ты помнишь весь предыдущий диалог.\n\n---\n${summary}\n---`,
+                timestamp: Date.now(),
+            };
+
+            const assistantGreeting: Message = {
+                id: uuidv4(),
+                role: 'assistant',
+                content: `✅ Чат сжат! Я прочитал саммари предыдущего диалога и готов продолжить.\n\n**Краткое содержание:**\n${summary}`,
+                model: model,
+                timestamp: Date.now(),
+            };
+
+            const newChat: Chat = {
+                id: uuidv4(),
+                title: `Продолжение: ${activeChat.title}`,
+                messages: [systemMessage, assistantGreeting],
+                model,
+                spaceId: activeChat.spaceId || state.activeSpace || undefined,
+                timestamp: Date.now(),
+                createdAt: Date.now(),
+                updatedAt: Date.now(),
+            };
+
+            dispatch({ type: 'NEW_CHAT', payload: newChat });
+        } catch (error: any) {
+            console.error('Ошибка при создании саммари:', error);
+            alert(`Не удалось создать саммари: ${error.message}`);
+        } finally {
+            setIsSummarizing(false);
+        }
+    }, [activeChat, model, state.settings.polzaApiKey, state.activeSpace, dispatch, navigate, isSummarizing]);
+
     const messages = activeChat?.messages || [];
 
     return (
@@ -592,6 +648,18 @@ export default function ChatView() {
                             </div>
                         );
                     })()}
+                    {activeChat && messages.length >= 4 && (
+                        <button
+                            className={`summarize-btn ${isSummarizing ? 'loading' : ''}`}
+                            onClick={handleSummarizeAndContinue}
+                            disabled={isSummarizing || isStreaming}
+                            title="Сжать чат — создать саммари и продолжить в новом чате"
+                        >
+                            <IconCompress size={16} />
+                            <span>{isSummarizing ? 'Создаю саммари...' : 'Сжать чат'}</span>
+                        </button>
+                    )}
+
                     <h3>Содержание беседы</h3>
                     {messages.length > 0 ? (
                         <div className="dialogue-history-list">
