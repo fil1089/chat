@@ -163,6 +163,76 @@ export async function getChats(): Promise<Chat[]> {
     return apiChats;
 }
 
+function optimizeChatsForDb(chats: Chat[]): Chat[] {
+    try {
+        let chatsJsonSize = JSON.stringify(chats).length;
+        if (chatsJsonSize <= 3 * 1024 * 1024) return chats; // Safe zone (< 3MB)
+
+        let threshold = 256 * 1024;
+        let dbChats = chats;
+
+        // Progressively lower the threshold until size is acceptable or we hit a minimum threshold
+        while (chatsJsonSize > 3.5 * 1024 * 1024 && threshold >= 10 * 1024) {
+            dbChats = chats.map(c => {
+                const dbM = c.messages.map(m => {
+                    let newM = m;
+                    let needsClone = false;
+
+                    if (m.fullAttachments && m.fullAttachments.some(a => a.content && a.content.length > threshold)) {
+                        needsClone = true;
+                        newM = { ...newM, fullAttachments: m.fullAttachments.map(a => (a.content && a.content.length > threshold) ? { ...a, content: '' } : a) };
+                    }
+
+                    if (m.content && m.content.length > threshold) {
+                        needsClone = true;
+                        const half = Math.max(10 * 1024, Math.floor(threshold / 2));
+                        newM = { ...newM, content: m.content.substring(0, half) + '\n\n...[TRUNCATED]...\n\n' + m.content.slice(-half) };
+                    }
+
+                    if (m.versions && m.versions.some(v => v.content && v.content.length > threshold)) {
+                        needsClone = true;
+                        newM = {
+                            ...newM, versions: m.versions.map(v => {
+                                if (v.content && v.content.length > threshold) {
+                                    const half = Math.max(10 * 1024, Math.floor(threshold / 2));
+                                    return { ...v, content: v.content.substring(0, half) + '\n\n...[TRUNCATED]...\n\n' + v.content.slice(-half) };
+                                }
+                                return v;
+                            })
+                        };
+                    }
+
+                    return needsClone ? newM : m;
+                });
+
+                if (dbM.some((m, idx) => m !== c.messages[idx])) {
+                    return { ...c, messages: dbM };
+                }
+                return c;
+            });
+
+            chatsJsonSize = JSON.stringify(dbChats).length;
+            threshold = Math.floor(threshold / 2);
+        }
+
+        // Failsafe: if it's still somehow over 4MB, aggressively strip ALL image/file contents
+        if (chatsJsonSize > 4 * 1024 * 1024) {
+             dbChats = dbChats.map(c => ({
+                 ...c,
+                 messages: c.messages.map(m => m.fullAttachments ? {
+                     ...m,
+                     fullAttachments: m.fullAttachments.map(a => ({...a, content: ''}))
+                 } : m)
+             }));
+        }
+
+        return dbChats;
+    } catch (err) {
+        console.error("Error optimizing chat DB payload:", err);
+        return chats;
+    }
+}
+
 export async function saveChat(chat: Chat): Promise<Chat[]> {
     const chats = await getChats();
     const idx = chats.findIndex((c) => c.id === chat.id);
@@ -178,59 +248,7 @@ export async function saveChat(chat: Chat): Promise<Chat[]> {
         console.warn('[Storage IDB] save chats failed:', e);
     }
 
-    // Strip extremely large base64 attachments before saving to DB 
-    // to prevent hitting Vercel's strict 4.5MB request size limit.
-    // Optimization: only process if the stringified JSON indicates it's huge
-    let dbChats = chats;
-    try {
-        const chatsJsonSize = JSON.stringify(chats).length;
-        if (chatsJsonSize > 1024 * 1024) { // Only do heavy mapping if total size > 1MB
-            dbChats = chats.map(c => {
-                const dbM = c.messages.map(m => {
-                    let newM = m;
-                    let needsClone = false;
-
-                    // 1. Strip attachments
-                    if (m.fullAttachments && m.fullAttachments.some(a => a.content && a.content.length > 256 * 1024)) {
-                        needsClone = true;
-                        newM = { ...newM, fullAttachments: m.fullAttachments.map(a => (a.content && a.content.length > 256 * 1024) ? { ...a, content: '' } : a) };
-                    }
-
-                    // 2. Strip text content
-                    if (m.content && m.content.length > 256 * 1024) {
-                        needsClone = true;
-                        const half = 120 * 1024;
-                        newM = { ...newM, content: m.content.substring(0, half) + '\n\n...[TRUNCATED_LARGE_PAYLOAD_FOR_DB_STORAGE]...\n\n' + m.content.slice(-half) };
-                    }
-
-                    // 3. Strip version content
-                    if (m.versions && m.versions.some(v => v.content && v.content.length > 256 * 1024)) {
-                        needsClone = true;
-                        newM = {
-                            ...newM, versions: m.versions.map(v => {
-                                if (v.content && v.content.length > 256 * 1024) {
-                                    const half = 120 * 1024;
-                                    return { ...v, content: v.content.substring(0, half) + '\n\n...[TRUNCATED_LARGE_PAYLOAD_FOR_DB_STORAGE]...\n\n' + v.content.slice(-half) };
-                                }
-                                return v;
-                            })
-                        };
-                    }
-
-                    return needsClone ? newM : m;
-                });
-
-                // Only clone the chat if any of its messages were actually modified
-                if (dbM.some((m, idx) => m !== c.messages[idx])) {
-                    return { ...c, messages: dbM };
-                }
-                return c;
-            });
-        }
-    } catch (err) {
-        console.error("Error optimizing chat DB payload:", err);
-    }
-
+    const dbChats = optimizeChatsForDb(chats);
     await apiSet(KEYS.CHATS, dbChats);
     return chats;
 }
@@ -238,7 +256,8 @@ export async function saveChat(chat: Chat): Promise<Chat[]> {
 export async function deleteChat(chatId: string): Promise<Chat[]> {
     const chats = (await getChats()).filter((c) => c.id !== chatId);
     try { await idbSet(KEYS.CHATS, chats); } catch {}
-    await apiSet(KEYS.CHATS, chats);
+    const dbChats = optimizeChatsForDb(chats);
+    await apiSet(KEYS.CHATS, dbChats);
     return chats;
 }
 
