@@ -368,7 +368,7 @@ export async function generateImagePolza({
 
 export async function summarizeChat({
     apiKey,
-    model,
+    model: _originalModel, // ignore original model
     messages,
 }: {
     apiKey: string;
@@ -385,6 +385,17 @@ export async function summarizeChat({
 
 Формат: лаконично, структурированно, на языке диалога. Не добавляй ничего от себя.`;
 
+    // Всегда используем openai/gpt-5-nano для саммари: это дешево, быстро и надежно
+    const summaryModel = 'openai/gpt-5-nano';
+
+    const systemMessage = {
+        role: 'system',
+        content: summaryPrompt
+    };
+
+    // Убираем старые системные сообщения, чтобы не было ошибки API (многие модели не поддерживают несколько system сообщений)
+    const filteredMessages = messages.filter(m => m.role !== 'system');
+
     const response = await fetch(`${API_URLS.polza}/v1/chat/completions`, {
         method: 'POST',
         headers: {
@@ -392,10 +403,10 @@ export async function summarizeChat({
             'Authorization': `Bearer ${apiKey}`,
         },
         body: JSON.stringify({
-            model,
+            model: summaryModel,
             messages: [
-                { role: 'system', content: summaryPrompt },
-                ...messages,
+                systemMessage,
+                ...filteredMessages,
             ],
             stream: false,
         }),
@@ -403,11 +414,28 @@ export async function summarizeChat({
 
     if (!response.ok) {
         const errorText = await response.text();
-        throw new Error(`Ошибка API при создании саммари: ${response.status} - ${errorText.slice(0, 200)}`);
+        let errorMessage = `Ошибка API при создании саммари: ${response.status}`;
+        try {
+            const err = JSON.parse(errorText);
+            errorMessage = err.error?.message || err.message || errorText;
+        } catch(e) {}
+        throw new Error(errorMessage);
     }
 
     const data = await response.json();
-    return data.choices?.[0]?.message?.content || 'Не удалось создать саммари.';
+    
+    if (data.error) {
+        console.error('[Summarize Error]', data.error);
+        throw new Error(data.error.message || JSON.stringify(data.error));
+    }
+
+    const content = data.choices?.[0]?.message?.content;
+    if (!content) {
+        console.error('[Summarize Error] Неожиданный ответ API:', data);
+        throw new Error('API не вернул текст саммари.');
+    }
+
+    return content;
 }
 
 export async function checkPolzaBalance(apiKey: string): Promise<string> {
