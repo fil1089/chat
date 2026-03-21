@@ -367,7 +367,14 @@ export default function ChatInput({ onSend, model, onModelChange, isStreaming, o
     };
 
     const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
+        // Detect mobile devices either by screen width or user agent
+        const isMobile = window.innerWidth <= 768 || /Mobi|Android/i.test(navigator.userAgent);
+
         if (e.key === 'Enter' && !e.shiftKey) {
+            if (isMobile) {
+                // Return early, allowing the default action (newline) to occur
+                return;
+            }
             e.preventDefault();
             handleSubmit();
         }
