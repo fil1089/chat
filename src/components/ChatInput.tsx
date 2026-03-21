@@ -47,14 +47,14 @@ async function renderPdfAsImages(file: File): Promise<Attachment[]> {
         canvas.height = viewport.height;
         const ctx = canvas.getContext('2d')!;
         await page.render({ canvasContext: ctx, viewport }).promise;
-        const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+        const dataUrl = canvas.toDataURL('image/webp', 0.85);
         console.log('[PDF] Page', i, 'rendered, dataUrl length:', dataUrl.length);
         attachments.push({
             name: `${file.name} (стр. ${i})`,
             content: dataUrl,
             size: dataUrl.length,
             type: 'image',
-            mimeType: 'image/jpeg',
+            mimeType: 'image/webp',
         });
     }
     return attachments;
@@ -97,12 +97,12 @@ async function compressImage(file: File, maxSizeMB: number = 0.5): Promise<strin
 
                 // Try compressing to target size by decrementing quality
                 let quality = 0.85;
-                let dataUrl = canvas.toDataURL('image/jpeg', quality);
+                let dataUrl = canvas.toDataURL('image/webp', quality);
                 
                 // Keep compressing if still too large, but stop at quality 0.4
                 while (dataUrl.length > maxSizeMB * 1024 * 1024 && quality > 0.4) {
                     quality -= 0.1;
-                    dataUrl = canvas.toDataURL('image/jpeg', quality);
+                    dataUrl = canvas.toDataURL('image/webp', quality);
                 }
                 
                 resolve(dataUrl);
@@ -125,7 +125,7 @@ async function readFile(file: File, isPolza: boolean): Promise<Attachment[]> {
             content: dataUrl,
             size: Math.round((dataUrl.length * 3) / 4), // Approximate bytes of base64
             type: 'image',
-            mimeType: 'image/jpeg',
+            mimeType: 'image/webp',
         }];
     }
 
