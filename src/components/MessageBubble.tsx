@@ -6,6 +6,8 @@ import { Document, Packer, Paragraph, TextRun } from 'docx';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeHighlight from 'rehype-highlight';
+import remarkMath from 'remark-math';
+import rehypeKatex from 'rehype-katex';
 import { IconCopy, IconCheck, IconRegenerate, IconDownload, IconEdit, IconMarkdown, IconPdf, IconDoc, IconFileText, IconChevronDown, IconChevronUp, IconUser, IconBrain, IconAttachment, IconHistory, IconSearch, IconChevronLeft, IconChevronRight, IconError, IconExternalLink, IconZap } from './Icons';
 import AnimatedLogo from './AnimatedLogo';
 import { useApp } from '../context/AppContext';
@@ -363,8 +365,8 @@ export default function MessageBubble({ message, chatId, isLatest, isStreaming, 
                             <div className="message-error">
                                 <span className="message-error-icon"><IconError size={16} /></span>
                                 <ReactMarkdown
-                                    remarkPlugins={[remarkGfm]}
-                                    rehypePlugins={[rehypeHighlight]}
+                                    remarkPlugins={[remarkGfm, remarkMath]}
+                                    rehypePlugins={[rehypeHighlight, rehypeKatex]}
                                     components={{
                                         code(props: React.HTMLAttributes<HTMLElement> & { children?: React.ReactNode }) {
                                             const { className, children, ...rest } = props;
@@ -392,8 +394,8 @@ export default function MessageBubble({ message, chatId, isLatest, isStreaming, 
                             </div>
                         ) : (
                             <ReactMarkdown
-                                remarkPlugins={[remarkGfm]}
-                                rehypePlugins={[rehypeHighlight]}
+                                remarkPlugins={[remarkGfm, remarkMath]}
+                                rehypePlugins={[rehypeHighlight, rehypeKatex]}
                                 components={{
                                     code(props: React.HTMLAttributes<HTMLElement> & { children?: React.ReactNode }) {
                                         const { className, children, ...rest } = props;
