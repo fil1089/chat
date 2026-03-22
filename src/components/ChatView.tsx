@@ -14,6 +14,8 @@ import type { Message, Chat, Attachment, StatusEvent, Space, ContextMode } from 
 import ModelSelector from './ModelSelector';
 import { AnimatedDiamond } from './AnimatedDiamond';
 import { Typewriter } from './Typewriter';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 interface StreamStatus {
     type: string;
@@ -484,9 +486,17 @@ export default function ChatView() {
                             <h2 style={{ textAlign: 'center' }}>
                                 <Typewriter text={activeSpace ? activeSpace.name : 'Начните диалог'} delay={2000} speed={70} />
                             </h2>
-                            <p style={{ color: 'rgba(255,255,255,0.6)', textAlign: 'center', maxWidth: '400px', margin: '0 auto' }}>
-                                <Typewriter text={activeSpace?.description || 'Выберите модель и отправьте сообщение'} delay={3500} speed={40} />
-                            </p>
+                            {activeSpace?.description ? (
+                                <div className="space-description-markdown" style={{ color: 'rgba(255,255,255,0.7)', textAlign: 'left', maxWidth: '600px', margin: '16px auto', fontSize: '14px', lineHeight: '1.6', background: 'var(--bg-secondary)', padding: '16px', borderRadius: '12px', border: '1px solid var(--border)' }}>
+                                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                        {activeSpace.description}
+                                    </ReactMarkdown>
+                                </div>
+                            ) : (
+                                <p style={{ color: 'rgba(255,255,255,0.6)', textAlign: 'center', maxWidth: '400px', margin: '0 auto' }}>
+                                    <Typewriter text="Выберите модель и отправьте сообщение" delay={3500} speed={40} />
+                                </p>
+                            )}
                         </div>
                     </div>
                 ) : (
