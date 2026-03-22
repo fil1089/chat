@@ -206,6 +206,8 @@ export async function getChatMessages(chatId: string): Promise<Message[]> {
     return [];
 }
 
+const pendingSaves = new Map<string, ReturnType<typeof setTimeout>>();
+
 export async function saveChat(chat: Chat): Promise<Chat[]> {
     const chats = await getChats();
     const idx = chats.findIndex((c) => c.id === chat.id);
@@ -217,18 +219,25 @@ export async function saveChat(chat: Chat): Promise<Chat[]> {
 
     try { await idbSet(KEYS.CHATS, chats); } catch (e) { console.warn('[Storage IDB] save chats failed:', e); }
 
-    try {
-        const headers = await authHeaders();
-        if (headers.Authorization) {
-            await fetch('/api/chats', {
-                method: 'POST',
-                headers,
-                body: JSON.stringify({ chat })
-            });
-        }
-    } catch (e) {
-        console.warn('[Storage API] save chats to SQL failed:', e);
+    if (pendingSaves.has(chat.id)) {
+        clearTimeout(pendingSaves.get(chat.id)!);
     }
+
+    pendingSaves.set(chat.id, setTimeout(async () => {
+        pendingSaves.delete(chat.id);
+        try {
+            const headers = await authHeaders();
+            if (headers.Authorization) {
+                await fetch('/api/chats', {
+                    method: 'POST',
+                    headers,
+                    body: JSON.stringify({ chat })
+                });
+            }
+        } catch (e) {
+            console.warn('[Storage API] save chats to SQL failed:', e);
+        }
+    }, 2000));
     
     return chats;
 }
