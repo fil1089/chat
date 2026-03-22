@@ -60,6 +60,14 @@ function reducer(state: AppState, action: AppAction): AppState {
             return { ...state, chats: finalChats };
         }
 
+        case 'UPDATE_CHAT_MESSAGES': {
+            const { chatId, messages } = action.payload;
+            const chats = state.chats.map((c) =>
+                c.id === chatId ? { ...c, messages: messages.length > 0 ? messages : c.messages } : c
+            );
+            return { ...state, chats };
+        }
+
         case 'DELETE_CHAT': {
             return {
                 ...state,
@@ -143,6 +151,20 @@ export function AppProvider({ children }: { children: ReactNode }) {
     const asyncDispatch = useCallback(async (action: AppAction) => {
         dispatch(action);
         switch (action.type) {
+            case 'SET_ACTIVE_CHAT': {
+                const chatId = action.payload;
+                if (chatId) {
+                    const chat = state.chats.find(c => c.id === chatId);
+                    if (chat && (!chat.messages || chat.messages.length === 0)) {
+                        storage.getChatMessages(chatId).then(messages => {
+                            if (messages.length > 0) {
+                                dispatch({ type: 'UPDATE_CHAT_MESSAGES', payload: { chatId, messages } });
+                            }
+                        });
+                    }
+                }
+                break;
+            }
             case 'NEW_CHAT': {
                 await storage.saveChat(action.payload);
                 break;

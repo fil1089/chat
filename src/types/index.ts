@@ -81,6 +81,7 @@ export type AppAction =
     | { type: 'SET_ACTIVE_CHAT'; payload: string | null }
     | { type: 'NEW_CHAT'; payload: Chat }
     | { type: 'UPDATE_CHAT'; payload: Chat }
+    | { type: 'UPDATE_CHAT_MESSAGES'; payload: { chatId: string; messages: Message[] } }
     | { type: 'DELETE_CHAT'; payload: string }
     | { type: 'SET_ACTIVE_SPACE'; payload: string | null }
     | { type: 'SAVE_SPACE'; payload: Space }

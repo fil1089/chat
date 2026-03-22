@@ -1,4 +1,4 @@
-import type { Chat, Space, Settings } from '../types';
+import type { Chat, Message, Space, Settings } from '../types';
 import { supabase } from '../lib/supabase';
 import { get as idbGet, set as idbSet, del as idbDel, clear as idbClear } from 'idb-keyval';
 
@@ -140,7 +140,26 @@ async function apiDelete(key: string): Promise<void> {
 
 // --- Chats ---
 export async function getChats(): Promise<Chat[]> {
-    const apiChats = (await apiGet<Chat[]>(KEYS.CHATS)) ?? [];
+    let apiChats: Chat[] = [];
+    try {
+        const headers = await authHeaders();
+        if (headers.Authorization) {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 10000);
+            const res = await fetch('/api/chats', {
+                headers,
+                signal: controller.signal
+            });
+            clearTimeout(timeoutId);
+            if (res.ok) {
+                const data = await res.json();
+                apiChats = data.chats || [];
+            }
+        }
+    } catch (e) {
+        console.warn('[Storage API] load chats from relational db failed:', e);
+    }
+
     try {
         const localChats = await idbGet<Chat[]>(KEYS.CHATS);
         if (localChats && Array.isArray(localChats)) {
@@ -163,74 +182,28 @@ export async function getChats(): Promise<Chat[]> {
     return apiChats;
 }
 
-function optimizeChatsForDb(chats: Chat[]): Chat[] {
+export async function getChatMessages(chatId: string): Promise<Message[]> {
     try {
-        let chatsJsonSize = JSON.stringify(chats).length;
-        if (chatsJsonSize <= 3 * 1024 * 1024) return chats; // Safe zone (< 3MB)
-
-        let threshold = 256 * 1024;
-        let dbChats = chats;
-
-        // Progressively lower the threshold until size is acceptable or we hit a minimum threshold
-        while (chatsJsonSize > 3.5 * 1024 * 1024 && threshold >= 10 * 1024) {
-            dbChats = chats.map(c => {
-                const dbM = c.messages.map(m => {
-                    let newM = m;
-                    let needsClone = false;
-
-                    if (m.fullAttachments && m.fullAttachments.some(a => a.content && a.content.length > threshold)) {
-                        needsClone = true;
-                        newM = { ...newM, fullAttachments: m.fullAttachments.map(a => (a.content && a.content.length > threshold) ? { ...a, content: '' } : a) };
-                    }
-
-                    if (m.content && m.content.length > threshold) {
-                        needsClone = true;
-                        const half = Math.max(10 * 1024, Math.floor(threshold / 2));
-                        newM = { ...newM, content: m.content.substring(0, half) + '\n\n...[TRUNCATED]...\n\n' + m.content.slice(-half) };
-                    }
-
-                    if (m.versions && m.versions.some(v => v.content && v.content.length > threshold)) {
-                        needsClone = true;
-                        newM = {
-                            ...newM, versions: m.versions.map(v => {
-                                if (v.content && v.content.length > threshold) {
-                                    const half = Math.max(10 * 1024, Math.floor(threshold / 2));
-                                    return { ...v, content: v.content.substring(0, half) + '\n\n...[TRUNCATED]...\n\n' + v.content.slice(-half) };
-                                }
-                                return v;
-                            })
-                        };
-                    }
-
-                    return needsClone ? newM : m;
-                });
-
-                if (dbM.some((m, idx) => m !== c.messages[idx])) {
-                    return { ...c, messages: dbM };
-                }
-                return c;
-            });
-
-            chatsJsonSize = JSON.stringify(dbChats).length;
-            threshold = Math.floor(threshold / 2);
+        const localChats = await idbGet<Chat[]>(KEYS.CHATS);
+        if (localChats) {
+            const localC = localChats.find(c => c.id === chatId);
+            if (localC && localC.messages && localC.messages.length > 0) {
+                return localC.messages;
+            }
         }
 
-        // Failsafe: if it's still somehow over 4MB, aggressively strip ALL image/file contents
-        if (chatsJsonSize > 4 * 1024 * 1024) {
-             dbChats = dbChats.map(c => ({
-                 ...c,
-                 messages: c.messages.map(m => m.fullAttachments ? {
-                     ...m,
-                     fullAttachments: m.fullAttachments.map(a => ({...a, content: ''}))
-                 } : m)
-             }));
+        const headers = await authHeaders();
+        if (headers.Authorization) {
+            const res = await fetch(`/api/messages?chatId=${chatId}`, { headers });
+            if (res.ok) {
+                const data = await res.json();
+                return data.messages || [];
+            }
         }
-
-        return dbChats;
     } catch (err) {
-        console.error("Error optimizing chat DB payload:", err);
-        return chats;
+        console.warn('Failed to load messages for chat', chatId, err);
     }
+    return [];
 }
 
 export async function saveChat(chat: Chat): Promise<Chat[]> {
@@ -242,22 +215,41 @@ export async function saveChat(chat: Chat): Promise<Chat[]> {
         chats.unshift({ ...chat, createdAt: Date.now(), updatedAt: Date.now() });
     }
 
-    try {
-        await idbSet(KEYS.CHATS, chats);
-    } catch (e) {
-        console.warn('[Storage IDB] save chats failed:', e);
-    }
+    try { await idbSet(KEYS.CHATS, chats); } catch (e) { console.warn('[Storage IDB] save chats failed:', e); }
 
-    const dbChats = optimizeChatsForDb(chats);
-    await apiSet(KEYS.CHATS, dbChats);
+    try {
+        const headers = await authHeaders();
+        if (headers.Authorization) {
+            await fetch('/api/chats', {
+                method: 'POST',
+                headers,
+                body: JSON.stringify({ chat })
+            });
+        }
+    } catch (e) {
+        console.warn('[Storage API] save chats to SQL failed:', e);
+    }
+    
     return chats;
 }
 
 export async function deleteChat(chatId: string): Promise<Chat[]> {
     const chats = (await getChats()).filter((c) => c.id !== chatId);
     try { await idbSet(KEYS.CHATS, chats); } catch {}
-    const dbChats = optimizeChatsForDb(chats);
-    await apiSet(KEYS.CHATS, dbChats);
+    
+    try {
+        const headers = await authHeaders();
+        if (headers.Authorization) {
+            await fetch('/api/chats', {
+                method: 'DELETE',
+                headers,
+                body: JSON.stringify({ chatId })
+            });
+        }
+    } catch (e) {
+        console.warn('[Storage API] delete chat from SQL failed:', e);
+    }
+
     return chats;
 }
 
