@@ -33,7 +33,8 @@ export default function SpaceDashboard() {
                 dispatch({ type: 'SET_ACTIVE_SPACE', payload: space.id });
             }
         }
-    }, [space?.id, space?.model, state.activeSpace, dispatch]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [space?.id, space?.model, dispatch]);
 
     if (!space) {
         return (
