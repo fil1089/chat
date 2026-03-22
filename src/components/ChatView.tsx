@@ -109,25 +109,26 @@ export default function ChatView() {
             timestamp: Date.now(),
         };
 
+        let currentTargetMessageId = targetMessageId;
+
         // Pre-insert empty message into UI for visual feedback (unless regenerating)
-        if (!targetMessageId) {
+        if (!currentTargetMessageId) {
             chat = {
                 ...chat,
                 messages: [...chat.messages, assistantMessage],
                 updatedAt: Date.now()
             };
             dispatch({ type: 'UPDATE_CHAT', payload: chat });
+            currentTargetMessageId = assistantMessage.id;
         }
 
         // Prepare context for API: 
         // 1. If regenerating, we send messages BEFORE the target message
         // 2. Apply context mode (last_n, system_only, etc.)
         let baseMessages = chat.messages;
-        if (targetMessageId) {
-            const idx = chat.messages.findIndex(m => m.id === targetMessageId);
-            if (idx !== -1) {
-                baseMessages = chat.messages.slice(0, idx);
-            }
+        const targetIdx = chat.messages.findIndex(m => m.id === currentTargetMessageId);
+        if (targetIdx !== -1) {
+            baseMessages = chat.messages.slice(0, targetIdx);
         }
 
         const messagesToSend = contextMode === 'system_only'
@@ -146,11 +147,20 @@ export default function ChatView() {
         const THROTTLE_MS = 150;
 
         const updateUI = (content: string, reasoning: string, anns: any[], usage: any) => {
-            let updatedMessages;
-            if (targetMessageId) {
-                updatedMessages = chat.messages.map(m => {
-                    if (m.id !== targetMessageId) return m;
-                    const versions = [...(m.versions || [])];
+            const updatedMessages = chat.messages.map(m => {
+                if (m.id !== currentTargetMessageId) return m;
+
+                const baseUpdate = {
+                    ...m,
+                    content,
+                    model: currentModel,
+                    usage: usage || undefined,
+                    reasoningContent: reasoning || undefined,
+                    annotations: anns.length > 0 ? anns : undefined
+                };
+
+                if (m.versions) {
+                    const versions = [...m.versions];
                     const activeIdx = m.activeVersion ?? 0;
                     if (versions[activeIdx]) {
                         versions[activeIdx] = {
@@ -163,25 +173,11 @@ export default function ChatView() {
                             annotations: anns.length > 0 ? anns : undefined
                         };
                     }
-                    return {
-                        ...m,
-                        content,
-                        versions,
-                        usage: usage || undefined,
-                        reasoningContent: reasoning || undefined,
-                        annotations: anns.length > 0 ? anns : undefined
-                    };
-                });
-            } else {
-                updatedMessages = [...chat.messages, {
-                    ...assistantMessage,
-                    content,
-                    model: currentModel,
-                    usage: usage || undefined,
-                    reasoningContent: reasoning || undefined,
-                    annotations: anns.length > 0 ? anns : undefined
-                }];
-            }
+                    return { ...baseUpdate, versions };
+                }
+
+                return baseUpdate;
+            });
 
             const updatedChat: Chat = {
                 ...chat,
@@ -247,15 +243,10 @@ export default function ChatView() {
             setStreamStatus(null);
             const errorText = `Ошибка: ${error.message || error}`;
 
-            let errorMessages;
-            if (targetMessageId) {
-                errorMessages = chat.messages.map(m => {
-                    if (m.id !== targetMessageId) return m;
-                    return { ...m, content: errorText };
-                });
-            } else {
-                errorMessages = [...chat.messages, { ...assistantMessage, content: errorText }];
-            }
+            const errorMessages = chat.messages.map(m => {
+                if (m.id !== currentTargetMessageId) return m;
+                return { ...m, content: errorText };
+            });
 
             const errorChat: Chat = {
                 ...chat,
