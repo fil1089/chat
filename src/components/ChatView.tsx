@@ -109,6 +109,16 @@ export default function ChatView() {
             timestamp: Date.now(),
         };
 
+        // Pre-insert empty message into UI for visual feedback (unless regenerating)
+        if (!targetMessageId) {
+            chat = {
+                ...chat,
+                messages: [...chat.messages, assistantMessage],
+                updatedAt: Date.now()
+            };
+            dispatch({ type: 'UPDATE_CHAT', payload: chat });
+        }
+
         // Prepare context for API: 
         // 1. If regenerating, we send messages BEFORE the target message
         // 2. Apply context mode (last_n, system_only, etc.)

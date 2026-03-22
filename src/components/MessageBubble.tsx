@@ -316,7 +316,18 @@ export default function MessageBubble({ message, chatId, isLatest, isStreaming, 
                             )}
                         </div>
                     ) : (
-                        displayText.startsWith('iVBORw0KGgo') || displayText.startsWith('/9j/') ? (
+                        processedDisplayText === '' && isStreaming ? (
+                            <div style={{ padding: '8px 0', display: 'flex', alignItems: 'center', gap: '8px', opacity: 0.8 }}>
+                                <div className="typing-dots">
+                                    <span style={{ animation: 'blink 1.4s infinite both 0s', fontSize: '24px', lineHeight: '10px' }}>.</span>
+                                    <span style={{ animation: 'blink 1.4s infinite both 0.2s', fontSize: '24px', lineHeight: '10px' }}>.</span>
+                                    <span style={{ animation: 'blink 1.4s infinite both 0.4s', fontSize: '24px', lineHeight: '10px' }}>.</span>
+                                </div>
+                                <span className={isStreaming ? 'shimmer-text' : ''} style={{ fontSize: '14px' }}>
+                                    Обработка запроса
+                                </span>
+                            </div>
+                        ) : displayText.startsWith('iVBORw0KGgo') || displayText.startsWith('/9j/') ? (
                             <div className="generated-image-container" style={{ position: 'relative', display: 'inline-block', maxWidth: '100%' }}>
                                 <img
                                     src={`data:image/${displayText.startsWith('/9j/') ? 'jpeg' : 'png'};base64,${displayText}`}
